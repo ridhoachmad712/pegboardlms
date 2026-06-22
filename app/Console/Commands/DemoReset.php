@@ -2,14 +2,22 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Setting;
 use Database\Seeders\DemoSeeder;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class DemoReset extends Command
 {
     protected $signature = 'lms:demo-reset {--force : Lewati konfirmasi}';
 
     protected $description = 'Reset database demo ke kondisi awal (HANYA saat DEMO_MODE=true)';
+
+    /** Pengaturan branding yang DIPERTAHANKAN lintas reset (diatur sekali via menu Tampilan). */
+    private const BRANDING_KEYS = [
+        'app_name', 'header_title', 'hide_header_title', 'theme_color', 'footer_text',
+        'logo_path', 'logo_dark_path', 'logo_height', 'favicon_path',
+    ];
 
     public function handle(): int
     {
@@ -34,11 +42,30 @@ class DemoReset extends Command
             return self::SUCCESS;
         }
 
+        // Simpan branding yang sudah diatur SEBELUM database dikosongkan.
+        $branding = [];
+        try {
+            $branding = DB::table('settings')
+                ->whereIn('key', self::BRANDING_KEYS)
+                ->pluck('value', 'key')
+                ->all();
+        } catch (\Throwable $e) {
+            // tabel belum ada (deploy pertama) — abaikan
+        }
+
         $this->info('Mengosongkan database…');
         $this->call('migrate:fresh', ['--force' => true]);
 
         $this->info('Mengisi data demo…');
         $this->call('db:seed', ['--class' => DemoSeeder::class, '--force' => true]);
+
+        // Pulihkan branding (menimpa default seeder) agar logo/header/footer/favicon tetap.
+        foreach ($branding as $key => $value) {
+            Setting::put($key, $value);
+        }
+        if ($branding !== []) {
+            $this->info('Branding dipertahankan: '.implode(', ', array_keys($branding)));
+        }
 
         $this->info('Selesai. Database demo sudah direset.');
 
