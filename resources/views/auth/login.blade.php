@@ -42,4 +42,27 @@
         </div>
     </div>
 </form>
+
+@if (config('demo.enabled'))
+    <div class="card card-md mt-3">
+        <div class="card-body">
+            <div class="text-center text-secondary mb-3">Atau coba langsung tanpa akun:</div>
+            <div class="row g-2">
+                <div class="col">
+                    <form method="POST" action="{{ route('demo.login', 'dosen') }}">
+                        @csrf
+                        <button class="btn btn-outline-primary w-100"><i class="ti ti-school me-1"></i>Coba sebagai Dosen</button>
+                    </form>
+                </div>
+                <div class="col">
+                    <form method="POST" action="{{ route('demo.login', 'mahasiswa') }}">
+                        @csrf
+                        <button class="btn btn-outline-primary w-100"><i class="ti ti-user me-1"></i>Coba sebagai Mahasiswa</button>
+                    </form>
+                </div>
+            </div>
+            <div class="text-center mt-3"><small class="text-secondary"><i class="ti ti-flask me-1"></i>Mode demo — data contoh, direset berkala.</small></div>
+        </div>
+    </div>
+@endif
 @endsection

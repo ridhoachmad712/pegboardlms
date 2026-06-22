@@ -25,6 +25,12 @@ class AiController extends Controller
         $material->load('meeting.course');
         $this->ensureCourseOwner($request, $material->meeting->course);
 
+        if (config('demo.enabled')) {
+            $material->update(['summary' => $this->demoSummary()]);
+
+            return back()->with('status', 'Ringkasan AI berhasil dibuat (contoh — mode demo).');
+        }
+
         if (! $this->claude->isConfigured()) {
             return back()->with('error', 'Fitur AI belum aktif. Atur provider & API key di Pengaturan → Integrasi AI.');
         }
@@ -48,6 +54,16 @@ class AiController extends Controller
     {
         $meeting->load('course.syllabus', 'materials');
         $this->ensureCourseOwner($request, $meeting->course);
+
+        if (config('demo.enabled')) {
+            $meeting->materials()->create([
+                'title' => 'Materi (AI) — '.$meeting->topic,
+                'type' => Material::TYPE_TEXT,
+                'content' => $this->demoMaterial($meeting->topic),
+            ]);
+
+            return back()->with('status', 'Materi berhasil dibuat AI (contoh — mode demo).');
+        }
 
         if (! $this->claude->isConfigured()) {
             return back()->with('error', 'Fitur AI belum aktif. Atur provider & API key di Pengaturan → Integrasi AI.');
@@ -98,6 +114,21 @@ class AiController extends Controller
         $this->ensureCourseOwner($request, $assignment->course);
         abort_unless($assignment->isQuiz(), 404);
 
+        if (config('demo.enabled')) {
+            $count = max(1, min(10, (int) $request->input('count', 3)));
+            foreach ($this->demoQuestions($count) as $q) {
+                $assignment->questions()->create([
+                    'type' => 'pg',
+                    'question' => $q['question'],
+                    'options' => $q['options'],
+                    'correct_answer' => $q['correct_answer'],
+                    'points' => $q['points'],
+                ]);
+            }
+
+            return back()->with('status', $count.' soal contoh dibuat (mode demo).');
+        }
+
         if (! $this->claude->isConfigured()) {
             return back()->with('error', 'Fitur AI belum aktif. Atur provider & API key di Pengaturan → Integrasi AI.');
         }
@@ -141,6 +172,57 @@ class AiController extends Controller
         }
 
         return back()->with('status', count($questions).' soal berhasil dibuat oleh AI.');
+    }
+
+    // ===================== Contoh statis untuk MODE DEMO =====================
+
+    private function demoSummary(): string
+    {
+        return "Ringkasan (contoh demo):\n\n"
+            ."• Materi ini membahas konsep dasar beserta penerapannya dalam studi kasus nyata.\n"
+            ."• Poin penting: definisi, tujuan, serta langkah-langkah penerapan di lapangan.\n"
+            ."• Mahasiswa diharapkan mampu menjelaskan konsep dan menganalisis contoh kasus.\n\n"
+            ."Catatan: ini hasil contoh pada mode demo. Pada aplikasi penuh, ringkasan dibuat otomatis dari isi PDF oleh AI.";
+    }
+
+    private function demoMaterial(string $topic): string
+    {
+        return "# {$topic}\n\n"
+            ."## Pendahuluan\n"
+            ."Materi ini menjelaskan konsep **{$topic}** secara ringkas dan terstruktur.\n\n"
+            ."## Tujuan Pembelajaran\n"
+            ."- Memahami definisi dan ruang lingkup {$topic}.\n"
+            ."- Mengidentifikasi penerapannya dalam kasus nyata.\n"
+            ."- Menganalisis permasalahan terkait.\n\n"
+            ."## Uraian\n"
+            ."1. Pengertian dan latar belakang.\n"
+            ."2. Komponen utama dan keterkaitannya.\n"
+            ."3. Contoh penerapan serta studi kasus.\n\n"
+            ."## Rangkuman\n"
+            ."{$topic} merupakan pokok bahasan penting yang menjadi dasar bagi materi berikutnya.\n\n"
+            ."> Catatan: ini materi contoh pada mode demo. Pada aplikasi penuh, materi dibuat otomatis oleh AI sesuai RPS & materi sumber.";
+    }
+
+    /** @return array<int, array{question:string, options:array<string,string>, correct_answer:string, points:int}> */
+    private function demoQuestions(int $count): array
+    {
+        $bank = [
+            ['question' => 'Apa tujuan utama dari materi pertemuan ini?', 'options' => ['A' => 'Memahami konsep dasar', 'B' => 'Menghafal tanggal', 'C' => 'Mengisi presensi', 'D' => 'Tidak ada'], 'correct_answer' => 'A'],
+            ['question' => 'Manakah yang merupakan contoh penerapan konsep tersebut?', 'options' => ['A' => 'Studi kasus nyata', 'B' => 'Libur kuliah', 'C' => 'Ganti jadwal', 'D' => 'Tidak relevan'], 'correct_answer' => 'A'],
+            ['question' => 'Langkah pertama dalam analisis kasus adalah?', 'options' => ['A' => 'Identifikasi masalah', 'B' => 'Menyimpulkan dulu', 'C' => 'Mengabaikan data', 'D' => 'Menunda'], 'correct_answer' => 'A'],
+            ['question' => 'Komponen utama yang dibahas meliputi?', 'options' => ['A' => 'Definisi & penerapan', 'B' => 'Warna sampul', 'C' => 'Nama dosen', 'D' => 'Nomor ruang'], 'correct_answer' => 'A'],
+            ['question' => 'Hasil yang diharapkan setelah mempelajari materi ini?', 'options' => ['A' => 'Mampu menganalisis kasus', 'B' => 'Lupa materi', 'C' => 'Tidak paham', 'D' => 'Tidak ada'], 'correct_answer' => 'A'],
+        ];
+
+        $out = [];
+        for ($i = 0; $i < $count; $i++) {
+            $q = $bank[$i % count($bank)];
+            $q['question'] = ($i + 1).'. '.$q['question'];
+            $q['points'] = 1;
+            $out[] = $q;
+        }
+
+        return $out;
     }
 
     /** Ekstrak teks dari materi PDF; null jika bukan PDF. */

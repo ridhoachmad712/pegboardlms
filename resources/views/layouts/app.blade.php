@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    @if (config('demo.enabled'))<meta name="robots" content="noindex,nofollow">@endif
     <link rel="icon" href="{{ $faviconUrl }}">
     <script>(function(){try{var t=localStorage.getItem('lms-theme');if(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches){t='dark';}if(t){document.documentElement.setAttribute('data-bs-theme',t);}}catch(e){}})();</script>
     <title>{{ $appName }}</title>
@@ -61,6 +62,14 @@
 <div id="nprogress"></div>
 <div class="page">
     @php($user = auth()->user())
+
+    @if (config('demo.enabled'))
+        <div class="bg-yellow-lt border-bottom text-center py-1 px-2 small d-print-none">
+            <i class="ti ti-flask me-1"></i><strong>Mode Demo</strong> — Anda menjelajah aplikasi contoh. Perubahan bersifat sementara &amp; data direset berkala.
+            <a href="#" class="ms-1 fw-bold" onclick="event.preventDefault();document.getElementById('demo-logout-form').submit();">Keluar / ganti peran</a>
+            <form id="demo-logout-form" method="POST" action="{{ route('logout') }}" class="d-none">@csrf</form>
+        </div>
+    @endif
 
     {{-- ===================== HEADER ATAS (brand + aksi) ===================== --}}
     <header class="navbar navbar-expand-md d-print-none sticky-top">

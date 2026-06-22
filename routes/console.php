@@ -17,3 +17,10 @@ Schedule::command('lms:send-reminders')
 Schedule::command('lms:backup-db')
     ->dailyAt('02:00')
     ->timezone('Asia/Makassar');
+
+// Reset data demo harian pukul 03.00 WITA (hanya aktif di instance DEMO_MODE=true)
+if (config('demo.enabled')) {
+    Schedule::command('lms:demo-reset --force')
+        ->dailyAt('03:00')
+        ->timezone('Asia/Makassar');
+}

@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    @if (config('demo.enabled'))<meta name="robots" content="noindex,nofollow">@endif
     <link rel="icon" href="{{ $faviconUrl }}">
     <title>{{ $appName }}</title>
     <link rel="stylesheet" href="{{ asset('tabler/css/tabler.min.css') }}">

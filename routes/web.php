@@ -36,6 +36,12 @@ Route::get('/', fn () => redirect()->route('dashboard'));
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
     Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:6,1');
+
+    // Akses 1-klik mode demo (controller menolak dengan 404 jika DEMO_MODE non-aktif)
+    Route::post('/demo/{role}', [LoginController::class, 'demo'])
+        ->whereIn('role', ['dosen', 'mahasiswa'])
+        ->middleware('throttle:30,1')
+        ->name('demo.login');
 });
 
 // --- Authenticated ---
