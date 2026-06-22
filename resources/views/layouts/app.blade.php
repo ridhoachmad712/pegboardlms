@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @if (config('demo.enabled'))<meta name="robots" content="noindex,nofollow">@endif
     <link rel="icon" href="{{ $faviconUrl }}">
-    <script>(function(){try{var t=localStorage.getItem('lms-theme');if(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches){t='dark';}if(t){document.documentElement.setAttribute('data-bs-theme',t);}}catch(e){}})();</script>
+    <script>(function(){try{var t=localStorage.getItem('lms-theme');if(t){document.documentElement.setAttribute('data-bs-theme',t);}}catch(e){}})();</script>
     <title>{{ $appName }}</title>
     <link rel="stylesheet" href="{{ asset('tabler/css/tabler.min.css') }}">
     <link rel="stylesheet" href="{{ asset('tabler/css/tabler-vendors.min.css') }}">
