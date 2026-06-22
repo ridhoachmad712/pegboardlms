@@ -29,3 +29,9 @@ Thumbs.db
 # Database lokal (SQLite) — jangan di-commit
 /database/*.sqlite
 /database/*.sqlite-journal
+
+# Artefak migrasi data (lokal saja, jangan di-commit)
+/database/data-export.sql
+/database/pegboard-mysql.sql
+/storage-public.zip
+/export_data.php

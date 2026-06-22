@@ -190,6 +190,7 @@
                                 </a>
                                 <div class="dropdown-menu">
                                     <a class="dropdown-item" href="{{ route('admin.students.index') }}"><i class="ti ti-users me-2"></i>Mahasiswa</a>
+                                    <a class="dropdown-item" href="{{ route('admin.semesters.index') }}"><i class="ti ti-calendar-stats me-2"></i>Kelola Semester</a>
                                     <a class="dropdown-item" href="{{ route('admin.settings.edit') }}"><i class="ti ti-palette me-2"></i>Tampilan</a>
                                     <a class="dropdown-item" href="{{ route('admin.gradeScale.edit') }}"><i class="ti ti-award me-2"></i>Skala Nilai</a>
                                     <a class="dropdown-item" href="{{ route('admin.ai.edit') }}"><i class="ti ti-sparkles me-2"></i>Integrasi AI</a>

@@ -19,8 +19,6 @@ class SettingController extends Controller
             'headerTitle' => Setting::get('header_title', config('app.name')),
             'hideHeaderTitle' => Setting::bool('hide_header_title', false),
             'themeColor' => Setting::get('theme_color', '#206bc4'),
-            'academicYear' => Setting::get('academic_year', (string) date('Y')),
-            'semester' => Setting::get('semester', 'Ganjil'),
             'emailEnabled' => Setting::bool('email_enabled', true),
             'aiConfigured' => ! empty(config('services.anthropic.key')),
             'hasLogo' => (bool) Setting::get('logo_path'),
@@ -37,8 +35,6 @@ class SettingController extends Controller
             'header_title' => ['required', 'string', 'max:100'],
             'theme_color' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'footer_text' => ['required', 'string', 'max:200'],
-            'academic_year' => ['required', 'integer', 'min:2000', 'max:2100'],
-            'semester' => ['required', 'in:Ganjil,Genap,Antara'],
             'logo' => ['nullable', 'file', 'mimes:png,jpg,jpeg,webp,svg', 'max:1024'],
             'logo_dark' => ['nullable', 'file', 'mimes:png,jpg,jpeg,webp,svg', 'max:1024'],
             'logo_height' => ['required', 'integer', 'min:16', 'max:96'],
@@ -50,8 +46,6 @@ class SettingController extends Controller
         Setting::put('hide_header_title', $request->boolean('hide_header_title') ? '1' : '0');
         Setting::put('theme_color', strtolower($data['theme_color']));
         Setting::put('footer_text', $data['footer_text']);
-        Setting::put('academic_year', (string) $data['academic_year']);
-        Setting::put('semester', $data['semester']);
         Setting::put('email_enabled', $request->boolean('email_enabled') ? '1' : '0');
         Setting::put('logo_height', (string) $data['logo_height']);
 

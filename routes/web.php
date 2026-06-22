@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\ActivityController as AdminActivityController;
 use App\Http\Controllers\Admin\BackupController;
+use App\Http\Controllers\Admin\SemesterController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\StudentController as AdminStudentController;
 use App\Http\Controllers\AiController;
@@ -190,6 +191,11 @@ Route::middleware('auth')->group(function () {
             Route::put('/grade-scale', [SettingController::class, 'updateGradeScale'])->name('gradeScale.update');
             Route::get('/ai', [SettingController::class, 'editAi'])->name('ai.edit');
             Route::put('/ai', [SettingController::class, 'updateAi'])->name('ai.update');
+
+            Route::get('/semesters', [SemesterController::class, 'index'])->name('semesters.index');
+            Route::post('/semesters', [SemesterController::class, 'store'])->name('semesters.store');
+            Route::put('/semesters/active', [SemesterController::class, 'updateActive'])->name('semesters.updateActive');
+            Route::delete('/semesters/{semester}', [SemesterController::class, 'destroy'])->name('semesters.destroy');
 
             Route::get('/students', [AdminStudentController::class, 'index'])->name('students.index');
             Route::get('/students/create', [AdminStudentController::class, 'create'])->name('students.create');

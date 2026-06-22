@@ -23,11 +23,6 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#tab-akademik" class="nav-link" data-bs-toggle="tab">
-                            <i class="ti ti-calendar me-1"></i>Akademik
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a href="#tab-integrasi" class="nav-link" data-bs-toggle="tab">
                             <i class="ti ti-plug me-1"></i>Notifikasi &amp; AI
                         </a>
@@ -138,27 +133,6 @@
                                     <span class="form-check-label text-danger">Hapus favicon (kembali ke ikon bawaan)</span>
                                 </label>
                             @endif
-                        </div>
-                    </div>
-
-                    {{-- ===================== AKADEMIK ===================== --}}
-                    <div class="tab-pane" id="tab-akademik">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label required">Tahun Ajaran Aktif</label>
-                                <input type="number" name="academic_year" class="form-control" value="{{ old('academic_year', $academicYear) }}" min="2000" max="2100" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label required">Semester Aktif</label>
-                                <select name="semester" class="form-select">
-                                    @foreach (['Ganjil', 'Genap', 'Antara'] as $s)
-                                        <option value="{{ $s }}" @selected(old('semester', $semester) === $s)>{{ $s }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-12">
-                                <small class="form-hint d-block">Dipakai sebagai nilai default saat membuat kelas baru.</small>
-                            </div>
                         </div>
                     </div>
 
