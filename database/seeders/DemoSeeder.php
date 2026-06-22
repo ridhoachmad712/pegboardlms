@@ -22,7 +22,14 @@ class DemoSeeder extends Seeder
 {
     public function run(): void
     {
-        $faker = \Faker\Factory::create('id_ID');
+        // Nama statis (tanpa Faker) agar seeder jalan di deploy --no-dev.
+        $names = [
+            'Budi Santoso', 'Siti Aminah', 'Andi Pratama', 'Dewi Lestari', 'Rizki Ramadhan',
+            'Putri Maharani', 'Agus Setiawan', 'Nur Fadilah', 'Eko Prasetyo', 'Indah Permata',
+            'Fajar Nugroho', 'Ayu Wulandari', 'Hendra Gunawan', 'Maya Sari', 'Dani Kurniawan',
+            'Rina Marlina', 'Bayu Aji', 'Lina Oktaviani', 'Yusuf Hidayat', 'Sri Wahyuni',
+            'Arif Rahman', 'Citra Dewanti', 'Galih Saputra', 'Wulan Anggraini',
+        ];
         $year = (int) date('Y');
         $semester = 'Ganjil';
 
@@ -57,12 +64,12 @@ class DemoSeeder extends Seeder
         $others = collect();
         for ($i = 1; $i <= 24; $i++) {
             $others->push(User::create([
-                'name' => $faker->name(),
+                'name' => $names[$i - 1],
                 'email' => sprintf('demo-mhs%03d@demo.test', $i),
                 'password' => Hash::make('demo'),
                 'role' => User::ROLE_MAHASISWA,
                 'nim_nip' => '2100'.str_pad((string) $i, 6, '0', STR_PAD_LEFT),
-                'phone' => $faker->phoneNumber(),
+                'phone' => '0812'.str_pad((string) $i, 7, '0', STR_PAD_LEFT),
                 'email_verified_at' => now(),
             ]));
         }
@@ -99,7 +106,7 @@ class DemoSeeder extends Seeder
                     'number' => $m,
                     'topic' => $cd['name'].' — Pertemuan '.$m,
                     'date' => now()->subWeeks(3 - $m),
-                    'description' => $faker->sentence(10),
+                    'description' => 'Ringkasan dan tujuan pembelajaran untuk pertemuan ke-'.$m.'.',
                 ]);
 
                 $meeting->materials()->create([
