@@ -6,9 +6,10 @@
 @if (config('demo.enabled'))
     {{-- ============ MODE DEMO: hanya pilihan peran (tanpa login) ============ --}}
     <style>
-        .demo-choice{transition:transform .15s ease, box-shadow .15s ease; min-height:175px; border-radius:1rem;}
-        .demo-choice:hover{transform:translateY(-4px); box-shadow:0 .85rem 1.75rem rgba(0,0,0,.18);}
+        .demo-choice{transition:transform .15s ease, box-shadow .15s ease; min-height:84px; border-radius:1rem;}
+        .demo-choice:hover{transform:translateY(-3px); box-shadow:0 .75rem 1.5rem rgba(0,0,0,.18);}
         .demo-choice:active{transform:translateY(-1px);}
+        .demo-choice .ti{font-size:2.25rem;line-height:1;}
     </style>
 
     <div class="card card-md">
@@ -16,29 +17,30 @@
             <h2 class="h2 text-center mb-1">Coba Aplikasi</h2>
             <p class="text-center text-secondary mb-4">Masuk langsung tanpa akun — pilih peran Anda:</p>
 
-            <div class="row g-3">
-                <div class="col-12 col-md-6">
-                    <form method="POST" action="{{ route('demo.login', 'dosen') }}">
-                        @csrf
-                        <button type="submit"
-                                class="btn btn-primary w-100 border-0 text-white demo-choice d-flex flex-column align-items-center justify-content-center">
-                            <i class="ti ti-school" style="font-size:2.75rem;line-height:1"></i>
-                            <span class="fw-bold fs-2 mt-2">Dosen</span>
-                            <span class="small opacity-75 mt-1">Kelola kelas, materi, tugas &amp; nilai</span>
-                        </button>
-                    </form>
-                </div>
-                <div class="col-12 col-md-6">
-                    <form method="POST" action="{{ route('demo.login', 'mahasiswa') }}">
-                        @csrf
-                        <button type="submit"
-                                class="btn btn-azure w-100 border-0 text-white demo-choice d-flex flex-column align-items-center justify-content-center">
-                            <i class="ti ti-user" style="font-size:2.75rem;line-height:1"></i>
-                            <span class="fw-bold fs-2 mt-2">Mahasiswa</span>
-                            <span class="small opacity-75 mt-1">Lihat materi, kumpul tugas &amp; kuis</span>
-                        </button>
-                    </form>
-                </div>
+            <div class="d-grid gap-3">
+                <form method="POST" action="{{ route('demo.login', 'dosen') }}">
+                    @csrf
+                    <button type="submit"
+                            class="btn btn-primary w-100 border-0 text-white demo-choice d-flex align-items-center text-start p-3">
+                        <i class="ti ti-school flex-shrink-0"></i>
+                        <span class="ms-3">
+                            <span class="d-block fw-bold fs-2">Dosen</span>
+                            <span class="d-block small opacity-75">Kelola kelas, materi, tugas &amp; nilai</span>
+                        </span>
+                    </button>
+                </form>
+
+                <form method="POST" action="{{ route('demo.login', 'mahasiswa') }}">
+                    @csrf
+                    <button type="submit"
+                            class="btn btn-azure w-100 border-0 text-white demo-choice d-flex align-items-center text-start p-3">
+                        <i class="ti ti-user flex-shrink-0"></i>
+                        <span class="ms-3">
+                            <span class="d-block fw-bold fs-2">Mahasiswa</span>
+                            <span class="d-block small opacity-75">Lihat materi, kumpul tugas &amp; kuis</span>
+                        </span>
+                    </button>
+                </form>
             </div>
 
             <p class="text-center text-secondary small mt-4 mb-0">
