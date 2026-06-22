@@ -38,6 +38,20 @@ class DemoSeeder extends Seeder
         Setting::put('semester', $semester);
         Semester::firstOrCreate(['year' => $year, 'semester' => $semester]);
 
+        // Branding demo — di-set ulang tiap reset agar tidak ikut terhapus migrate:fresh.
+        $brand = config('app.name');
+        Setting::put('app_name', $brand);
+        Setting::put('header_title', $brand);
+        if ($color = config('demo.theme_color')) {
+            Setting::put('theme_color', $color);
+        }
+        if ($footer = config('demo.footer_text')) {
+            Setting::put('footer_text', $footer);
+        }
+        if ($logo = config('demo.logo_path')) {
+            Setting::put('logo_path', $logo); // file fisik tetap di storage (tak terhapus)
+        }
+
         // --- Dosen demo (merangkap admin) ---
         $dosen = User::create([
             'name' => 'Dr. Andi Wijaya, S.E., M.M.',
