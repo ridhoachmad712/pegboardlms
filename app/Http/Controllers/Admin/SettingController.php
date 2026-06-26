@@ -114,6 +114,7 @@ class SettingController extends Controller
         return view('admin.ai', [
             'active' => \App\Services\Ai\AiProviderFactory::active(),
             'providers' => $providers,
+            'aiEnabled' => Setting::bool('ai_enabled', true),
         ]);
     }
 
@@ -131,6 +132,7 @@ class SettingController extends Controller
             'key_gemini' => ['nullable', 'string', 'max:255'],
         ]);
 
+        Setting::put('ai_enabled', $request->boolean('ai_enabled') ? '1' : '0');
         Setting::put('ai_provider', $request->input('ai_provider'));
 
         foreach (['anthropic', 'openai', 'gemini'] as $p) {

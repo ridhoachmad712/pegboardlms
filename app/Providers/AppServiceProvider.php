@@ -51,6 +51,9 @@ class AppServiceProvider extends ServiceProvider
         View::share('faviconUrl', $favicon ? Storage::url($favicon) : asset('favicon.svg'));
         View::share('footerText', \App\Models\Setting::get('footer_text', 'Prodi Manajemen · Fakultas Ekonomi dan Bisnis · UNM'));
 
+        // Status integrasi AI (untuk menyembunyikan tombol AI bila dinonaktifkan)
+        View::share('aiEnabled', \App\Models\Setting::bool('ai_enabled', true));
+
         // Sapaan menurut waktu (WITA)
         $hour = (int) now()->timezone('Asia/Makassar')->format('H');
         View::share('greeting', match (true) {

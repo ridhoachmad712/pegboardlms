@@ -93,11 +93,13 @@
                                     <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modal-material-{{ $meeting->id }}">
                                         <i class="ti ti-plus me-1"></i>Materi
                                     </button>
-                                    <form method="POST" action="{{ route('ai.material.generate', $meeting) }}"
-                                          data-confirm="Buat draf materi dengan AI untuk pertemuan ini? Materi disusun dari RPS (CPL/CPMK/Sub-CPMK), topik, dan PDF yang sudah ada. Bisa diedit setelahnya.">
-                                        @csrf
-                                        <button class="btn btn-sm btn-outline-purple" data-loading="Menyusun materi…"><i class="ti ti-sparkles me-1"></i>Materi AI</button>
-                                    </form>
+                                    @if ($aiEnabled)
+                                        <form method="POST" action="{{ route('ai.material.generate', $meeting) }}"
+                                              data-confirm="Buat draf materi dengan AI untuk pertemuan ini? Materi disusun dari RPS (CPL/CPMK/Sub-CPMK), topik, dan PDF yang sudah ada. Bisa diedit setelahnya.">
+                                            @csrf
+                                            <button class="btn btn-sm btn-outline-purple" data-loading="Menyusun materi…"><i class="ti ti-sparkles me-1"></i>Materi AI</button>
+                                        </form>
+                                    @endif
                                     <a href="{{ route('assignments.create', [$course, 'meeting' => $meeting->id, 'type' => 'tugas']) }}" class="btn btn-sm"><i class="ti ti-checklist me-1"></i>Tugas</a>
                                     <a href="{{ route('assignments.create', [$course, 'meeting' => $meeting->id, 'type' => 'kuis']) }}" class="btn btn-sm"><i class="ti ti-help-circle me-1"></i>Kuis</a>
                                     <form method="POST" action="{{ route('meetings.destroy', $meeting) }}"
@@ -177,7 +179,7 @@
                                             </div>
                                         </div>
                                         <div class="btn-list">
-                                            @if ($isDosen && $isPdf)
+                                            @if ($isDosen && $isPdf && $aiEnabled)
                                                 <form method="POST" action="{{ route('ai.material.summarize', $material) }}">
                                                     @csrf
                                                     <button class="btn btn-sm btn-outline-purple" title="Ringkasan AI" data-loading="Meringkas…"><i class="ti ti-sparkles me-1"></i>Ringkasan AI</button>

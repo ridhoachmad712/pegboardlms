@@ -12,6 +12,17 @@
             @csrf @method('PUT')
             <div class="card-body">
                 <div class="mb-3">
+                    <label class="form-check form-switch">
+                        <input type="hidden" name="ai_enabled" value="0">
+                        <input type="checkbox" name="ai_enabled" value="1" class="form-check-input" @checked($aiEnabled)>
+                        <span class="form-check-label fw-bold">Aktifkan Integrasi AI</span>
+                    </label>
+                    <small class="form-hint">Jika dimatikan, fitur AI (<strong>Ringkasan AI</strong> &amp; <strong>Materi AI</strong>) disembunyikan di seluruh aplikasi dan tidak dapat dipanggil.</small>
+                </div>
+
+                <hr class="my-3">
+
+                <div class="mb-3">
                     <label class="form-label required">Provider Aktif</label>
                     <select name="ai_provider" class="form-select" x-model="active" style="max-width:320px">
                         @foreach ($providers as $key => $p)

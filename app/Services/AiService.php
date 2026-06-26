@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Setting;
 use App\Services\Ai\AiProvider;
 use App\Services\Ai\AiProviderFactory;
 use RuntimeException;
@@ -19,9 +20,15 @@ class AiService
         $this->provider = AiProviderFactory::make();
     }
 
+    /** Integrasi AI diaktifkan admin? (default aktif) */
+    public function enabled(): bool
+    {
+        return Setting::bool('ai_enabled', true);
+    }
+
     public function isConfigured(): bool
     {
-        return $this->provider->isConfigured();
+        return $this->enabled() && $this->provider->isConfigured();
     }
 
     public function testConnection(): array
