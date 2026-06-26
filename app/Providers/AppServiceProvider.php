@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -23,6 +24,12 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Paginator::useBootstrapFive();
+
+        // Di balik SSL hosting, PHP kadang mengira request http → URL (iframe/aset) jadi http
+        // dan diblokir browser sebagai mixed content. Paksa https bila APP_URL https.
+        if (str_starts_with((string) config('app.url'), 'https://')) {
+            URL::forceScheme('https');
+        }
 
         // Identitas & tema (dari pengaturan) untuk semua view
         View::share('appName', \App\Models\Setting::get('app_name', config('app.name')));
