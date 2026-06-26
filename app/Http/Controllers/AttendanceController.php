@@ -40,7 +40,7 @@ class AttendanceController extends Controller
 
         $token = $meeting->activeToken();
         $qr = null;
-        if ($token) {
+        if ($token && $meeting->isTatapMuka()) {
             $url = route('attendance.attend', $token->token);
             $qr = $this->qrDataUri($url);
         }
@@ -51,10 +51,22 @@ class AttendanceController extends Controller
         return view('attendance.session', compact('meeting', 'token', 'qr', 'students', 'attendances'));
     }
 
-    /** Mulai/refresh sesi absensi → buat token UUID kedaluwarsa 15 menit. */
+    /** Mulai sesi absensi. Tatap Muka → QR 15 menit; Mandiri → jendela swa-presensi (hari). */
     public function start(Request $request, Meeting $meeting): RedirectResponse
     {
         $this->ensureCourseOwner($request, $meeting->course);
+
+        if ($meeting->isMandiri()) {
+            $days = max(1, min(60, (int) $request->input('days', 7)));
+            $meeting->tokens()->create([
+                'token' => (string) Str::uuid(),
+                'code' => \App\Models\AttendanceToken::generateCode(),
+                'expires_at' => now()->addDays($days),
+            ]);
+
+            return redirect()->route('attendance.session', $meeting)
+                ->with('status', "Presensi mandiri dibuka selama {$days} hari.");
+        }
 
         $meeting->tokens()->create([
             'token' => (string) Str::uuid(),
@@ -64,6 +76,42 @@ class AttendanceController extends Controller
 
         return redirect()->route('attendance.session', $meeting)
             ->with('status', 'Sesi absensi dimulai. QR berlaku 15 menit.');
+    }
+
+    /** Tutup sesi/jendela presensi (kedaluwarsakan token aktif). */
+    public function close(Request $request, Meeting $meeting): RedirectResponse
+    {
+        $this->ensureCourseOwner($request, $meeting->course);
+
+        $meeting->tokens()->where('expires_at', '>', now())->update(['expires_at' => now()]);
+
+        return back()->with('status', 'Presensi ditutup.');
+    }
+
+    /** Swa-presensi mahasiswa untuk pertemuan Mandiri (selama jendela terbuka). */
+    public function selfAttend(Request $request, Meeting $meeting): RedirectResponse
+    {
+        $user = $request->user();
+        $meeting->loadMissing('course');
+
+        abort_unless($meeting->isMandiri(), 404);
+        abort_unless(
+            $user->isMahasiswa() && $meeting->course->students()->whereKey($user->id)->exists(),
+            403,
+        );
+
+        if (! $meeting->activeToken()) {
+            return back()->with('error', 'Presensi pertemuan ini sedang tidak dibuka.');
+        }
+
+        $att = Attendance::firstOrNew(['meeting_id' => $meeting->id, 'user_id' => $user->id]);
+        if ($att->exists && $att->status === 'hadir') {
+            return back()->with('status', 'Anda sudah tercatat hadir.');
+        }
+
+        $att->fill(['status' => 'hadir', 'method' => 'mandiri'])->save();
+
+        return back()->with('status', 'Kehadiran berhasil dicatat. Terima kasih!');
     }
 
     /** Mahasiswa scan QR → /attend/{token}. */
@@ -80,6 +128,10 @@ class AttendanceController extends Controller
         }
 
         $meeting = $record->meeting()->with('course')->first();
+
+        if ($meeting && $meeting->isMandiri()) {
+            return view('attendance.attend', ['ok' => false, 'message' => 'Pertemuan ini memakai swa-presensi — gunakan tombol "Tandai Hadir" di halaman kelas.', 'meeting' => $meeting]);
+        }
 
         if ($record->isExpired()) {
             return view('attendance.attend', ['ok' => false, 'message' => 'Token absensi sudah kedaluwarsa.', 'meeting' => $meeting]);

@@ -130,12 +130,18 @@ class CourseController extends Controller
         $course->loadCount('students');
 
         $readiness = [];
+        $myAttendance = collect();
 
         if ($isDosen) {
             $readiness = $this->completionReadiness($course, $calc);
+        } else {
+            // Presensi mahasiswa per pertemuan (untuk swa-presensi pertemuan Mandiri)
+            $myAttendance = \App\Models\Attendance::where('user_id', $request->user()->id)
+                ->whereIn('meeting_id', $course->meetings->pluck('id'))
+                ->get()->keyBy('meeting_id');
         }
 
-        return view('courses.show', compact('course', 'isDosen', 'readiness'));
+        return view('courses.show', compact('course', 'isDosen', 'readiness', 'myAttendance'));
     }
 
     /** Daftar mahasiswa kelas (tab tersendiri, khusus dosen pemilik). */

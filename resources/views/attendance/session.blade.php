@@ -17,7 +17,42 @@
 
 @section('content')
 <div class="row row-cards">
-    {{-- QR --}}
+    {{-- Kontrol presensi --}}
+    @if ($meeting->isMandiri())
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title"><i class="ti ti-device-laptop me-1"></i>Swa-presensi (Mandiri)</h3></div>
+            <div class="card-body text-center">
+                @if ($token)
+                    <div class="mb-2"><span class="badge bg-green-lt">Dibuka</span></div>
+                    <div class="text-secondary small mb-3">Mahasiswa bisa menandai hadir sampai<br><strong>{{ $token->expires_at->translatedFormat('d M Y, H:i') }}</strong></div>
+                    <div class="d-flex gap-2 justify-content-center">
+                        <form method="POST" action="{{ route('attendance.start', $meeting) }}">
+                            @csrf <input type="hidden" name="days" value="7">
+                            <button class="btn btn-sm"><i class="ti ti-refresh me-1"></i>Perpanjang 7 hari</button>
+                        </form>
+                        <form method="POST" action="{{ route('attendance.close', $meeting) }}">
+                            @csrf
+                            <button class="btn btn-sm btn-outline-danger"><i class="ti ti-lock me-1"></i>Tutup</button>
+                        </form>
+                    </div>
+                @else
+                    <x-empty-state icon="ti-device-laptop" title="Presensi belum dibuka" description="Buka jendela agar mahasiswa bisa menandai kehadiran mandiri." />
+                    <form method="POST" action="{{ route('attendance.start', $meeting) }}">
+                        @csrf
+                        <div class="input-group mb-2 mx-auto" style="max-width:240px">
+                            <span class="input-group-text">Buka</span>
+                            <input type="number" name="days" class="form-control text-center" value="7" min="1" max="60">
+                            <span class="input-group-text">hari</span>
+                        </div>
+                        <button class="btn btn-primary w-100"><i class="ti ti-player-play me-1"></i>Buka Presensi</button>
+                    </form>
+                @endif
+                <div class="text-secondary small mt-3">Mahasiswa menandai hadir dari halaman <strong>kelas</strong> (pada pertemuan ini).</div>
+            </div>
+        </div>
+    </div>
+    @else
     <div class="col-lg-5">
         <div class="card">
             <div class="card-header"><h3 class="card-title">QR Absensi</h3></div>
@@ -61,6 +96,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     {{-- Edit manual --}}
     <div class="col-lg-7">
@@ -77,7 +113,7 @@
                             @php($att = $attendances[$s->id] ?? null)
                             <tr>
                                 <td>{{ $s->name }}<div class="small text-secondary">{{ $s->nim_nip }}</div></td>
-                                <td>@if ($att)<span class="badge bg-{{ $att->method === 'qr' ? 'green' : 'secondary' }}-lt">{{ strtoupper($att->method) }}</span>@else<span class="text-secondary">—</span>@endif</td>
+                                <td>@if ($att)<span class="badge bg-{{ ['qr' => 'green', 'mandiri' => 'azure'][$att->method] ?? 'secondary' }}-lt">{{ ['qr' => 'QR', 'mandiri' => 'Mandiri', 'manual' => 'Manual'][$att->method] ?? strtoupper($att->method) }}</span>@else<span class="text-secondary">—</span>@endif</td>
                                 <td>
                                     <select name="statuses[{{ $s->id }}]" class="form-select form-select-sm">
                                         <option value="">—</option>

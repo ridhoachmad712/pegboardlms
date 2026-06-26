@@ -117,6 +117,19 @@
                                     </form>
                                 </div>
                             @endif
+                            @if (! $isDosen && $meeting->isMandiri())
+                                @php($myAtt = $myAttendance[$meeting->id] ?? null)
+                                @if ($myAtt && $myAtt->status === 'hadir')
+                                    <span class="badge bg-green-lt"><i class="ti ti-checks me-1"></i>Hadir</span>
+                                @elseif ($meeting->activeToken())
+                                    <form method="POST" action="{{ route('attendance.selfAttend', $meeting) }}">
+                                        @csrf
+                                        <button class="btn btn-sm btn-primary"><i class="ti ti-user-check me-1"></i>Tandai Hadir</button>
+                                    </form>
+                                @else
+                                    <span class="badge bg-secondary-lt" title="Dosen belum membuka presensi">Presensi belum dibuka</span>
+                                @endif
+                            @endif
                         </div>
                         <div class="collapse" id="meeting-{{ $meeting->id }}">
                         <div class="list-group list-group-flush">

@@ -115,6 +115,9 @@ Route::middleware('auth')->group(function () {
     // ===== Kehadiran (kedua role) =====
     Route::get('/courses/{course}/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
     Route::get('/attend/{token}', [AttendanceController::class, 'attend'])->name('attendance.attend');
+    // Swa-presensi mahasiswa (pertemuan Mandiri)
+    Route::post('/meetings/{meeting}/self-attend', [AttendanceController::class, 'selfAttend'])
+        ->middleware('throttle:20,1')->name('attendance.selfAttend');
 
     // ===== Silabus / RPS (kedua role lihat & unduh) =====
     Route::get('/courses/{course}/syllabus', [SyllabusController::class, 'show'])->name('syllabus.show');
@@ -224,6 +227,7 @@ Route::middleware('auth')->group(function () {
         // Absensi — sesi & edit manual
         Route::get('/meetings/{meeting}/attendance', [AttendanceController::class, 'session'])->name('attendance.session');
         Route::post('/meetings/{meeting}/attendance/start', [AttendanceController::class, 'start'])->name('attendance.start');
+        Route::post('/meetings/{meeting}/attendance/close', [AttendanceController::class, 'close'])->name('attendance.close');
         Route::post('/meetings/{meeting}/attendance', [AttendanceController::class, 'updateStatus'])->name('attendance.update');
 
         // Silabus / RPS — edit
