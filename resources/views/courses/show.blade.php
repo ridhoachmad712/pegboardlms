@@ -195,11 +195,9 @@
                                                     <i class="ti ti-eye me-1"></i>Preview
                                                 </button>
                                             @endif
-                                            @if ($material->isFile())
-                                                <a href="{{ route('materials.download', $material) }}" class="btn btn-sm"><i class="ti ti-download me-1"></i>Unduh</a>
-                                            @else
+                                            @unless ($material->isFile())
                                                 <a href="{{ $material->url }}" target="_blank" rel="noopener" class="btn btn-sm"><i class="ti ti-external-link me-1"></i>Buka</a>
-                                            @endif
+                                            @endunless
                                             @if ($isDosen && ! $course->isCompleted())
                                                 <button class="btn btn-sm" data-bs-toggle="modal" data-bs-target="#edit-material-{{ $material->id }}" title="Edit" aria-label="Edit materi {{ $material->title }}"><i class="ti ti-edit"></i></button>
                                                 <form method="POST" action="{{ route('materials.destroy', $material) }}"
