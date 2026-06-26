@@ -33,6 +33,16 @@
                value="{{ old('year', $course->year ?? \App\Models\Setting::get('academic_year', date('Y'))) }}" min="2000" max="2100" required>
         @error('year')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
+    <div class="col-12 mb-3">
+        <label class="form-label required">Jenis Pertemuan Default</label>
+        <select name="default_meeting_type" class="form-select @error('default_meeting_type') is-invalid @enderror">
+            @php($dmt = old('default_meeting_type', $course->default_meeting_type ?? 'tatap_muka'))
+            <option value="tatap_muka" @selected($dmt === 'tatap_muka')>Tatap Muka (jadwal, lokasi, presensi)</option>
+            <option value="mandiri" @selected($dmt === 'mandiri')>Mandiri / Full LMS (swa-presensi)</option>
+        </select>
+        <small class="form-hint">Dipakai otomatis saat menambah pertemuan baru. Tiap pertemuan tetap bisa diubah sendiri.</small>
+        @error('default_meeting_type')<div class="invalid-feedback">{{ $message }}</div>@enderror
+    </div>
 </div>
 
 <hr class="my-4">

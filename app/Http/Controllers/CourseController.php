@@ -305,6 +305,7 @@ class CourseController extends Controller
             'class_name' => ['nullable', 'string', 'max:100'],
             'semester' => ['required', 'in:Ganjil,Genap,Antara'],
             'year' => ['required', 'integer', 'min:2000', 'max:2100'],
+            'default_meeting_type' => ['required', 'in:tatap_muka,mandiri'],
             'description' => ['nullable', 'string'],
         ]);
     }

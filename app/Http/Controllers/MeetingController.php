@@ -23,9 +23,15 @@ class MeetingController extends Controller
         $data = $request->validate([
             'number' => ['required', 'integer', 'min:1', 'max:'.self::MAX_MEETINGS],
             'topic' => ['required', 'string', 'max:255'],
+            'type' => ['required', 'in:tatap_muka,mandiri'],
+            'location' => ['nullable', 'string', 'max:255'],
             'date' => ['nullable', 'date'],
             'description' => ['nullable', 'string'],
         ]);
+
+        if ($data['type'] === Meeting::TYPE_MANDIRI) {
+            $data['location'] = null; // pertemuan mandiri tak punya lokasi fisik
+        }
 
         $course->meetings()->create($data);
 
@@ -36,12 +42,20 @@ class MeetingController extends Controller
     {
         $this->authorizeOwner($request, $meeting->course);
 
-        $meeting->update($request->validate([
+        $data = $request->validate([
             'number' => ['required', 'integer', 'min:1', 'max:'.self::MAX_MEETINGS],
             'topic' => ['required', 'string', 'max:255'],
+            'type' => ['required', 'in:tatap_muka,mandiri'],
+            'location' => ['nullable', 'string', 'max:255'],
             'date' => ['nullable', 'date'],
             'description' => ['nullable', 'string'],
-        ]));
+        ]);
+
+        if ($data['type'] === Meeting::TYPE_MANDIRI) {
+            $data['location'] = null;
+        }
+
+        $meeting->update($data);
 
         return back()->with('status', 'Pertemuan berhasil diperbarui.');
     }

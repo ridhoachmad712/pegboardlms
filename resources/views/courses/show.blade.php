@@ -75,9 +75,17 @@
                                 <i class="ti ti-chevron-down meeting-chevron me-2 text-secondary"></i>
                                 <span>
                                     <span class="badge bg-blue-lt me-2">Pertemuan {{ $meeting->number }}</span>
+                                    @if ($meeting->isMandiri())
+                                        <span class="badge bg-purple-lt me-2" title="Mandiri (Full LMS)"><i class="ti ti-device-laptop me-1"></i>Mandiri</span>
+                                    @else
+                                        <span class="badge bg-azure-lt me-2" title="Tatap Muka"><i class="ti ti-users me-1"></i>Tatap Muka</span>
+                                    @endif
                                     <strong>{{ $meeting->topic }}</strong>
                                     @if ($meeting->date)
                                         <span class="text-secondary ms-2 small text-nowrap"><i class="ti ti-calendar-event"></i> {{ $meeting->date->translatedFormat('d M Y') }}</span>
+                                    @endif
+                                    @if ($meeting->isTatapMuka() && $meeting->location)
+                                        <span class="text-secondary ms-2 small text-nowrap"><i class="ti ti-map-pin"></i> {{ $meeting->location }}</span>
                                     @endif
                                     <span class="badge bg-secondary-lt ms-2">{{ $meeting->materials->count() }} materi</span>
                                     @if ($meeting->assignments->count())
@@ -320,7 +328,7 @@
                     @if ($isDosen && ! $course->isCompleted())
                         <div class="modal modal-blur fade" id="edit-meeting-{{ $meeting->id }}" tabindex="-1">
                             <div class="modal-dialog modal-dialog-centered">
-                                <form class="modal-content" method="POST" action="{{ route('meetings.update', $meeting) }}">
+                                <form class="modal-content" method="POST" action="{{ route('meetings.update', $meeting) }}" x-data="{ mtype: '{{ $meeting->type ?? 'tatap_muka' }}' }">
                                     @csrf @method('PUT')
                                     <div class="modal-header">
                                         <h5 class="modal-title">Edit Pertemuan {{ $meeting->number }}</h5>
@@ -335,6 +343,17 @@
                                             <div class="col-8 mb-3">
                                                 <label class="form-label">Tanggal</label>
                                                 <input type="date" name="date" class="form-control" value="{{ $meeting->date?->format('Y-m-d') }}">
+                                            </div>
+                                            <div class="col-12 mb-3">
+                                                <label class="form-label required">Jenis Pertemuan</label>
+                                                <select name="type" class="form-select" x-model="mtype">
+                                                    <option value="tatap_muka">Tatap Muka</option>
+                                                    <option value="mandiri">Mandiri (Full LMS)</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-12 mb-3" x-show="mtype === 'tatap_muka'" x-cloak>
+                                                <label class="form-label">Lokasi / Ruang</label>
+                                                <input type="text" name="location" class="form-control" value="{{ $meeting->location }}" placeholder="Ruang 301 / Gedung A">
                                             </div>
                                             <div class="col-12 mb-3">
                                                 <label class="form-label required">Topik</label>
@@ -365,7 +384,7 @@
     {{-- Tambah pertemuan --}}
     <div class="modal modal-blur fade" id="modal-meeting" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <form class="modal-content" method="POST" action="{{ route('meetings.store', $course) }}">
+            <form class="modal-content" method="POST" action="{{ route('meetings.store', $course) }}" x-data="{ mtype: '{{ $course->default_meeting_type ?? 'tatap_muka' }}' }">
                 @csrf
                 <div class="modal-header">
                     <h5 class="modal-title">Tambah Pertemuan</h5>
@@ -380,6 +399,17 @@
                         <div class="col-8 mb-3">
                             <label class="form-label">Tanggal</label>
                             <input type="date" name="date" class="form-control">
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label required">Jenis Pertemuan</label>
+                            <select name="type" class="form-select" x-model="mtype">
+                                <option value="tatap_muka">Tatap Muka</option>
+                                <option value="mandiri">Mandiri (Full LMS)</option>
+                            </select>
+                        </div>
+                        <div class="col-12 mb-3" x-show="mtype === 'tatap_muka'" x-cloak>
+                            <label class="form-label">Lokasi / Ruang</label>
+                            <input type="text" name="location" class="form-control" placeholder="Ruang 301 / Gedung A">
                         </div>
                         <div class="col-12 mb-3">
                             <label class="form-label required">Topik</label>

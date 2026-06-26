@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-#[Fillable(['user_id', 'name', 'code', 'class_name', 'join_code', 'semester', 'year', 'description', 'status'])]
+#[Fillable(['user_id', 'name', 'code', 'class_name', 'join_code', 'semester', 'year', 'description', 'status', 'default_meeting_type'])]
 class Course extends Model
 {
     /** @use HasFactory<\Database\Factories\CourseFactory> */
