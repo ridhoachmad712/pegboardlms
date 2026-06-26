@@ -431,7 +431,7 @@
     // Preview materi: isi iframe modal dari tombol yang diklik.
     (function () {
         var modal = document.getElementById('modal-preview');
-        if (!modal || !window.bootstrap) return;
+        if (!modal) return; // cukup elemen modal-nya; event show.bs.modal dipicu Tabler saat dibuka
         var frame = document.getElementById('preview-frame');
         var titleEl = document.getElementById('preview-title');
         var dl = document.getElementById('preview-download');
