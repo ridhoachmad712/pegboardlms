@@ -20,6 +20,9 @@
     <h1 class="h2 mb-0">{{ $assignment->title }}</h1>
 </div>
 
+@php($pageStatus = $submission?->isGraded() ? 'graded' : ($submission?->submitted_at ? ($submission->isLate() ? 'late' : 'submitted') : ($assignment->isPastDeadline() ? 'overdue' : 'not_started')))
+<div class="d-flex align-items-center gap-2 mb-3"><span class="text-secondary small">Status:</span><x-learning-status :status="$pageStatus" :score="$submission?->score" /></div>
+
 <div class="row row-cards">
     <div class="col-lg-7 order-2 order-lg-1">
         <div class="card">
@@ -181,7 +184,7 @@
                         <div class="text-secondary mb-3">Menunggu penilaian dosen. Anda masih bisa memperbarui jawaban.</div>
                     @endif
 
-                    <form method="POST" action="{{ route('submissions.store', $assignment) }}" enctype="multipart/form-data" data-warn-unsaved
+                    <form method="POST" action="{{ route('submissions.store', $assignment) }}" enctype="multipart/form-data" data-warn-unsaved data-autosave="assignment-{{ $assignment->id }}"
                           x-data="{ fileName: '' }" @if($submission) data-confirm="Perbarui pengumpulan ini? Jawaban sebelumnya akan diganti dengan versi terbaru." @endif>
                         @csrf
 

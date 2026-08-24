@@ -47,6 +47,7 @@
                                 <button type="button" class="w-100 border-0 bg-transparent p-0 d-flex align-items-center gap-3 text-start collapsed" data-bs-toggle="collapse" data-bs-target="#material-text-{{ $material->id }}">
                                     <span class="avatar avatar-sm bg-purple-lt"><i class="ti ti-notes"></i></span>
                                     <span class="min-w-0 flex-fill"><span class="d-block fw-bold material-title">{{ $material->title }}</span><span class="text-secondary small">Materi teks · Baca</span></span>
+                                    <x-learning-status status="available" />
                                     <i class="ti ti-chevron-down material-chevron text-secondary"></i>
                                 </button>
                                 <div class="collapse" id="material-text-{{ $material->id }}">
@@ -64,6 +65,7 @@
                                     </div>
                                 </div>
                                 <div class="d-flex gap-1 flex-shrink-0">
+                                    <x-learning-status status="available" class="d-none d-sm-inline-flex" />
                                     <a href="{{ route('materials.preview', $material) }}" class="btn btn-sm btn-icon" title="Baca" aria-label="Baca {{ $material->title }}"><i class="ti ti-eye"></i></a>
                                     <a href="{{ route('materials.download', $material) }}" class="btn btn-sm btn-icon" title="Unduh" aria-label="Unduh {{ $material->title }}"><i class="ti ti-download"></i></a>
                                 </div>
@@ -73,6 +75,7 @@
                             <a href="{{ route('materials.preview', $material) }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
                                 <span class="avatar avatar-sm bg-{{ $isVideo ? 'red' : 'azure' }}-lt"><i class="ti ti-{{ $isVideo ? 'player-play' : 'link' }}"></i></span>
                                 <span class="min-w-0 flex-fill"><span class="d-block fw-bold material-title">{{ $material->title }}</span><span class="text-secondary small">{{ $isVideo ? 'Video · Tonton' : 'Tautan · Buka' }}</span></span>
+                                <x-learning-status status="available" class="d-none d-sm-inline-flex" />
                                 <i class="ti ti-external-link text-secondary"></i>
                             </a>
                         @endif

@@ -95,6 +95,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications/count', [NotificationController::class, 'count'])->name('notifications.count');
     Route::get('/notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
     Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.readAll');
+    Route::put('/notifications/preferences', [NotificationController::class, 'updatePreferences'])->name('notifications.preferences');
 
     // ===== Tugas & Kuis (kedua role; otorisasi di controller) =====
     Route::get('/courses/{course}/assignments', [AssignmentController::class, 'index'])->name('assignments.index');

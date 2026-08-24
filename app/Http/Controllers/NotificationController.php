@@ -12,9 +12,19 @@ class NotificationController extends Controller
 {
     public function index(Request $request): View
     {
-        $notifications = $request->user()->notifications()->paginate(20);
+        $filter = in_array($request->query('filter'), ['all', 'unread'], true) ? $request->query('filter') : 'all';
+        $type = in_array($request->query('type'), ['grade', 'announcement', 'forum', 'revision', 'reminder'], true) ? $request->query('type') : null;
+        $notifications = $request->user()->notifications()
+            ->when($filter === 'unread', fn ($query) => $query->unread())
+            ->when($type, fn ($query) => $query->where('type', $type))
+            ->paginate(20)->withQueryString();
+        $groups = $notifications->getCollection()->groupBy(function (Notification $notification) {
+            if ($notification->created_at->isToday()) return 'Hari ini';
+            if ($notification->created_at->isYesterday()) return 'Kemarin';
+            return $notification->created_at->translatedFormat('d F Y');
+        });
 
-        return view('notifications.index', compact('notifications'));
+        return view('notifications.index', compact('notifications', 'groups', 'filter', 'type'));
     }
 
     /** Jumlah notifikasi belum dibaca (untuk auto-refresh lonceng via polling). */
@@ -40,5 +50,14 @@ class NotificationController extends Controller
         $request->user()->notifications()->unread()->update(['read_at' => now()]);
 
         return back()->with('status', 'Semua notifikasi ditandai dibaca.');
+    }
+
+    public function updatePreferences(Request $request): RedirectResponse
+    {
+        $types = ['grade', 'announcement', 'forum', 'revision', 'reminder'];
+        $preferences = collect($types)->mapWithKeys(fn ($type) => [$type => $request->boolean($type)])->all();
+        $request->user()->update(['notification_preferences' => $preferences]);
+
+        return back()->with('status', 'Preferensi notifikasi disimpan.');
     }
 }

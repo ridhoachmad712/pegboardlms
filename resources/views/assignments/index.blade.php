@@ -49,13 +49,14 @@
                             <div class="list-group list-group-flush">
                                 @foreach ($items as $a)
                                     @php($sub = $mySubs[$a->id] ?? null)
+                                    @php($learningStatus = $sub?->isGraded() ? 'graded' : ($sub?->submitted_at ? ($sub->isLate() ? 'late' : 'submitted') : ($a->isPastDeadline() ? 'overdue' : 'not_started')))
                                     <a href="{{ route('assignments.show', $a) }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3">
                                         <span class="avatar bg-{{ $a->isQuiz() ? 'purple' : 'blue' }}-lt flex-shrink-0"><i class="ti {{ $a->isQuiz() ? 'ti-help-circle' : 'ti-file-text' }}"></i></span>
                                         <div class="min-w-0 flex-fill">
                                             <div class="d-flex align-items-center gap-1"><span class="fw-bold text-truncate">{{ $a->title }}</span>@if($a->isGroup())<i class="ti ti-users text-secondary" title="Tugas kelompok"></i>@endif</div>
                                             <div class="d-flex flex-wrap align-items-center gap-1 mt-1">
                                                 <span class="badge bg-{{ $a->isQuiz() ? 'purple' : 'blue' }}-lt">{{ $a->isQuiz() ? 'Kuis' : 'Tugas' }}</span>
-                                                @if ($sub?->isGraded())<span class="badge bg-green-lt">Nilai {{ \App\Support\Grades::num($sub->score) }}</span>@else<x-due :date="$a->deadline" />@endif
+                                                <x-learning-status :status="$learningStatus" :score="$sub?->score" />
                                             </div>
                                             <div class="text-secondary small mt-1">
                                                 @if ($a->deadline)
@@ -97,15 +98,8 @@
                                     @if (auth()->user()->isDosen() && ! $course->isCompleted())
                                         <span class="text-secondary small"><i class="ti ti-users"></i> {{ $a->submissions_count }} pengumpulan</span>
                                     @else
-                                        @if ($sub && $sub->isGraded())
-                                            <span class="badge bg-green-lt">Nilai: {{ \App\Support\Grades::num($sub->score) }}</span>
-                                        @elseif ($sub)
-                                            <span class="badge bg-azure-lt">Sudah dikumpulkan</span>
-                                        @elseif ($a->isPastDeadline())
-                                            <span class="badge bg-red-lt">Terlewat</span>
-                                        @else
-                                            <span class="badge bg-yellow-lt">Belum dikerjakan</span>
-                                        @endif
+                                        @php($learningStatus = $sub?->isGraded() ? 'graded' : ($sub?->submitted_at ? ($sub->isLate() ? 'late' : 'submitted') : ($a->isPastDeadline() ? 'overdue' : 'not_started')))
+                                        <x-learning-status :status="$learningStatus" :score="$sub?->score" />
                                     @endif
                                 </div>
                             </div>

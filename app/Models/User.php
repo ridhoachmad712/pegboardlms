@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'role', 'nim_nip', 'phone', 'avatar', 'email_notifications'])]
+#[Fillable(['name', 'email', 'password', 'role', 'nim_nip', 'phone', 'avatar', 'email_notifications', 'notification_preferences'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -31,6 +31,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'email_notifications' => 'boolean',
+            'notification_preferences' => 'array',
         ];
     }
 
@@ -55,6 +56,11 @@ class User extends Authenticatable
     public function initial(): string
     {
         return strtoupper(mb_substr($this->name, 0, 1));
+    }
+
+    public function wantsNotification(string $type): bool
+    {
+        return (bool) (($this->notification_preferences ?? [])[$type] ?? true);
     }
 
     // --- Relationships ---

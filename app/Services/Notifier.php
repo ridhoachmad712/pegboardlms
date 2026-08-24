@@ -11,8 +11,13 @@ class Notifier
 {
     public static function toUser(User|int $user, string $type, string $title, ?string $message = null, ?string $link = null): void
     {
+        $recipient = $user instanceof User ? $user : User::find($user);
+        if (! $recipient || ! $recipient->wantsNotification($type)) {
+            return;
+        }
+
         Notification::create([
-            'user_id' => $user instanceof User ? $user->id : $user,
+            'user_id' => $recipient->id,
             'type' => $type,
             'title' => $title,
             'message' => $message,
@@ -23,7 +28,9 @@ class Notifier
     /** Kirim ke semua mahasiswa dalam kelas (opsional kecualikan satu user). */
     public static function toCourseStudents(Course $course, string $type, string $title, ?string $message = null, ?string $link = null, ?int $exceptUserId = null): void
     {
-        $ids = $course->students()->pluck('users.id')
+        $ids = $course->students()->get(['users.id', 'users.notification_preferences'])
+            ->filter(fn (User $student) => $student->wantsNotification($type))
+            ->pluck('id')
             ->when($exceptUserId, fn (Collection $c) => $c->reject(fn ($id) => $id === $exceptUserId));
 
         $now = now();

@@ -4,6 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="theme-color" content="{{ $themeColor }}">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
     @if (config('demo.enabled'))<meta name="robots" content="noindex,nofollow">@endif
     <link rel="icon" href="{{ $faviconUrl }}">
     <script>(function(){try{var t=localStorage.getItem('lms-theme');if(t){document.documentElement.setAttribute('data-bs-theme',t);}}catch(e){}})();</script>
@@ -47,6 +51,8 @@
         .responsive-item-main{min-width:0;flex:1 1 auto;}
         .responsive-item-title{overflow-wrap:anywhere;word-break:break-word;}
         .responsive-item-meta{display:flex;flex-wrap:wrap;gap:.15rem .65rem;min-width:0;}
+        .learning-status{max-width:100%;white-space:normal;text-align:left;}
+        .network-status{position:fixed;z-index:2100;top:0;left:50%;transform:translateX(-50%);max-width:calc(100% - 2rem);padding:.45rem .8rem;border-radius:0 0 .65rem .65rem;background:var(--tblr-danger);color:#fff;font-size:.78rem;font-weight:600;box-shadow:0 .25rem 1rem rgba(0,0,0,.18);}
         /* Sub-nav kelas: 1 baris yang bisa digeser di layar kecil */
         .lms-subnav{scrollbar-width:thin;-ms-overflow-style:none;}
         .lms-subnav::-webkit-scrollbar{height:4px;}
@@ -167,6 +173,7 @@
 </head>
 <body @class(['student-mobile-ui' => auth()->user()?->isMahasiswa()])>
 <div id="nprogress"></div>
+<div id="network-status" class="network-status d-none" role="status" aria-live="polite"><i class="ti ti-wifi-off me-1"></i><span>Anda offline — beberapa fitur tidak tersedia.</span></div>
 <div class="page">
     @php($user = auth()->user())
 
@@ -413,6 +420,7 @@
             <div class="mobile-more-grid">
                 <a href="{{ route('profile.edit') }}" class="mobile-more-link"><i class="ti ti-user"></i><span>Profil</span></a>
                 <a href="{{ route('panduan') }}" class="mobile-more-link"><i class="ti ti-help-circle"></i><span>Panduan</span></a>
+                <button type="button" id="install-app" class="mobile-more-link d-none"><i class="ti ti-device-mobile-down"></i><span>Instal Aplikasi</span></button>
             </div>
             <button type="submit" form="mobile-logout-form" class="mobile-more-logout"><i class="ti ti-logout"></i><span>Keluar dari akun</span></button>
             <form id="mobile-logout-form" method="POST" action="{{ route('logout') }}" class="d-none">@csrf</form>
@@ -463,6 +471,14 @@
 document.addEventListener('DOMContentLoaded', function () {
     var bs = window.bootstrap;
     if (!bs) return;
+
+    var network = document.getElementById('network-status');
+    function updateNetwork() { if (network) network.classList.toggle('d-none', navigator.onLine); }
+    updateNetwork(); window.addEventListener('online', updateNetwork); window.addEventListener('offline', updateNetwork);
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/service-worker.js').catch(function () {});
+    var installPrompt = null, installButton = document.getElementById('install-app');
+    window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); installPrompt = e; if (installButton) installButton.classList.remove('d-none'); });
+    if (installButton) installButton.addEventListener('click', function () { if (!installPrompt) return; installPrompt.prompt(); installPrompt.userChoice.finally(function () { installPrompt = null; installButton.classList.add('d-none'); }); });
 
     // Tampilkan semua toast otomatis
     document.querySelectorAll('.toast').forEach(function (el) { new bs.Toast(el).show(); });
@@ -521,8 +537,16 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    function setLoading(form) {
+        var b = form.querySelector('button[data-loading]');
+        if (!b || b.disabled) return;
+        var label = b.getAttribute('data-loading') || 'Memproses…';
+        b.dataset.orig = b.innerHTML;
+        b.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span>' + label;
+        b.disabled = true;
+    }
     okBtn.addEventListener('click', function () {
-        if (pending) { pending.dataset.confirmed = '1'; pending.submit(); }
+        if (pending) { pending.dataset.confirmed = '1'; setLoading(pending); pending.submit(); }
         modal.hide();
     });
 
@@ -540,13 +564,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Loading state untuk tombol operasi lambat: <button data-loading="teks…">
     document.querySelectorAll('form').forEach(function (form) {
-        form.addEventListener('submit', function () {
-            var b = form.querySelector('button[data-loading]');
-            if (!b || b.disabled) return;
-            var label = b.getAttribute('data-loading') || 'Memproses…';
-            b.dataset.orig = b.innerHTML;
-            b.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span>' + label;
-            setTimeout(function () { b.disabled = true; }, 0);
+        form.addEventListener('submit', function (event) {
+            if (event.defaultPrevented) return;
+            setLoading(form);
         });
     });
 
@@ -559,6 +579,15 @@ document.addEventListener('DOMContentLoaded', function () {
         window.addEventListener('beforeunload', function (e) {
             if (dirty) { e.preventDefault(); e.returnValue = ''; }
         });
+    });
+
+    document.querySelectorAll('form[data-autosave]').forEach(function (form) {
+        var key = 'lms-draft:' + (form.getAttribute('data-autosave') || location.pathname);
+        var fields = Array.from(form.querySelectorAll('textarea, input[type="text"], input[type="radio"], input[type="checkbox"], select')).filter(function (field) { return field.name; });
+        try { var saved = JSON.parse(localStorage.getItem(key) || '{}'); fields.forEach(function (field) { if ((field.type === 'radio' || field.type === 'checkbox') && saved[field.name] === field.value) field.checked = true; else if (!field.value && saved[field.name]) field.value = saved[field.name]; }); } catch (e) {}
+        function saveDraft() { var data = {}; fields.forEach(function (field) { if (field.type === 'radio' || field.type === 'checkbox') { if (field.checked) data[field.name] = field.value; } else data[field.name] = field.value; }); try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) {} }
+        fields.forEach(function (field) { field.addEventListener('input', saveDraft); });
+        form.addEventListener('submit', function () { try { localStorage.removeItem(key); } catch (e) {} });
     });
 
     // Sort tabel: <table class="table-sortable"> — klik <th> (kecuali .no-sort)

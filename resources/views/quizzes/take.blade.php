@@ -8,6 +8,7 @@
 
 @section('content')
 <form method="POST" action="{{ route('quizzes.submit', $assignment) }}" id="quiz-form" class="quiz-taking"
+      data-autosave="quiz-{{ $assignment->id }}"
       data-confirm="Kumpulkan jawaban sekarang? Jawaban tidak dapat diubah setelah dikirim."
       x-data="quizTimer({{ is_null($secondsLeft) ? 'null' : max(0, (int) $secondsLeft) }})" x-init="start()">
     @csrf
@@ -20,7 +21,7 @@
                     <div class="text-secondary small">Sisa waktu</div>
                     <div class="h2 mb-0" :class="remaining <= 60 ? 'text-red' : ''" x-text="display"></div>
                 </div>
-                <button type="submit" class="btn btn-primary ms-auto"><i class="ti ti-send me-1"></i>Kumpulkan</button>
+                <button type="submit" class="btn btn-primary ms-auto" data-loading="Mengirim…"><i class="ti ti-send me-1"></i>Kumpulkan</button>
             </div>
         </div>
     @endif
@@ -50,7 +51,7 @@
 
     <div class="card quiz-submit-card">
         <div class="card-body text-end">
-            <button type="submit" class="btn btn-primary btn-lg"><i class="ti ti-send me-1"></i>Kumpulkan Jawaban</button>
+            <button type="submit" class="btn btn-primary btn-lg" data-loading="Mengirim jawaban…"><i class="ti ti-send me-1"></i>Kumpulkan Jawaban</button>
         </div>
     </div>
 </form>
