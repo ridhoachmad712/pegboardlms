@@ -71,6 +71,13 @@ class Meeting extends Model
     /** Token absensi aktif (belum kedaluwarsa). */
     public function activeToken(): ?AttendanceToken
     {
+        if ($this->relationLoaded('tokens')) {
+            return $this->tokens
+                ->filter(fn (AttendanceToken $token) => $token->expires_at?->isFuture())
+                ->sortByDesc('created_at')
+                ->first();
+        }
+
         return $this->tokens()->where('expires_at', '>', now())->latest()->first();
     }
 

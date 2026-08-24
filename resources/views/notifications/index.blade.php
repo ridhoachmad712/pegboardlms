@@ -21,11 +21,11 @@
                 <div class="list-group list-group-flush">
                     @foreach ($notifications as $n)
                         <a href="{{ route('notifications.read', $n) }}" class="list-group-item list-group-item-action">
-                            <div class="d-flex align-items-center">
+                            <div class="d-flex align-items-start">
                                 @if ($n->isUnread())<span class="status-dot status-dot-animated bg-red me-2"></span>@else<span class="status-dot me-2"></span>@endif
-                                <div>
-                                    <div class="fw-bold {{ $n->isUnread() ? '' : 'text-secondary' }}">{{ $n->title }}</div>
-                                    @if ($n->message)<div class="small text-secondary">{{ $n->message }}</div>@endif
+                                <div class="responsive-item-main">
+                                    <div class="fw-bold responsive-item-title {{ $n->isUnread() ? '' : 'text-secondary' }}">{{ $n->title }}</div>
+                                    @if ($n->message)<div class="small text-secondary content-prose">{{ $n->message }}</div>@endif
                                     <div class="small text-secondary">{{ $n->created_at->translatedFormat('d M Y H:i') }}</div>
                                 </div>
                             </div>

@@ -10,8 +10,8 @@
 <div class="row justify-content-center">
     <div class="col-lg-9">
         <div class="card mb-3">
-            <div class="card-body d-flex align-items-center">
-                <div>
+            <div class="card-body d-flex align-items-center flex-wrap gap-2">
+                <div class="responsive-item-main">
                     <div class="text-secondary">{{ $isDosen ? 'Peserta: '.$submission->student->name : 'Hasil Anda' }}</div>
                     <div class="h1 mb-0">
                         {{ is_null($submission->score) ? '—' : \App\Support\Grades::num($submission->score) }}
@@ -34,13 +34,13 @@
                             <span class="badge bg-{{ $q->isPg() ? 'blue' : 'purple' }}-lt me-2">Soal {{ $i + 1 }} · {{ $q->isPg() ? 'PG' : 'Esai' }}</span>
                             <span class="text-secondary small ms-auto">{{ $q->points }} poin</span>
                         </div>
-                        <div class="mb-3" style="white-space:pre-line">{{ $q->question }}</div>
+                        <div class="mb-3 content-prose" style="white-space:pre-line">{{ $q->question }}</div>
 
                         @if ($q->isPg())
                             @foreach ($q->options as $key => $opt)
                                 @php($isChosen = $ans && $ans->answer === $key)
                                 @php($isCorrect = $key === $q->correct_answer)
-                                <div class="p-2 rounded mb-1 {{ $isCorrect ? 'bg-green-lt' : ($isChosen ? 'bg-red-lt' : '') }}">
+                                <div class="p-2 rounded mb-1 content-prose {{ $isCorrect ? 'bg-green-lt' : ($isChosen ? 'bg-red-lt' : '') }}">
                                     <strong>{{ $key }}.</strong> {{ $opt }}
                                     @if ($isCorrect)<i class="ti ti-check text-green ms-1"></i>@endif
                                     @if ($isChosen)<span class="badge bg-dark-lt ms-1">Jawaban {{ $isDosen ? 'mahasiswa' : 'Anda' }}</span>@endif
@@ -50,7 +50,7 @@
                         @else
                             <div class="mb-2">
                                 <div class="text-secondary small">Jawaban {{ $isDosen ? 'mahasiswa' : 'Anda' }}:</div>
-                                <div class="border rounded p-2" style="white-space:pre-line">{{ $ans?->answer ?: '(kosong)' }}</div>
+                                <div class="border rounded p-2 content-prose" style="white-space:pre-line">{{ $ans?->answer ?: '(kosong)' }}</div>
                             </div>
                             @if ($isDosen)
                                 <div class="row align-items-end">

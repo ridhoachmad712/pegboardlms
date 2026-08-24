@@ -63,7 +63,7 @@
                         <button type="button" class="btn btn-sm btn-ghost-secondary ms-auto" @click="edit = ! edit" title="Edit diskusi"><i class="ti ti-pencil"></i></button>
                     @endif
                 </div>
-                <div x-show="!edit" style="white-space:pre-line">{{ $thread->content }}</div>
+                <div x-show="!edit" class="content-prose" style="white-space:pre-line">{{ $thread->content }}</div>
                 @if ($thread->user_id === auth()->id() || $isOwner)
                     <form x-show="edit" x-cloak method="POST" action="{{ route('forum.threads.update', $thread) }}" class="mt-2">
                         @csrf @method('PUT')
@@ -98,7 +98,7 @@
                             </div>
                         @endif
                     </div>
-                    <div x-show="!edit" style="white-space:pre-line">{{ $reply->content }}</div>
+                    <div x-show="!edit" class="content-prose" style="white-space:pre-line">{{ $reply->content }}</div>
                     @if ($canEditReply)
                         <form x-show="edit" x-cloak method="POST" action="{{ route('forum.replies.update', $reply) }}" class="mt-1">
                             @csrf @method('PUT')

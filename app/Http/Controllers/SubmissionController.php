@@ -123,10 +123,25 @@ class SubmissionController extends Controller
         $submission->load('assignment.course');
         $this->ensureCourseOwner($request, $submission->assignment->course);
 
+        $assignment = $submission->assignment;
+        $recipients = $assignment->isGroup() && $submission->assignment_group_id
+            ? $submission->group()->first()?->members()->pluck('users.id')->all() ?? []
+            : [$submission->user_id];
+
         if ($submission->file_path) {
             Storage::disk('public')->delete($submission->file_path);
         }
         $submission->delete();
+
+        foreach ($recipients as $userId) {
+            Notifier::toUser(
+                $userId,
+                'revision',
+                'Tugas perlu dikumpulkan ulang',
+                $assignment->title.' dibuka kembali oleh dosen.',
+                route('assignments.show', $assignment),
+            );
+        }
 
         return back()->with('status', 'Pengumpulan dibuka kembali — mahasiswa dapat mengumpulkan ulang.');
     }

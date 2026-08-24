@@ -38,21 +38,21 @@
     @endif
 </section>
 
-{{-- Aksi cepat: tugas terdekat yang belum dikerjakan --}}
-@if ($pending->isNotEmpty())
-    @php($next = $pending->first())
+{{-- Ringkasan pusat aktivitas: tampilkan tindakan paling relevan. --}}
+@if ($activity['total'] > 0)
+    @php($next = $activity['actions']->first() ?? $activity['updates']->first())
     <div class="card mb-3 border-primary overflow-hidden student-priority-card" id="pengingat" style="scroll-margin-top:5rem">
         <div class="card-body">
             <div class="d-flex align-items-start gap-3">
-                <span class="avatar avatar-md bg-orange-lt flex-shrink-0"><i class="ti ti-{{ $next->isQuiz() ? 'help-circle' : 'file-text' }} fs-2"></i></span>
+                <span class="avatar avatar-md bg-orange-lt flex-shrink-0"><i class="ti ti-bolt fs-2"></i></span>
                 <div class="min-w-0 flex-fill">
-                    <div class="text-uppercase text-primary fw-bold" style="font-size:.68rem;letter-spacing:.05em">Pengingat terdekat</div>
-                    <div class="fw-bold fs-3 text-truncate">{{ $next->title }}</div>
-                    <div class="text-secondary small text-truncate">{{ $next->course->name }}</div>
-                    <div class="mt-2"><x-due :date="$next->deadline" /></div>
+                    <div class="text-uppercase text-primary fw-bold" style="font-size:.68rem;letter-spacing:.05em">Perlu perhatian</div>
+                    <div class="fw-bold fs-3 responsive-item-title">{{ $next['title'] }}</div>
+                    <div class="text-secondary small responsive-item-title">{{ $next['subtitle'] }}</div>
+                    <div class="small text-orange mt-1">{{ $next['meta'] }}</div>
                 </div>
             </div>
-            <a href="{{ route('assignments.index', $next->course) }}" class="btn btn-primary w-100 mt-3"><i class="ti ti-book-2 me-1"></i>Buka Tugas Mata Kuliah Ini</a>
+            <a href="{{ route('activities.index') }}" class="btn btn-primary w-100 mt-3"><i class="ti ti-list-check me-1"></i>Lihat {{ $activity['total'] }} Aktivitas</a>
         </div>
     </div>
 @endif

@@ -30,6 +30,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RubricController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SubmissionController;
+use App\Http\Controllers\StudentActivityController;
 use App\Http\Controllers\SyllabusController;
 use Illuminate\Support\Facades\Route;
 
@@ -61,6 +62,8 @@ Route::middleware('auth')->group(function () {
         ->middleware('role:dosen')->name('dashboard.dosen');
     Route::get('/dashboard/mahasiswa', [DashboardController::class, 'mahasiswa'])
         ->middleware('role:mahasiswa')->name('dashboard.mahasiswa');
+    Route::get('/activities', [StudentActivityController::class, 'index'])
+        ->middleware('role:mahasiswa')->name('activities.index');
 
     // Panduan penggunaan (per role, dibaca dari auth() di view)
     Route::view('/panduan', 'panduan')->name('panduan');

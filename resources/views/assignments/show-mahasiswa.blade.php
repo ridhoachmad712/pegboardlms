@@ -42,7 +42,7 @@
                 @if ($assignment->description)
                     <hr>
                     <div class="text-secondary small mb-1">Instruksi</div>
-                    <div class="assignment-instructions" style="white-space:pre-line">{{ $assignment->description }}</div>
+                    <div class="assignment-instructions content-prose" style="white-space:pre-line">{{ $assignment->description }}</div>
                 @else
                     <div class="text-secondary">Tidak ada instruksi tambahan dari dosen.</div>
                 @endif
@@ -81,7 +81,7 @@
                             @endforeach
                         </div>
                         @if (! $myGroup->isLocked() && $groupmateCandidates->isNotEmpty() && (! $assignment->group_max || $myGroup->members->count() < $assignment->group_max))
-                            <form method="POST" action="{{ route('assignment-groups.addMember', $myGroup) }}" class="d-flex gap-2">
+                            <form method="POST" action="{{ route('assignment-groups.addMember', $myGroup) }}" class="d-flex gap-2 mobile-action-stack">
                                 @csrf
                                 <select name="user_id" class="form-select form-select-sm" required>
                                     <option value="">+ Tambah anggota…</option>
@@ -158,7 +158,7 @@
                     {{-- Sudah dinilai: tampilkan jawaban terkirim (baca saja) + nilai --}}
                     @if ($assignment->allowsText() && $submission->answer_text)
                         <div class="mb-3"><span class="text-secondary">Jawaban teks Anda</span>
-                            <div class="border rounded p-2 mt-1" style="white-space:pre-line">{{ $submission->answer_text }}</div>
+                            <div class="border rounded p-2 mt-1 content-prose" style="white-space:pre-line">{{ $submission->answer_text }}</div>
                         </div>
                     @endif
                     @if ($submission->file_path)
@@ -170,7 +170,7 @@
                     </div>
                     @if ($submission->feedback)
                         <div class="mt-2"><span class="text-secondary">Feedback dosen</span>
-                            <div class="alert alert-info mt-1" style="white-space:pre-line">{{ $submission->feedback }}</div>
+                            <div class="alert alert-info mt-1 content-prose" style="white-space:pre-line">{{ $submission->feedback }}</div>
                         </div>
                     @endif
                 @else

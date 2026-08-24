@@ -9,6 +9,7 @@ use App\Models\Material;
 use App\Models\Meeting;
 use App\Models\Setting;
 use App\Services\AttendanceService;
+use App\Services\StudentActivity;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -108,7 +109,7 @@ class DashboardController extends Controller
         ));
     }
 
-    public function mahasiswa(Request $request, AttendanceService $attendance): View
+    public function mahasiswa(Request $request, AttendanceService $attendance, StudentActivity $activityService): View
     {
         $user = $request->user();
 
@@ -167,8 +168,10 @@ class DashboardController extends Controller
             'unread' => $user->notifications()->unread()->count(),
         ];
 
+        $activity = $activityService->forStudent($user);
+
         return view('dashboard.mahasiswa', compact(
-            'courses', 'pending', 'upcomingMeetings', 'lowAttendance', 'stats'
+            'courses', 'pending', 'upcomingMeetings', 'lowAttendance', 'stats', 'activity'
         ));
     }
 }

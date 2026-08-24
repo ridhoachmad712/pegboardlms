@@ -41,6 +41,12 @@
         code{overflow-wrap:anywhere;word-break:break-word;}
         .card,.card-body,.card-header,.card-footer,.list-group-item{min-width:0;}
         .card-title,.page-title,.fw-bold,.fw-semibold{overflow-wrap:anywhere;}
+        .content-prose,.content-prose *{max-width:100%;overflow-wrap:anywhere;word-break:break-word;}
+        .content-prose img,.content-prose iframe,.content-prose video{max-width:100%;height:auto;}
+        .content-prose pre{max-width:100%;overflow:auto;white-space:pre-wrap;}
+        .responsive-item-main{min-width:0;flex:1 1 auto;}
+        .responsive-item-title{overflow-wrap:anywhere;word-break:break-word;}
+        .responsive-item-meta{display:flex;flex-wrap:wrap;gap:.15rem .65rem;min-width:0;}
         /* Sub-nav kelas: 1 baris yang bisa digeser di layar kecil */
         .lms-subnav{scrollbar-width:thin;-ms-overflow-style:none;}
         .lms-subnav::-webkit-scrollbar{height:4px;}
@@ -64,6 +70,27 @@
         }
         /* ============ Penghalusan tampilan mobile (≤575px) ============ */
         @media (max-width: 575.98px) {
+            html,body{max-width:100%;overflow-x:hidden;}
+            .page-body>.container-xl,.page-header .container-xl{max-width:100%;}
+            .row>*{min-width:0;}
+            .card-header{padding:.85rem 1rem;gap:.5rem;flex-wrap:wrap;}
+            .card-header .card-actions{max-width:100%;margin-left:auto;}
+            .card-body{padding:1rem;}
+            .btn-list{max-width:100%;flex-wrap:wrap;}
+            .btn-list>*{min-width:0;}
+            .table-responsive{max-width:100%;margin:0;overscroll-behavior-x:contain;scrollbar-width:thin;}
+            .table-responsive>.table{margin-bottom:0;}
+            .table th,.table td{max-width:16rem;overflow-wrap:anywhere;}
+            .modal-dialog{margin:0;min-height:100%;align-items:stretch;}
+            .modal-content{min-height:100dvh;border:0;border-radius:0 !important;}
+            .modal-body{overflow-y:auto;}
+            .modal-footer{position:sticky;bottom:0;z-index:2;padding:.75rem 1rem calc(.75rem + env(safe-area-inset-bottom));background:var(--tblr-bg-surface);flex-wrap:wrap;}
+            .modal-footer .btn{flex:1 1 auto;min-height:2.75rem;}
+            .mobile-action-stack{flex-direction:column !important;align-items:stretch !important;}
+            .mobile-action-stack>.btn,.mobile-action-stack>button,.mobile-action-stack>select,.mobile-action-stack>.form-control{width:100%;}
+            .responsive-item-title{line-height:1.35;}
+            .responsive-item-meta{font-size:.75rem;}
+            .content-prose{font-size:.9rem;line-height:1.6;}
             body.student-mobile-ui{background:var(--tblr-bg-surface-secondary,#f6f8fb);}
             body.student-mobile-ui .page{min-height:100dvh;padding-bottom:calc(4.75rem + env(safe-area-inset-bottom));}
             body.student-mobile-ui .navbar{display:none !important;}
@@ -271,6 +298,14 @@
                                 <span class="nav-link-title">Kalender</span>
                             </a>
                         </li>
+                        @if ($user->isMahasiswa())
+                            <li class="nav-item {{ request()->routeIs('activities.*') ? 'active' : '' }}">
+                                <a class="nav-link" href="{{ route('activities.index') }}">
+                                    <span class="nav-link-icon"><i class="ti ti-list-check"></i></span>
+                                    <span class="nav-link-title">Aktivitas</span>
+                                </a>
+                            </li>
+                        @endif
                         @if ($user->isDosen())
                             <li class="nav-item dropdown {{ request()->routeIs('admin.*') ? 'active' : '' }}">
                                 <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" role="button" aria-expanded="false">
@@ -337,6 +372,7 @@
     @php($mobileHomeActive = request()->routeIs('dashboard*'))
     @php($mobileCoursesActive = request()->routeIs('courses.*', 'materials.*', 'assignments.*', 'quizzes.*', 'submissions.*', 'grades.*', 'attendance.*', 'forum.*', 'announcements.*', 'syllabus.*'))
     @php($mobileCalendarActive = request()->routeIs('calendar'))
+    @php($mobileMoreActive = request()->routeIs('activities.*', 'notifications.*', 'profile.*', 'panduan'))
     <nav class="mobile-bottom-nav d-print-none" aria-label="Navigasi utama">
         <a href="{{ route('dashboard') }}" class="mobile-bottom-nav__item {{ $mobileHomeActive ? 'active' : '' }}" aria-current="{{ $mobileHomeActive ? 'page' : 'false' }}">
             <i class="ti ti-home"></i><span>Beranda</span>
@@ -348,7 +384,7 @@
             <i class="ti ti-calendar"></i><span>Kalender</span>
         </a>
         @php($mobileUnread = $user->notifications()->unread()->count())
-        <button class="mobile-bottom-nav__item" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobile-more-menu" aria-controls="mobile-more-menu">
+        <button class="mobile-bottom-nav__item {{ $mobileMoreActive ? 'active' : '' }}" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobile-more-menu" aria-controls="mobile-more-menu" aria-current="{{ $mobileMoreActive ? 'page' : 'false' }}">
             <i class="ti ti-menu-2"></i><span>Lainnya</span>
             @if($mobileUnread)<span class="mobile-bottom-nav__badge">{{ $mobileUnread > 99 ? '99+' : $mobileUnread }}</span>@endif
         </button>
@@ -369,7 +405,7 @@
             </div>
             <div class="mobile-more-section-title">Akademik</div>
             <div class="mobile-more-grid">
-                <a href="{{ route('dashboard.mahasiswa') }}#pengingat" class="mobile-more-link"><i class="ti ti-checklist"></i><span>Pengingat</span></a>
+                <a href="{{ route('activities.index') }}" class="mobile-more-link"><i class="ti ti-list-check"></i><span>Aktivitas</span></a>
                 <a href="{{ route('notifications.index') }}" class="mobile-more-link position-relative"><i class="ti ti-bell"></i><span>Notifikasi</span>@if($mobileUnread)<span class="badge bg-red text-white position-absolute top-0 end-0 m-2">{{ $mobileUnread }}</span>@endif</a>
                 <a href="{{ route('enrollments.join.show') }}" class="mobile-more-link"><i class="ti ti-key"></i><span>Gabung Kelas</span></a>
             </div>

@@ -15,15 +15,15 @@
     <div class="col-lg-9">
         @forelse ($threads as $thread)
             <div class="card mb-2 overflow-hidden">
-                <a href="{{ route('forum.show', $thread) }}" class="card-body d-flex align-items-center text-reset text-decoration-none">
-                    <span class="avatar bg-{{ $thread->pinned ? 'yellow' : 'blue' }}-lt me-3"><i class="ti {{ $thread->pinned ? 'ti-pin' : 'ti-message' }}"></i></span>
-                    <div class="me-auto">
-                        <div class="fw-bold">{{ $thread->title }}</div>
+                <a href="{{ route('forum.show', $thread) }}" class="card-body d-flex align-items-center gap-2 text-reset text-decoration-none">
+                    <span class="avatar bg-{{ $thread->pinned ? 'yellow' : 'blue' }}-lt flex-shrink-0"><i class="ti {{ $thread->pinned ? 'ti-pin' : 'ti-message' }}"></i></span>
+                    <div class="responsive-item-main">
+                        <div class="fw-bold responsive-item-title">{{ $thread->title }}</div>
                         @if ($thread->pinned)<span class="badge bg-yellow-lt ms-1">Disematkan</span>@endif
                         <div class="text-secondary small">{{ $thread->author->name }} · {{ $thread->created_at->diffForHumans() }}</div>
                     </div>
-                    <span class="badge bg-secondary-lt"><i class="ti ti-messages me-1"></i>{{ $thread->replies_count }}</span>
-                    <i class="ti ti-chevron-right text-secondary ms-2 d-md-none"></i>
+                    <span class="badge bg-secondary-lt flex-shrink-0"><i class="ti ti-messages me-1"></i>{{ $thread->replies_count }}</span>
+                    <i class="ti ti-chevron-right text-secondary flex-shrink-0 d-md-none"></i>
                 </a>
             </div>
         @empty

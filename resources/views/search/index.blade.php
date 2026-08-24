@@ -27,7 +27,7 @@
                     @foreach ($courses as $c)
                         <a href="{{ route('courses.show', $c) }}" class="list-group-item list-group-item-action d-flex align-items-center">
                             <span class="avatar bg-primary-lt me-2"><i class="ti ti-school"></i></span>
-                            <div><div class="fw-bold">{{ $c->name }}</div><div class="small text-secondary">{{ $c->code }} · {{ $c->semester }} {{ $c->year }}</div></div>
+                            <div class="responsive-item-main"><div class="fw-bold responsive-item-title">{{ $c->name }}</div><div class="small text-secondary responsive-item-meta">{{ $c->code }} · {{ $c->semester }} {{ $c->year }}</div></div>
                         </a>
                     @endforeach
                 </div>
@@ -41,7 +41,7 @@
                     @foreach ($assignments as $a)
                         <a href="{{ route('assignments.show', $a) }}" class="list-group-item list-group-item-action d-flex align-items-center">
                             <span class="avatar bg-{{ $a->isQuiz() ? 'purple' : 'blue' }}-lt me-2"><i class="ti {{ $a->isQuiz() ? 'ti-help-circle' : 'ti-file-text' }}"></i></span>
-                            <div><div class="fw-bold">{{ $a->title }}</div><div class="small text-secondary">{{ $a->course->name }}</div></div>
+                            <div class="responsive-item-main"><div class="fw-bold responsive-item-title">{{ $a->title }}</div><div class="small text-secondary">{{ $a->course->name }}</div></div>
                         </a>
                     @endforeach
                 </div>
@@ -55,7 +55,7 @@
                     @foreach ($students as $s)
                         <div class="list-group-item d-flex align-items-center">
                             <span class="avatar bg-secondary-lt me-2">{{ strtoupper(mb_substr($s->name,0,1)) }}</span>
-                            <div><div class="fw-bold">{{ $s->name }}</div><div class="small text-secondary">{{ $s->nim_nip }} · {{ $s->email }}</div></div>
+                            <div class="responsive-item-main"><div class="fw-bold responsive-item-title">{{ $s->name }}</div><div class="small text-secondary responsive-item-meta"><span>{{ $s->nim_nip }}</span><span>{{ $s->email }}</span></div></div>
                         </div>
                     @endforeach
                 </div>

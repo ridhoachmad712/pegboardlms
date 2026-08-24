@@ -19,8 +19,8 @@
                     <div class="d-flex align-items-start gap-3">
                         <span class="avatar avatar-sm bg-orange-lt flex-shrink-0"><i class="ti ti-speakerphone"></i></span>
                         <div class="flex-fill min-w-0">
-                            <div class="d-flex">
-                                <h3 class="card-title mb-0">{{ $a->title }}</h3>
+                            <div class="d-flex align-items-start gap-2">
+                                <h3 class="card-title mb-0 responsive-item-main responsive-item-title">{{ $a->title }}</h3>
                                 @if (auth()->user()->isDosen())
                                     <form method="POST" action="{{ route('announcements.destroy', $a) }}" class="ms-auto" data-confirm="Hapus pengumuman?">
                                         @csrf @method('DELETE')
@@ -30,7 +30,7 @@
                             </div>
                             <div class="text-secondary small mt-1">{{ $a->author->name }}</div>
                             <time class="d-block text-secondary small mb-2" datetime="{{ $a->created_at->toIso8601String() }}">{{ $a->created_at->translatedFormat('d M Y, H:i') }}</time>
-                            <div class="announcement-content" style="white-space:pre-line">{{ $a->content }}</div>
+                            <div class="announcement-content content-prose" style="white-space:pre-line">{{ $a->content }}</div>
                         </div>
                     </div>
                 </div>

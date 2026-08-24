@@ -41,7 +41,7 @@
                             @if ($numbered)
                                 <ol class="mb-0 ps-3">@foreach (preg_split('/\r\n|\r|\n/', $val) as $line) @if (trim($line) !== '')<li>{{ trim($line) }}</li>@endif @endforeach</ol>
                             @else
-                                <div style="white-space:pre-line">{{ $val }}</div>
+                                <div class="content-prose" style="white-space:pre-line">{{ $val }}</div>
                             @endif
                         </div>
                     </details>
@@ -59,7 +59,7 @@
                                     @endforeach
                                 </ol>
                             @else
-                                <div style="white-space:pre-line">{{ $val }}</div>
+                                <div class="content-prose" style="white-space:pre-line">{{ $val }}</div>
                             @endif
                         </div>
                     </div>
@@ -78,7 +78,7 @@
                 <div class="list-group list-group-flush">
                     @foreach ($course->meetings as $m)
                         <div class="list-group-item">
-                            <div class="fw-bold">P{{ $m->number }} — {{ $m->topic }}</div>
+                            <div class="fw-bold responsive-item-title">P{{ $m->number }} — {{ $m->topic }}</div>
                             <div class="text-secondary small">{{ $m->date?->translatedFormat('d M Y') ?? 'Tanggal belum ditentukan' }}</div>
                         </div>
                     @endforeach
