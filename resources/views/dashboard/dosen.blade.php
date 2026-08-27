@@ -31,6 +31,16 @@
 @endsection
 
 @section('content')
+@if (auth()->user()->isAdmin())
+    <a href="{{ route('admin.lecturers.index') }}" class="card mb-3 text-reset text-decoration-none">
+        <div class="card-body d-flex align-items-center gap-3">
+            <span class="avatar bg-primary-lt flex-shrink-0"><i class="ti ti-user-plus" aria-hidden="true"></i></span>
+            <div class="responsive-item-main"><div class="fw-bold">Pendaftaran dosen</div><div class="text-secondary small">{{ $pendingLecturerCount }} akun menunggu aktivasi</div></div>
+            @if ($pendingLecturerCount)<span class="badge bg-orange-lt">{{ $pendingLecturerCount }}</span>@endif
+            <i class="ti ti-chevron-right text-secondary" aria-hidden="true"></i>
+        </div>
+    </a>
+@endif
 @if ($periods->isEmpty())
     @include('partials.welcome-banner')
 @endif
@@ -107,7 +117,7 @@
 
 @php($statCards = [
     ['Kelas Aktif', $stats['active_courses'], 'ti-school', 'primary', route('courses.index', ['periode' => $periode])],
-    ['Mahasiswa', $stats['students'], 'ti-users', 'green', route('admin.students.index')],
+    ['Mahasiswa', $stats['students'], 'ti-users', 'green', auth()->user()->isAdmin() ? route('admin.students.index') : route('courses.index')],
     ['Mata Kuliah', $stats['subjects'], 'ti-book', 'azure', route('courses.index', ['periode' => $periode])],
     ['Tugas & Kuis', $stats['assignments'], 'ti-checklist', 'purple', null],
 ])

@@ -10,15 +10,18 @@
 @endsection
 
 @section('content')
-@php($icons = ['grade' => ['ti-clipboard-check', 'green'], 'announcement' => ['ti-speakerphone', 'yellow'], 'forum' => ['ti-messages', 'azure'], 'revision' => ['ti-refresh', 'orange'], 'reminder' => ['ti-clock', 'purple']])
+@php($icons = ['grade' => ['ti-clipboard-check', 'green'], 'announcement' => ['ti-speakerphone', 'yellow'], 'forum' => ['ti-messages', 'azure'], 'revision' => ['ti-refresh', 'orange'], 'reminder' => ['ti-clock', 'purple'], 'lecturer_registration' => ['ti-user-plus', 'blue']])
 <div class="row justify-content-center"><div class="col-lg-8">
-    <div class="d-flex gap-2 mb-3 overflow-x-auto notification-filters">
-        <a href="{{ route('notifications.index', ['filter' => 'all', 'type' => $type]) }}" class="btn btn-sm text-nowrap {{ $filter === 'all' ? 'btn-primary' : '' }}">Semua</a>
-        <a href="{{ route('notifications.index', ['filter' => 'unread', 'type' => $type]) }}" class="btn btn-sm text-nowrap {{ $filter === 'unread' ? 'btn-primary' : '' }}">Belum dibaca</a>
+    <nav class="nav nav-pills flex-nowrap gap-2 mb-3 overflow-x-auto notification-filters mobile-filter-chips" aria-label="Filter notifikasi">
+        <a href="{{ route('notifications.index', ['filter' => 'all', 'type' => $type]) }}" class="nav-link text-nowrap {{ $filter === 'all' ? 'active' : '' }}" aria-current="{{ $filter === 'all' && ! $type ? 'page' : 'false' }}">Semua</a>
+        <a href="{{ route('notifications.index', ['filter' => 'unread', 'type' => $type]) }}" class="nav-link text-nowrap {{ $filter === 'unread' ? 'active' : '' }}" aria-current="{{ $filter === 'unread' && ! $type ? 'page' : 'false' }}">Belum dibaca</a>
         @foreach (['grade' => 'Nilai', 'announcement' => 'Pengumuman', 'forum' => 'Forum', 'revision' => 'Revisi'] as $key => $label)
-            <a href="{{ route('notifications.index', ['filter' => $filter, 'type' => $type === $key ? null : $key]) }}" class="btn btn-sm text-nowrap {{ $type === $key ? 'btn-primary' : '' }}">{{ $label }}</a>
+            <a href="{{ route('notifications.index', ['filter' => $filter, 'type' => $type === $key ? null : $key]) }}" class="nav-link text-nowrap {{ $type === $key ? 'active' : '' }}" aria-current="{{ $type === $key ? 'page' : 'false' }}">{{ $label }}</a>
         @endforeach
-    </div>
+        @if (auth()->user()->isAdmin())
+            <a href="{{ route('notifications.index', ['filter' => $filter, 'type' => 'lecturer_registration']) }}" class="nav-link text-nowrap {{ $type === 'lecturer_registration' ? 'active' : '' }}">Pendaftaran dosen</a>
+        @endif
+    </nav>
 
     @forelse ($groups as $label => $items)
         <section class="mb-3" aria-labelledby="notification-group-{{ $loop->index }}">

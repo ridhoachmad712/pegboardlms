@@ -3,6 +3,10 @@
 @section('title', 'Daftar')
 
 @section('content')
+<nav class="auth-tabs" aria-label="Jenis pendaftaran">
+    <a href="{{ route('register') }}" aria-current="page">Mahasiswa</a>
+    <a href="{{ route('register.lecturer') }}">Dosen</a>
+</nav>
 <form class="card card-md" method="POST" action="{{ route('register') }}" autocomplete="off">
     @csrf
     <div class="card-body">

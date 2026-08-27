@@ -17,9 +17,9 @@
 
 <div class="row justify-content-center">
     <div class="col-lg-8">
-        <nav class="nav nav-pills flex-nowrap overflow-x-auto gap-1 mb-3 activity-filters" aria-label="Filter aktivitas">
+        <nav class="nav nav-pills flex-nowrap overflow-x-auto gap-2 mb-3 activity-filters mobile-filter-chips" aria-label="Filter aktivitas">
             @foreach (['all' => 'Semua', 'tasks' => 'Tugas & Kuis', 'attendance' => 'Absensi', 'updates' => 'Pembaruan'] as $key => $label)
-                <a href="{{ route('activities.index', ['filter' => $key]) }}" class="nav-link text-nowrap {{ $filter === $key ? 'active' : '' }}">{{ $label }}</a>
+                <a href="{{ route('activities.index', ['filter' => $key]) }}" class="nav-link text-nowrap {{ $filter === $key ? 'active' : '' }}" aria-current="{{ $filter === $key ? 'page' : 'false' }}">{{ $label }}</a>
             @endforeach
         </nav>
 

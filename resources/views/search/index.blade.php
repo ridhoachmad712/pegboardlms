@@ -9,12 +9,12 @@
         <div class="card-body">
             <div class="input-group mb-2"><span class="input-group-text"><i class="ti ti-search"></i></span><input type="search" name="q" class="form-control" value="{{ $q }}" placeholder="Cari materi, tugas, pertemuan…" aria-label="Kata pencarian"><button class="btn btn-primary">Cari</button></div>
             <div class="row g-2">
-                <div class="col-6"><label class="form-label small mb-1" for="search-type">Jenis</label><select id="search-type" name="type" class="form-select form-select-sm" onchange="this.form.submit()">
+                <div class="col-6"><label class="form-label small mb-1" for="search-type">Jenis</label><select id="search-type" name="type" class="form-select" onchange="this.form.submit()">
                     @foreach (['all'=>'Semua konten','courses'=>'Mata kuliah','assignments'=>'Tugas & kuis','materials'=>'Materi','meetings'=>'Pertemuan','announcements'=>'Pengumuman','forum'=>'Forum','students'=>'Mahasiswa'] as $key=>$label)
                         @if($key !== 'students' || auth()->user()->isDosen())<option value="{{ $key }}" @selected($type===$key)>{{ $label }}</option>@endif
                     @endforeach
                 </select></div>
-                <div class="col-6"><label class="form-label small mb-1" for="search-course">Mata kuliah</label><select id="search-course" name="course" class="form-select form-select-sm" onchange="this.form.submit()"><option value="">Semua</option>@foreach($accessibleCourses as $item)<option value="{{ $item->id }}" @selected($courseId===$item->id)>{{ $item->name }}</option>@endforeach</select></div>
+                <div class="col-6"><label class="form-label small mb-1" for="search-course">Mata kuliah</label><select id="search-course" name="course" class="form-select" onchange="this.form.submit()"><option value="">Semua</option>@foreach($accessibleCourses as $item)<option value="{{ $item->id }}" @selected($courseId===$item->id)>{{ $item->name }}</option>@endforeach</select></div>
             </div>
         </div>
     </form>

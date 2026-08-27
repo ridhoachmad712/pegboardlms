@@ -53,7 +53,7 @@
                                     <a href="{{ route('assignments.show', $a) }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3">
                                         <span class="avatar bg-{{ $a->isQuiz() ? 'purple' : 'blue' }}-lt flex-shrink-0"><i class="ti {{ $a->isQuiz() ? 'ti-help-circle' : 'ti-file-text' }}"></i></span>
                                         <div class="min-w-0 flex-fill">
-                                            <div class="d-flex align-items-center gap-1"><span class="fw-bold text-truncate">{{ $a->title }}</span>@if($a->isGroup())<i class="ti ti-users text-secondary" title="Tugas kelompok"></i>@endif</div>
+                                            <div class="d-flex align-items-start gap-1"><span class="fw-bold line-clamp-2">{{ $a->title }}</span>@if($a->isGroup())<i class="ti ti-users text-secondary flex-shrink-0 mt-1" title="Tugas kelompok" aria-label="Tugas kelompok"></i>@endif</div>
                                             <div class="d-flex flex-wrap align-items-center gap-1 mt-1">
                                                 <span class="badge bg-{{ $a->isQuiz() ? 'purple' : 'blue' }}-lt">{{ $a->isQuiz() ? 'Kuis' : 'Tugas' }}</span>
                                                 <x-learning-status :status="$learningStatus" :score="$sub?->score" />
@@ -120,7 +120,7 @@
 @media (max-width:575.98px){
     .assignment-tabs{display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.2rem;scrollbar-width:none;}
     .assignment-tabs::-webkit-scrollbar{display:none;}
-    .assignment-tab{display:inline-flex;align-items:center;gap:.35rem;min-height:2.65rem;padding:.45rem .7rem;flex:0 0 auto;border:1px solid var(--tblr-border-color);border-radius:.75rem;background:var(--tblr-bg-surface);color:var(--tblr-secondary-color);font-size:.75rem;font-weight:600;transition:color .15s ease,background-color .15s ease,border-color .15s ease;}
+    .assignment-tab{display:inline-flex;align-items:center;gap:.35rem;min-height:2.75rem;padding:.45rem .7rem;flex:0 0 auto;border:1px solid var(--tblr-border-color);border-radius:.75rem;background:var(--tblr-bg-surface);color:var(--tblr-secondary-color);font-size:.75rem;font-weight:600;transition:color .15s ease,background-color .15s ease,border-color .15s ease;}
     .assignment-tab:hover,.assignment-tab:focus{color:var(--tblr-primary);border-color:rgba(var(--tblr-primary-rgb),.35);background:rgba(var(--tblr-primary-rgb),.06);}
     .assignment-tab.active{color:var(--tblr-primary);border-color:rgba(var(--tblr-primary-rgb),.45);background:rgba(var(--tblr-primary-rgb),.1);}
 }

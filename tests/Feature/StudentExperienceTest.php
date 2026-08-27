@@ -17,7 +17,7 @@ class StudentExperienceTest extends TestCase
 
     private function courseWithStudent(): array
     {
-        $lecturer = User::factory()->create(['role' => User::ROLE_DOSEN]);
+        $lecturer = User::factory()->activeLecturer()->create();
         $student = User::factory()->create(['role' => User::ROLE_MAHASISWA]);
         $course = Course::create([
             'user_id' => $lecturer->id, 'name' => 'Ekonometrika', 'code' => 'EKO101',

@@ -77,7 +77,11 @@
             </div>
         </div>
         <div class="card-footer text-center text-secondary">
-            Mahasiswa baru punya kode kelas? <a href="{{ route('register') }}">Daftar di sini</a>
+            <div class="mb-2">Belum punya akun?</div>
+            <div class="d-flex flex-wrap justify-content-center gap-2">
+                <a href="{{ route('register') }}" class="btn btn-outline-primary">Daftar Mahasiswa</a>
+                <a href="{{ route('register.lecturer') }}" class="btn btn-outline-primary">Daftar Dosen</a>
+            </div>
         </div>
     </form>
 @endif

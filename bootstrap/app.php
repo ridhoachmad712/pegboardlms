@@ -15,13 +15,16 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'role' => RoleMiddleware::class,
+            'admin' => \App\Http\Middleware\EnsureAdmin::class,
+            'lecturer.active' => \App\Http\Middleware\EnsureLecturerActivated::class,
         ]);
 
         // Pengaman mode demo (efektif hanya saat DEMO_MODE=true)
         $middleware->appendToGroup('web', \App\Http\Middleware\DemoGuard::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->dontFlash(['activation_code']);
         $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->is('api/*'),
+            fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
     })->create();

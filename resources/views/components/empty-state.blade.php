@@ -4,7 +4,7 @@
     'description' => null,
 ])
 
-<div class="empty">
+<div {{ $attributes->class(['empty lms-empty-state']) }}>
     <div class="empty-icon mb-3" style="width:auto;height:auto;">
         <span class="avatar avatar-xl rounded-circle bg-primary-lt"><i class="ti {{ $icon }}" style="font-size:2rem;"></i></span>
     </div>

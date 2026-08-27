@@ -9,10 +9,8 @@
 
 {{-- Di HP, mata kuliah adalah pintu masuk utama. --}}
 <section class="d-md-none mb-3" aria-labelledby="mobile-courses-title">
-    <div class="d-flex align-items-end mb-2">
-        <h2 class="h2 mb-0" id="mobile-courses-title">Mata Kuliah Saya</h2>
-        <a href="{{ route('courses.index') }}" class="ms-auto small fw-bold text-decoration-none">Lihat semua</a>
-    </div>
+    <x-section-heading id="mobile-courses-title" title="Mata Kuliah Saya"
+        :href="route('courses.index')" action="Lihat semua" />
     @if ($courses->isEmpty())
         <div class="card"><div class="card-body text-center py-4">
             <span class="avatar avatar-lg bg-primary-lt mb-2"><i class="ti ti-books fs-1"></i></span>
@@ -27,8 +25,8 @@
                     <a href="{{ route('courses.show', $course) }}" class="list-group-item list-group-item-action d-flex align-items-center gap-2 py-2 px-3">
                         <span class="avatar avatar-sm bg-{{ $course->color() }}-lt flex-shrink-0"><i class="ti ti-book-2"></i></span>
                         <div class="min-w-0 flex-fill">
-                            <div class="fw-bold text-truncate">{{ $course->name }}</div>
-                            <div class="text-secondary small text-truncate">{{ $course->lecturer->name }}</div>
+                            <div class="fw-bold line-clamp-2">{{ $course->name }}</div>
+                            <div class="text-secondary small line-clamp-1">{{ $course->lecturer->name }}</div>
                         </div>
                         <i class="ti ti-chevron-right text-secondary flex-shrink-0"></i>
                     </a>
@@ -107,10 +105,8 @@
     {{-- Pertemuan mendatang --}}
     <div class="col-lg-6">
         <section class="d-md-none" aria-labelledby="mobile-meetings-title">
-            <div class="d-flex align-items-end mb-2">
-                <h2 class="h2 mb-0" id="mobile-meetings-title">Pertemuan Berikutnya</h2>
-                <a href="{{ route('calendar') }}" class="ms-auto small fw-bold text-decoration-none">Lihat kalender</a>
-            </div>
+            <x-section-heading id="mobile-meetings-title" title="Pertemuan Berikutnya"
+                :href="route('calendar')" action="Lihat kalender" />
             @if ($upcomingMeetings->isEmpty())
                 <div class="card"><div class="card-body py-3"><x-empty-state icon="ti-calendar-off" title="Tidak ada jadwal mendatang" /></div></div>
             @else
@@ -123,8 +119,8 @@
                                     <span class="d-block text-secondary text-uppercase" style="font-size:.68rem">{{ $m->date->translatedFormat('M') }}</span>
                                 </time>
                                 <div class="min-w-0 flex-fill">
-                                    <div class="fw-semibold text-truncate">{{ $m->topic }}</div>
-                                    <div class="small text-secondary text-truncate">{{ $m->course->name }} · P{{ $m->number }}</div>
+                                    <div class="fw-semibold line-clamp-2">{{ $m->topic }}</div>
+                                    <div class="small text-secondary line-clamp-1">{{ $m->course->name }} · P{{ $m->number }}</div>
                                 </div>
                                 <i class="ti ti-chevron-right text-secondary flex-shrink-0"></i>
                             </a>

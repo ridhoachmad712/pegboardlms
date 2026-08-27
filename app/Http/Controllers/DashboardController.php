@@ -27,6 +27,9 @@ class DashboardController extends Controller
     public function dosen(Request $request): View
     {
         $user = $request->user();
+        $pendingLecturerCount = $user->isAdmin()
+            ? \App\Models\User::where('role', \App\Models\User::ROLE_DOSEN)->whereNull('lecturer_activated_at')->count()
+            : 0;
 
         $courses = $user->teachingCourses()
             ->withCount(['students', 'meetings'])
@@ -105,7 +108,7 @@ class DashboardController extends Controller
 
         return view('dashboard.dosen', compact(
             'stats', 'activeCourses', 'periods', 'periode', 'activeKeys', 'activeLabel',
-            'needGrading', 'needAttendance', 'todayMeetings'
+            'needGrading', 'needAttendance', 'todayMeetings', 'pendingLecturerCount'
         ));
     }
 

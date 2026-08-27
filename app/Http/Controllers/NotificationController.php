@@ -13,7 +13,11 @@ class NotificationController extends Controller
     public function index(Request $request): View
     {
         $filter = in_array($request->query('filter'), ['all', 'unread'], true) ? $request->query('filter') : 'all';
-        $type = in_array($request->query('type'), ['grade', 'announcement', 'forum', 'revision', 'reminder'], true) ? $request->query('type') : null;
+        $allowedTypes = ['grade', 'announcement', 'forum', 'revision', 'reminder'];
+        if ($request->user()->isAdmin()) {
+            $allowedTypes[] = 'lecturer_registration';
+        }
+        $type = in_array($request->query('type'), $allowedTypes, true) ? $request->query('type') : null;
         $notifications = $request->user()->notifications()
             ->when($filter === 'unread', fn ($query) => $query->unread())
             ->when($type, fn ($query) => $query->where('type', $type))

@@ -29,6 +29,7 @@ class DemoGuard
         'admin.students.bulkDestroy',
         'admin.students.bulkReset',
         'admin.students.resetPassword',
+        'admin.lecturers.issueCode',
     ];
 
     public function handle(Request $request, Closure $next): Response

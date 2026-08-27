@@ -52,6 +52,16 @@
         .responsive-item-title{overflow-wrap:anywhere;word-break:break-word;}
         .responsive-item-meta{display:flex;flex-wrap:wrap;gap:.15rem .65rem;min-width:0;}
         .learning-status{max-width:100%;white-space:normal;text-align:left;}
+        .line-clamp-1,.line-clamp-2{display:-webkit-box;overflow:hidden;-webkit-box-orient:vertical;overflow-wrap:anywhere;word-break:break-word;}
+        .line-clamp-1{-webkit-line-clamp:1;line-clamp:1;}
+        .line-clamp-2{-webkit-line-clamp:2;line-clamp:2;}
+        .mobile-section-heading{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:.75rem;margin-bottom:.65rem;}
+        .mobile-section-heading__title{min-width:0;margin:0;overflow-wrap:anywhere;}
+        .mobile-section-heading__action{display:inline-flex;align-items:center;justify-content:center;min-height:2.75rem;padding:.35rem .25rem;color:var(--tblr-primary);font-size:.78rem;font-weight:700;text-align:right;text-decoration:none;}
+        .mobile-section-heading__action:hover,.mobile-section-heading__action:focus{color:var(--tblr-primary-darken);text-decoration:none;}
+        .skip-link{position:fixed;z-index:3000;top:.5rem;left:.5rem;transform:translateY(-150%);padding:.65rem .9rem;border-radius:.6rem;background:var(--tblr-primary);color:#fff;font-weight:700;transition:transform .15s ease;}
+        .skip-link:focus{transform:translateY(0);color:#fff;}
+        :where(a,button,input,select,textarea,[tabindex]):focus-visible{outline:3px solid rgba(var(--tblr-primary-rgb),.35);outline-offset:2px;}
         .network-status{position:fixed;z-index:2100;top:0;left:50%;transform:translateX(-50%);max-width:calc(100% - 2rem);padding:.45rem .8rem;border-radius:0 0 .65rem .65rem;background:var(--tblr-danger);color:#fff;font-size:.78rem;font-weight:600;box-shadow:0 .25rem 1rem rgba(0,0,0,.18);}
         /* Sub-nav kelas: 1 baris yang bisa digeser di layar kecil */
         .lms-subnav{scrollbar-width:thin;-ms-overflow-style:none;}
@@ -116,6 +126,8 @@
             body.student-mobile-ui .page-title{font-size:1.35rem;line-height:1.25;}
             body.student-mobile-ui .footer{display:none;}
             body.student-mobile-ui .card{border-radius:.875rem !important;box-shadow:0 1px 3px rgba(35,46,60,.06);}
+            body.student-mobile-ui .card-header{padding:.85rem 1rem;}
+            body.student-mobile-ui .card-title{font-size:.95rem;line-height:1.35;}
             body.student-mobile-ui .card-body,
             body.student-mobile-ui .list-group-item{overflow-wrap:anywhere;}
             body.student-mobile-ui .badge{max-width:100%;overflow:hidden;text-overflow:ellipsis;vertical-align:middle;}
@@ -123,6 +135,30 @@
             body.student-mobile-ui input,
             body.student-mobile-ui select,
             body.student-mobile-ui textarea{max-width:100%;}
+            body.student-mobile-ui .form-control:not(textarea),
+            body.student-mobile-ui .form-select,
+            body.student-mobile-ui .input-group-text{min-height:2.75rem;}
+            body.student-mobile-ui input.form-control,
+            body.student-mobile-ui select.form-select,
+            body.student-mobile-ui textarea.form-control{font-size:1rem;}
+            body.student-mobile-ui .nav-pills .nav-link{display:flex;align-items:center;justify-content:center;min-height:2.75rem;}
+            body.student-mobile-ui .mobile-segmented{padding:.25rem;border-radius:.85rem;background:var(--tblr-bg-surface);box-shadow:0 1px 3px rgba(35,46,60,.05);}
+            body.student-mobile-ui .mobile-segmented .nav-link{border-radius:.65rem;color:var(--tblr-secondary-color);font-size:.8rem;font-weight:600;}
+            body.student-mobile-ui .mobile-segmented .nav-link.active{background:rgba(var(--tblr-primary-rgb),.1);color:var(--tblr-primary);}
+            body.student-mobile-ui .mobile-filter-chips{margin-right:-1rem;margin-left:-1rem;padding:.05rem 1rem .35rem;scroll-padding-inline:1rem;scroll-snap-type:x proximity;scrollbar-width:none;}
+            body.student-mobile-ui .mobile-filter-chips::-webkit-scrollbar{display:none;}
+            body.student-mobile-ui .mobile-filter-chips>*{flex:0 0 auto;scroll-snap-align:start;}
+            body.student-mobile-ui .mobile-filter-chips .nav-link,
+            body.student-mobile-ui .mobile-filter-chips .btn{min-height:2.75rem;padding:.55rem .8rem;border-radius:.75rem;font-size:.75rem;font-weight:600;}
+            body.student-mobile-ui .page-header .col-sm-auto>.btn-list{display:flex;gap:.5rem;}
+            body.student-mobile-ui .page-header .col-sm-auto>.btn-list>.btn,
+            body.student-mobile-ui .page-header .col-sm-auto>.btn-list>form>.btn{min-height:2.75rem;}
+            body.student-mobile-ui .btn-sm:not(.btn-link),
+            body.student-mobile-ui .btn-icon{min-width:2.75rem;min-height:2.75rem;}
+            body.student-mobile-ui .btn-close{min-width:2.75rem;min-height:2.75rem;background-size:.9rem;}
+            body.student-mobile-ui .form-check{display:flex;align-items:center;min-height:2.75rem;}
+            body.student-mobile-ui .form-check:not(.form-switch) .form-check-input{width:1.25rem;height:1.25rem;flex:0 0 1.25rem;}
+            body.student-mobile-ui details>summary{min-height:2.75rem;}
             body.student-mobile-ui .alert,
             body.student-mobile-ui .form-hint,
             body.student-mobile-ui .dropdown-item{overflow-wrap:anywhere;}
@@ -144,7 +180,11 @@
             /* Hero kelas rapi saat elemen menumpuk */
             .course-hero .card-body{gap:.75rem;}
             /* Target sentuh tombol ikon lebih nyaman */
-            .btn-icon{min-width:2.25rem;min-height:2.25rem;}
+            .btn-icon{min-width:2.75rem;min-height:2.75rem;}
+        }
+        @media (hover:none) and (pointer:coarse){
+            .card-lift:hover,.mobile-bottom-nav__item:hover,.mobile-more-link:hover{transform:none;}
+            .list-group-item-action:active,.course-mobile-menu__item:active,.mobile-more-link:active{background:rgba(var(--tblr-primary-rgb),.08);}
         }
         .mobile-bottom-nav{display:none;}
         @media (max-width:575.98px){
@@ -152,6 +192,7 @@
             .mobile-bottom-nav__item{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.1rem;min-height:3.55rem;border:0;background:transparent;color:var(--tblr-secondary-color);font-size:.68rem;font-weight:600;text-decoration:none;border-radius:.75rem;}
             .mobile-bottom-nav__item i{font-size:1.45rem;line-height:1;}
             .mobile-bottom-nav__item.active{color:var(--tblr-primary);}
+            .mobile-bottom-nav__item.active::before{content:"";position:absolute;top:.18rem;width:1.5rem;height:.18rem;border-radius:2rem;background:var(--tblr-primary);}
             .mobile-bottom-nav__item{transition:color .15s ease,background-color .15s ease,transform .15s ease;}
             .mobile-bottom-nav__item:hover{color:var(--tblr-primary);background:rgba(var(--tblr-primary-rgb),.08);text-decoration:none;transform:translateY(-1px);}
             .mobile-bottom-nav__badge{position:absolute;top:.15rem;left:calc(50% + .45rem);min-width:1rem;padding:.05rem .25rem;border-radius:2rem;background:var(--tblr-danger);color:#fff;font-size:.58rem;text-align:center;}
@@ -167,11 +208,13 @@
         }
         @media (prefers-reduced-motion:reduce){
             .navbar .nav-link,.dropdown-item,.mobile-bottom-nav__item,.mobile-more-link{transition:none !important;transform:none !important;}
+            .skip-link{transition:none !important;}
         }
     </style>
     @stack('styles')
 </head>
 <body @class(['student-mobile-ui' => auth()->user()?->isMahasiswa()])>
+<a href="#main-content" class="skip-link">Langsung ke konten</a>
 <div id="nprogress"></div>
 <div id="network-status" class="network-status d-none" role="status" aria-live="polite"><i class="ti ti-wifi-off me-1"></i><span>Anda offline — beberapa fitur tidak tersedia.</span></div>
 <div class="page">
@@ -313,13 +356,14 @@
                                 </a>
                             </li>
                         @endif
-                        @if ($user->isDosen())
+                        @if ($user->isAdmin())
                             <li class="nav-item dropdown {{ request()->routeIs('admin.*') ? 'active' : '' }}">
                                 <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" role="button" aria-expanded="false">
                                     <span class="nav-link-icon"><i class="ti ti-settings"></i></span>
-                                    <span class="nav-link-title">Pengaturan</span>
+                                    <span class="nav-link-title">Admin</span>
                                 </a>
                                 <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="{{ route('admin.lecturers.index') }}"><i class="ti ti-school me-2"></i>Kelola Dosen</a>
                                     <a class="dropdown-item" href="{{ route('admin.students.index') }}"><i class="ti ti-users me-2"></i>Mahasiswa</a>
                                     <a class="dropdown-item" href="{{ route('admin.semesters.index') }}"><i class="ti ti-calendar-stats me-2"></i>Kelola Semester</a>
                                     <a class="dropdown-item" href="{{ route('admin.settings.edit') }}"><i class="ti ti-palette me-2"></i>Tampilan</a>
@@ -346,7 +390,7 @@
                         @hasSection('page-pretitle')
                             <div class="page-pretitle">@yield('page-pretitle')</div>
                         @endif
-                        <h2 class="page-title">@yield('page-title')</h2>
+                        <h1 class="page-title">@yield('page-title')</h1>
                     </div>
                     <div class="col-12 col-sm-auto ms-sm-auto d-print-none">
                         @yield('page-actions')
@@ -356,12 +400,12 @@
         </div>
         @endif
 
-        <div class="page-body">
+        <main class="page-body" id="main-content" tabindex="-1">
             <div class="container-xl">
                 @include('partials.flash')
                 @yield('content')
             </div>
-        </div>
+        </main>
 
         <footer class="footer footer-transparent d-print-none">
             <div class="container-xl">

@@ -47,6 +47,7 @@ class EnrollmentController extends Controller
     /** Dosen reset kata sandi mahasiswa (ke NIM, atau "password" bila NIM kosong). */
     public function resetPassword(Request $request, Course $course, User $user): RedirectResponse
     {
+        abort_unless($request->user()->isAdmin(), 403);
         $this->authorizeOwner($request, $course);
         abort_unless($course->students()->whereKey($user->id)->exists(), 404);
 
@@ -80,6 +81,8 @@ class EnrollmentController extends Controller
         // Hanya mahasiswa yang boleh di-enroll
         $mahasiswaIds = User::whereIn('id', $validated['user_ids'])
             ->where('role', User::ROLE_MAHASISWA)
+            ->when(! $request->user()->isAdmin(), fn ($query) => $query->whereHas('enrolledCourses',
+                fn ($courses) => $courses->where('courses.user_id', $request->user()->id)))
             ->pluck('id')
             ->all();
 

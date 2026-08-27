@@ -25,6 +25,7 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
+            'role' => User::ROLE_MAHASISWA,
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
@@ -41,5 +42,15 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
         ]);
+    }
+
+    public function activeLecturer(): static
+    {
+        return $this->state(fn () => ['role' => User::ROLE_DOSEN, 'lecturer_activated_at' => now()]);
+    }
+
+    public function admin(): static
+    {
+        return $this->activeLecturer()->state(fn () => ['is_admin' => true]);
     }
 }

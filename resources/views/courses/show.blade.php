@@ -58,7 +58,7 @@
                     <span class="avatar bg-orange-lt"><i class="ti ti-checklist fs-2"></i></span>
                     <div class="min-w-0 flex-fill">
                         <div class="text-uppercase text-primary fw-bold" style="font-size:.68rem;letter-spacing:.05em">Tugas berikutnya</div>
-                        <div class="fw-bold text-truncate">{{ $nextAssignment->title }}</div>
+                        <div class="fw-bold line-clamp-2">{{ $nextAssignment->title }}</div>
                         <div class="d-flex align-items-center gap-2 mt-1"><x-due :date="$nextAssignment->deadline" />@if($nextAssignment->deadline)<span class="text-secondary small">{{ $nextAssignment->deadline->format('H:i') }}</span>@endif</div>
                     </div>
                 </div>
@@ -76,8 +76,8 @@
                     <span class="d-block text-secondary text-uppercase" style="font-size:.68rem">{{ $nextMeeting->date->translatedFormat('M') }}</span>
                 </time>
                 <div class="min-w-0 flex-fill">
-                    <div class="fw-semibold text-truncate">{{ $nextMeeting->topic }}</div>
-                    <div class="text-secondary small text-truncate">Pertemuan {{ $nextMeeting->number }}@if($nextMeeting->location) · {{ $nextMeeting->location }}@endif</div>
+                    <div class="fw-semibold line-clamp-2">{{ $nextMeeting->topic }}</div>
+                    <div class="text-secondary small line-clamp-1">Pertemuan {{ $nextMeeting->number }}@if($nextMeeting->location) · {{ $nextMeeting->location }}@endif</div>
                 </div>
             </div></div>
         </div>

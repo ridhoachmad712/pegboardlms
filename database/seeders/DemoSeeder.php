@@ -64,6 +64,8 @@ class DemoSeeder extends Seeder
             'email_verified_at' => now(),
         ]);
 
+        $dosen->forceFill(['is_admin' => true, 'lecturer_activated_at' => now()])->save();
+
         // --- Mahasiswa demo (akun 1-klik) sebagai mahasiswa pertama ---
         $demoMhs = User::create([
             'name' => 'Mahasiswa Demo',

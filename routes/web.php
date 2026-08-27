@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\SemesterController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\StudentController as AdminStudentController;
+use App\Http\Controllers\Admin\LecturerController as AdminLecturerController;
 use App\Http\Controllers\AiController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AnnouncementController;
@@ -15,6 +16,8 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\LecturerRegisterController;
+use App\Http\Controllers\Auth\ActivationController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EnrollmentController;
@@ -45,6 +48,9 @@ Route::middleware('guest')->group(function () {
     Route::get('/register', [RegisterController::class, 'create'])->name('register');
     Route::post('/register', [RegisterController::class, 'store'])->middleware('throttle:10,1');
 
+    Route::get('/register/dosen', [LecturerRegisterController::class, 'create'])->name('register.lecturer');
+    Route::post('/register/dosen', [LecturerRegisterController::class, 'store'])->middleware('throttle:5,1');
+
     // Akses 1-klik mode demo (controller menolak dengan 404 jika DEMO_MODE non-aktif)
     Route::post('/demo/{role}', [LoginController::class, 'demo'])
         ->whereIn('role', ['dosen', 'mahasiswa'])
@@ -53,8 +59,12 @@ Route::middleware('guest')->group(function () {
 });
 
 // --- Authenticated ---
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'lecturer.active'])->group(function () {
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
+
+    Route::get('/activation', [ActivationController::class, 'show'])->middleware('role:dosen')->name('activation.show');
+    Route::post('/activation', [ActivationController::class, 'store'])
+        ->middleware(['role:dosen', 'throttle:5,1'])->name('activation.store');
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -159,7 +169,7 @@ Route::middleware('auth')->group(function () {
         Route::patch('/courses/{course}/complete', [CourseController::class, 'toggleComplete'])->name('courses.complete');
         Route::patch('/courses/{course}/join-code', [CourseController::class, 'regenerateJoinCode'])->name('courses.regenerateCode');
         Route::get('/enrollments/template', [EnrollmentController::class, 'template'])->name('enrollments.template');
-        Route::post('/courses/{course}/students/{user}/reset-password', [EnrollmentController::class, 'resetPassword'])->name('enrollments.resetPassword');
+        Route::post('/courses/{course}/students/{user}/reset-password', [EnrollmentController::class, 'resetPassword'])->middleware('admin')->name('enrollments.resetPassword');
 
         // Enrollment mahasiswa
         Route::get('/courses/{course}/students', [CourseController::class, 'students'])->name('courses.students');
@@ -214,8 +224,12 @@ Route::middleware('auth')->group(function () {
         // Forum — pin
         Route::patch('/forum/{thread}/pin', [ForumController::class, 'pin'])->name('forum.pin');
 
-        // ===== Admin (dosen merangkap admin) =====
-        Route::prefix('admin')->name('admin.')->group(function () {
+        // Admin is an explicit permission, not inherited by every lecturer.
+        Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
+            Route::get('/lecturers', [AdminLecturerController::class, 'index'])->name('lecturers.index');
+            Route::get('/lecturers/{lecturer}', [AdminLecturerController::class, 'show'])->name('lecturers.show');
+            Route::post('/lecturers/{lecturer}/activation-code', [AdminLecturerController::class, 'issueCode'])
+                ->middleware('throttle:10,1')->name('lecturers.issueCode');
             Route::get('/settings', [SettingController::class, 'edit'])->name('settings.edit');
             Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
             Route::get('/grade-scale', [SettingController::class, 'editGradeScale'])->name('gradeScale.edit');

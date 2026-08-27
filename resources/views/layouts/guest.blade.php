@@ -10,6 +10,23 @@
     <link rel="stylesheet" href="{{ asset('tabler/css/tabler.min.css') }}">
     <link rel="stylesheet" href="{{ asset('tabler/css/tabler-icons.min.css') }}">
     <style>
+        .page.page-center{min-height:100svh;height:auto;justify-content:flex-start;}
+        .page-center>.container-tight{flex-shrink:0;margin-top:auto;margin-bottom:auto;}
+        .auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:1rem;}
+        .auth-tabs a{display:flex;align-items:center;justify-content:center;min-height:2.75rem;padding:.6rem;border:1px solid var(--tblr-border-color);border-radius:.75rem;color:var(--tblr-secondary-color);background:var(--tblr-bg-surface);text-decoration:none;font-weight:600;}
+        .auth-tabs a[aria-current="page"]{color:var(--tblr-primary);background:rgba(var(--tblr-primary-rgb),.08);border-color:rgba(var(--tblr-primary-rgb),.35);}
+        .auth-tabs a:hover{color:var(--tblr-primary);background:rgba(var(--tblr-primary-rgb),.08);}
+        .activation-code-input{font-family:monospace;text-transform:uppercase;letter-spacing:.08em;}
+        .activation-code-input::placeholder{font-family:var(--tblr-font-sans-serif);font-size:.875rem;text-transform:none;letter-spacing:normal;}
+        .navbar-brand span{white-space:normal;}
+        .card,.card-body,.navbar-brand{min-width:0;max-width:100%;overflow-wrap:anywhere;}
+        :where(a,button,input):focus-visible{outline:3px solid rgba(var(--tblr-primary-rgb),.4);outline-offset:2px;}
+        @media(max-width:575.98px){
+            .card-md>.card-body{padding:1.25rem;}
+            .form-control,.btn{min-height:2.75rem;}
+            .form-control{font-size:1rem;}
+            .container-tight{padding-left:1rem;padding-right:1rem;}
+        }
         *{corner-shape:round !important;}
         @supports (corner-shape: squircle) {
             .card{border-radius:var(--tblr-card-border-radius) !important;}

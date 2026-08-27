@@ -22,8 +22,8 @@
                 <a href="{{ route('courses.show', $course) }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3">
                     <span class="avatar avatar-md bg-{{ $course->color() }}-lt flex-shrink-0"><i class="ti ti-book-2 fs-2"></i></span>
                     <div class="min-w-0 flex-fill">
-                        <div class="fw-bold text-truncate">{{ $course->name }}</div>
-                        <div class="text-secondary small text-truncate">{{ $course->lecturer->name }}</div>
+                        <div class="fw-bold line-clamp-2">{{ $course->name }}</div>
+                        <div class="text-secondary small line-clamp-1">{{ $course->lecturer->name }}</div>
                     </div>
                     <i class="ti ti-chevron-right text-secondary flex-shrink-0"></i>
                 </a>

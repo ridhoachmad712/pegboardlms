@@ -209,6 +209,8 @@ class CourseController extends Controller
         $students = $course->students()->orderBy('name')->get();
         $availableStudents = User::where('role', User::ROLE_MAHASISWA)
             ->whereNotIn('id', $students->pluck('id'))
+            ->when(! $request->user()->isAdmin(), fn ($query) => $query->whereHas('enrolledCourses',
+                fn ($courses) => $courses->where('courses.user_id', $request->user()->id)))
             ->orderBy('name')
             ->get(['id', 'name', 'nim_nip']);
 

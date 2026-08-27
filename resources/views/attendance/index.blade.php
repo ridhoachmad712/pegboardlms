@@ -120,7 +120,7 @@
                             <div class="d-flex align-items-center gap-3">
                                 <span class="avatar avatar-sm bg-{{ $st ? $letter[$st][1] : 'secondary' }}-lt">P{{ $m->number }}</span>
                                 <div class="flex-fill min-w-0">
-                                    <div class="fw-semibold text-truncate">{{ $m->topic }}</div>
+                                    <div class="fw-semibold line-clamp-2">{{ $m->topic }}</div>
                                     <div class="small text-secondary">{{ $m->date?->translatedFormat('d M Y') ?? 'Tanggal belum ditentukan' }}</div>
                                 </div>
                                 @if ($st)<span class="badge bg-{{ $letter[$st][1] }}-lt">{{ ucfirst($st) }}</span>@else<span class="small text-secondary">Belum ada sesi</span>@endif

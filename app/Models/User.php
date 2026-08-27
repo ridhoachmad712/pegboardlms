@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'role', 'nim_nip', 'phone', 'avatar', 'email_notifications', 'notification_preferences'])]
+#[Fillable(['name', 'email', 'password', 'role', 'nim_nip', 'phone', 'avatar', 'institution', 'email_notifications', 'notification_preferences'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -32,6 +32,8 @@ class User extends Authenticatable
             'password' => 'hashed',
             'email_notifications' => 'boolean',
             'notification_preferences' => 'array',
+            'is_admin' => 'boolean',
+            'lecturer_activated_at' => 'datetime',
         ];
     }
 
@@ -45,6 +47,21 @@ class User extends Authenticatable
     public function isMahasiswa(): bool
     {
         return $this->role === self::ROLE_MAHASISWA;
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->isDosen() && $this->is_admin;
+    }
+
+    public function needsLecturerActivation(): bool
+    {
+        return $this->isDosen() && $this->lecturer_activated_at === null;
+    }
+
+    public function activationCodes(): HasMany
+    {
+        return $this->hasMany(LecturerActivationCode::class);
     }
 
     /** URL foto profil, atau null bila belum ada. */

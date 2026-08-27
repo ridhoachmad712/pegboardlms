@@ -5,13 +5,13 @@
 @section('page-title', 'Profil & Kata Sandi')
 
 @section('content')
-<ul class="nav nav-pills nav-fill mb-3 d-md-none" role="tablist">
-    <li class="nav-item"><button class="nav-link active w-100" data-bs-toggle="tab" data-bs-target="#profile-data" type="button">Data Diri</button></li>
-    <li class="nav-item"><button class="nav-link w-100" data-bs-toggle="tab" data-bs-target="#profile-password" type="button">Kata Sandi</button></li>
+<ul class="nav nav-pills nav-fill mb-3 d-md-none mobile-segmented" role="tablist">
+    <li class="nav-item" role="presentation"><button id="profile-data-tab" class="nav-link active w-100" data-bs-toggle="tab" data-bs-target="#profile-data" type="button" role="tab" aria-controls="profile-data" aria-selected="true">Data Diri</button></li>
+    <li class="nav-item" role="presentation"><button id="profile-password-tab" class="nav-link w-100" data-bs-toggle="tab" data-bs-target="#profile-password" type="button" role="tab" aria-controls="profile-password" aria-selected="false">Kata Sandi</button></li>
 </ul>
 <div class="row row-cards tab-content">
     {{-- Profil --}}
-    <div class="col-md-6 tab-pane active d-md-block" id="profile-data">
+    <div class="col-md-6 tab-pane active d-md-block" id="profile-data" role="tabpanel" aria-labelledby="profile-data-tab">
         <form class="card" method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data">
             @csrf
             @method('PATCH')
@@ -59,7 +59,7 @@
     </div>
 
     {{-- Password --}}
-    <div class="col-md-6 tab-pane d-md-block" id="profile-password">
+    <div class="col-md-6 tab-pane d-md-block" id="profile-password" role="tabpanel" aria-labelledby="profile-password-tab">
         <form class="card" method="POST" action="{{ route('profile.password') }}">
             @csrf
             @method('PUT')

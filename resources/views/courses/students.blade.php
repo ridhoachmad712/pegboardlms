@@ -65,11 +65,13 @@
                                 <td class="text-end">
                                     @unless ($course->isCompleted())
                                     <div class="btn-list justify-content-end">
+                                        @if (auth()->user()->isAdmin())
                                         <form method="POST" action="{{ route('enrollments.resetPassword', [$course, $student]) }}"
                                               data-confirm="Reset kata sandi {{ $student->name }} menjadi NIM-nya?">
                                             @csrf
                                             <button class="btn btn-sm" title="Reset kata sandi" data-bs-toggle="tooltip"><i class="ti ti-key"></i></button>
                                         </form>
+                                        @endif
                                         <form method="POST" action="{{ route('enrollments.destroy', [$course, $student]) }}"
                                               data-confirm="Keluarkan {{ $student->name }} dari kelas?">
                                             @csrf @method('DELETE')

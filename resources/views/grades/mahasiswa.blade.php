@@ -35,7 +35,7 @@
                         @php($score = $row['components'][$c->id] ?? null)
                         <div class="list-group-item d-flex align-items-center gap-3">
                             <span class="avatar avatar-sm bg-primary-lt"><i class="ti ti-clipboard-check"></i></span>
-                            <div class="min-w-0 flex-fill"><div class="fw-semibold text-truncate">{{ $c->name }}</div><div class="small text-secondary">Bobot {{ $c->weight }}%</div></div>
+                            <div class="min-w-0 flex-fill"><div class="fw-semibold line-clamp-2">{{ $c->name }}</div><div class="small text-secondary">Bobot {{ $c->weight }}%</div></div>
                             <div class="text-end"><div class="fw-bold fs-3">{{ is_null($score) ? '—' : \App\Support\Grades::num($score) }}</div><div class="small text-secondary">{{ is_null($score) ? 'Belum dinilai' : 'Kontribusi '.round($score * $c->weight / 100, 2) }}</div></div>
                         </div>
                     @endforeach

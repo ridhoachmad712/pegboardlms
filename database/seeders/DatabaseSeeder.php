@@ -26,6 +26,8 @@ class DatabaseSeeder extends Seeder
             'phone' => '081234567890',
         ]);
 
+        $dosen->forceFill(['is_admin' => true, 'lecturer_activated_at' => now()])->save();
+
         // --- 30 Mahasiswa ---
         $students = collect();
         for ($i = 1; $i <= 30; $i++) {

@@ -1,7 +1,7 @@
 # Pegboard LMS by ridhoachmad_
 
 Learning Management System untuk Prodi Manajemen, FEB Universitas Negeri Makassar.
-Aplikasi web mobile-friendly: 1 dosen + ±120 mahasiswa.
+Aplikasi web mobile-friendly untuk banyak dosen dan mahasiswa. Satu mahasiswa dapat mengikuti kelas dari beberapa dosen.
 
 ## Tech Stack
 
@@ -27,8 +27,42 @@ Buka http://127.0.0.1:8000
 
 | Role | Email | Kata sandi |
 |------|-------|-----------|
-| Dosen | `dosen@test.com` | `password` |
+| Admin / dosen | `dosen@test.com` | `password` |
 | Mahasiswa | `mhs001@test.com` … `mhs030@test.com` | `password` |
+
+## Registrasi dosen dan aktivasi sekali bayar
+
+- Dosen mendaftar di `/register/dosen`; akun baru berstatus **menunggu aktivasi**. Admin menerima notifikasi di dalam aplikasi (bukan email).
+- Dosen yang belum aktif hanya dapat membuka halaman aktivasi atau keluar. Dashboard, kelas, berkas, dan endpoint JSON tetap dibatasi di server.
+- Admin memeriksa pembayaran secara manual, lalu membuka **Admin → Kelola Dosen → detail dosen** dan mencentang konfirmasi pembayaran untuk menerbitkan kode.
+- Kode terdiri dari **20 karakter huruf kapital dan angka**, terikat pada satu akun, dan hanya dapat digunakan sekali. Kode utuh ditampilkan sekali kepada admin untuk disalin dan dikirim kepada dosen melalui saluran yang disepakati; tabel kode hanya menyimpan hash.
+- Kode harus ditukarkan dalam 7 hari secara default. Menerbitkan kode baru membatalkan kode sebelumnya. Batas ini hanya untuk penukaran kode, **bukan masa aktif akun**.
+- Setelah aktivasi, akses dosen berlaku tanpa tanggal kedaluwarsa atau tagihan berkala. Aktivasi tidak memberikan hak admin. Belum ada payment gateway atau pengiriman kode otomatis.
+- Mahasiswa tetap menggunakan registrasi/kode gabung kelas yang terpisah; tidak membutuhkan kode aktivasi dosen.
+
+### Memperbarui instalasi yang sudah memiliki data
+
+Cadangkan database terlebih dahulu. **Jangan jalankan `migrate:fresh` atau seeder pada database produksi.** Jalankan dari direktori aplikasi:
+
+```bash
+php artisan down
+php artisan migrate --force
+php artisan lms:make-admin "email-pemilik-yang-sudah-terdaftar@example.com"
+php artisan optimize:clear
+php artisan up
+```
+
+Ganti email contoh dengan akun **dosen pemilik instalasi** yang benar-benar sudah ada. Perintah menolak akun mahasiswa dan email yang belum terdaftar. Migrasi mempertahankan akses mengajar seluruh dosen lama, tetapi tidak memberikan hak admin otomatis; tetapkan admin sebelum membuka registrasi untuk publik. Akun dosen baru tetap membutuhkan aktivasi.
+
+Pengaturan produksi di `.env`:
+
+```dotenv
+DEMO_MODE=false
+LECTURER_ACTIVATION_CODE_DAYS=7
+LICENSING_SUPPORT_EMAIL=admin@example.com
+```
+
+Gunakan alamat bantuan yang sebenarnya, atau kosongkan untuk menyembunyikan tautan email. Jika menggunakan cache konfigurasi, bangun ulang dengan `php artisan config:cache` setelah perubahan `.env`. Mode demo menonaktifkan pendaftaran dosen dan penerbitan kode. Data kelas tetap dimiliki dosen masing-masing; pengaturan aplikasi, backup, dan pengelolaan akun mahasiswa global hanya untuk admin.
 
 ## Status fitur — FASE 1 (Fondasi & MVP) ✅
 

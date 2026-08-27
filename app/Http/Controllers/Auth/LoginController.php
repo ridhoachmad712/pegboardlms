@@ -34,6 +34,12 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
 
+        if ($request->user()->needsLecturerActivation()) {
+            $request->session()->forget('url.intended');
+
+            return redirect()->route('activation.show');
+        }
+
         return redirect()->intended(route('dashboard'));
     }
 
@@ -57,6 +63,11 @@ class LoginController extends Controller
                 'email_verified_at' => now(),
             ]
         );
+
+        // Demo-only permissions; production registration never goes through this endpoint.
+        if ($user->isDosen()) {
+            $user->forceFill(['is_admin' => true, 'lecturer_activated_at' => $user->lecturer_activated_at ?? now()])->save();
+        }
 
         Auth::login($user);
         $request->session()->regenerate();
