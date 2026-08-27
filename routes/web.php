@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\ActivityController as AdminActivityController;
 use App\Http\Controllers\Admin\BackupController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\SemesterController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\StudentController as AdminStudentController;
@@ -226,6 +227,7 @@ Route::middleware(['auth', 'lecturer.active'])->group(function () {
 
         // Admin is an explicit permission, not inherited by every lecturer.
         Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
+            Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
             Route::get('/lecturers', [AdminLecturerController::class, 'index'])->name('lecturers.index');
             Route::get('/lecturers/{lecturer}', [AdminLecturerController::class, 'show'])->name('lecturers.show');
             Route::post('/lecturers/{lecturer}/activation-code', [AdminLecturerController::class, 'issueCode'])

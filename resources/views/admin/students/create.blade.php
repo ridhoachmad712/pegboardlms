@@ -15,25 +15,25 @@
         <form class="card" method="POST" data-warn-unsaved action="{{ route('admin.students.store') }}">
             @csrf
             <div class="card-body">
-                <div class="mb-3"><label class="form-label required">Nama</label>
-                    <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}" required>
+                <div class="mb-3"><label for="student-name" class="form-label required">Nama</label>
+                    <input id="student-name" type="text" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}" required>
                     @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
-                <div class="mb-3"><label class="form-label required">Email</label>
-                    <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}" required>
+                <div class="mb-3"><label for="student-email" class="form-label required">Email</label>
+                    <input id="student-email" type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}" required>
                     @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
                 <div class="row">
-                    <div class="col-md-6 mb-3"><label class="form-label">NIM</label>
-                        <input type="text" name="nim_nip" class="form-control @error('nim_nip') is-invalid @enderror" value="{{ old('nim_nip') }}">
+                    <div class="col-md-6 mb-3"><label for="student-nim_nip" class="form-label">NIM</label>
+                        <input id="student-nim_nip" type="text" name="nim_nip" class="form-control @error('nim_nip') is-invalid @enderror" value="{{ old('nim_nip') }}">
                         @error('nim_nip')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
-                    <div class="col-md-6 mb-3"><label class="form-label">No. HP</label>
-                        <input type="text" name="phone" class="form-control" value="{{ old('phone') }}">
+                    <div class="col-md-6 mb-3"><label for="student-phone" class="form-label">No. HP</label>
+                        <input id="student-phone" type="text" name="phone" class="form-control" value="{{ old('phone') }}">
                     </div>
                 </div>
-                <div class="mb-1"><label class="form-label">Kata Sandi</label>
-                    <input type="text" name="password" class="form-control" placeholder="Kosongkan = pakai NIM (atau 'password')">
+                <div class="mb-1"><label for="student-password" class="form-label">Kata Sandi</label>
+                    <input id="student-password" type="text" name="password" class="form-control" placeholder="Kosongkan = pakai NIM (atau 'password')">
                     <small class="form-hint">Mahasiswa bisa menggantinya nanti di profil.</small>
                 </div>
             </div>

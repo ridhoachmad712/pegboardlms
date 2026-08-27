@@ -17,7 +17,7 @@ class LecturerController extends Controller
         $q = trim((string) $request->query('q', ''));
         $status = in_array($request->query('status'), ['pending', 'active', 'all'], true)
             ? $request->query('status') : 'pending';
-        $base = User::where('role', User::ROLE_DOSEN);
+        $base = User::where('role', User::ROLE_DOSEN)->where('is_admin', false);
         $pendingCount = (clone $base)->whereNull('lecturer_activated_at')->count();
         $activeCount = (clone $base)->whereNotNull('lecturer_activated_at')->count();
         $lecturers = $base->when($status === 'pending', fn ($query) => $query->whereNull('lecturer_activated_at'))
@@ -25,7 +25,8 @@ class LecturerController extends Controller
             ->when($q !== '', fn ($query) => $query->where(fn ($where) => $where
                 ->where('name', 'like', '%'.$q.'%')->orWhere('email', 'like', '%'.$q.'%')
                 ->orWhere('institution', 'like', '%'.$q.'%')))
-            ->latest()->paginate(20)->withQueryString();
+            ->orderBy('created_at', $status === 'pending' ? 'asc' : 'desc')
+            ->orderBy('id', $status === 'pending' ? 'asc' : 'desc')->paginate(20)->withQueryString();
 
         return view('admin.lecturers.index', compact('q', 'status', 'pendingCount', 'activeCount', 'lecturers'));
     }

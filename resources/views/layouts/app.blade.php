@@ -211,9 +211,12 @@
             .skip-link{transition:none !important;}
         }
     </style>
+    @if (request()->routeIs('admin.*'))
+        <link rel="stylesheet" href="{{ asset('css/admin.css') }}?v={{ filemtime(public_path('css/admin.css')) }}">
+    @endif
     @stack('styles')
 </head>
-<body @class(['student-mobile-ui' => auth()->user()?->isMahasiswa()])>
+<body @class(['student-mobile-ui' => auth()->user()?->isMahasiswa(), 'admin-ui' => request()->routeIs('admin.*')])>
 <a href="#main-content" class="skip-link">Langsung ke konten</a>
 <div id="nprogress"></div>
 <div id="network-status" class="network-status d-none" role="status" aria-live="polite"><i class="ti ti-wifi-off me-1"></i><span>Anda offline — beberapa fitur tidak tersedia.</span></div>
@@ -229,6 +232,9 @@
     @endif
 
     {{-- ===================== HEADER ATAS (brand + aksi) ===================== --}}
+    @if (request()->routeIs('admin.*') && $user->isAdmin())
+        @include('admin.partials.navigation')
+    @else
     <header class="navbar navbar-expand-md d-print-none sticky-top">
         <div class="container-xl">
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu" aria-controls="navbar-menu" aria-label="Toggle navigation">
@@ -363,6 +369,7 @@
                                     <span class="nav-link-title">Admin</span>
                                 </a>
                                 <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="{{ route('admin.dashboard') }}"><i class="ti ti-layout-dashboard me-2"></i>Ringkasan Admin</a>
                                     <a class="dropdown-item" href="{{ route('admin.lecturers.index') }}"><i class="ti ti-school me-2"></i>Kelola Dosen</a>
                                     <a class="dropdown-item" href="{{ route('admin.students.index') }}"><i class="ti ti-users me-2"></i>Mahasiswa</a>
                                     <a class="dropdown-item" href="{{ route('admin.semesters.index') }}"><i class="ti ti-calendar-stats me-2"></i>Kelola Semester</a>
@@ -379,6 +386,7 @@
             </div>
         </div>
     </header>
+    @endif
 
     {{-- ===================== PAGE CONTENT ===================== --}}
     <div class="page-wrapper">
@@ -388,7 +396,7 @@
                 <div class="row g-2 align-items-center">
                     <div class="col-12 col-sm">
                         @hasSection('page-pretitle')
-                            <div class="page-pretitle">@yield('page-pretitle')</div>
+                            <div class="page-pretitle">@if(request()->routeIs('admin.*'))Administrasi @else @yield('page-pretitle') @endif</div>
                         @endif
                         <h1 class="page-title">@yield('page-title')</h1>
                     </div>

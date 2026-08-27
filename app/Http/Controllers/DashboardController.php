@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Assignment;
 use App\Models\Course;
 use App\Models\Enrollment;
-use App\Models\Material;
 use App\Models\Meeting;
-use App\Models\Setting;
+use App\Models\Semester;
+use App\Models\User;
 use App\Services\AttendanceService;
 use App\Services\StudentActivity;
 use Illuminate\Http\RedirectResponse;
@@ -19,6 +19,10 @@ class DashboardController extends Controller
     /** Arahkan ke dashboard sesuai role. */
     public function index(Request $request): RedirectResponse
     {
+        if ($request->user()->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+
         return redirect()->route(
             $request->user()->isDosen() ? 'dashboard.dosen' : 'dashboard.mahasiswa'
         );
@@ -28,7 +32,7 @@ class DashboardController extends Controller
     {
         $user = $request->user();
         $pendingLecturerCount = $user->isAdmin()
-            ? \App\Models\User::where('role', \App\Models\User::ROLE_DOSEN)->whereNull('lecturer_activated_at')->count()
+            ? User::where('role', User::ROLE_DOSEN)->whereNull('lecturer_activated_at')->count()
             : 0;
 
         $courses = $user->teachingCourses()
@@ -47,7 +51,7 @@ class DashboardController extends Controller
             'sort' => $c->year * 10 + ($semOrder[$c->semester] ?? 0),
         ])->unique('key')->sortByDesc('sort')->values();
 
-        $activeKeys = \App\Models\Semester::activeKeys();
+        $activeKeys = Semester::activeKeys();
         $periode = (string) $request->query('periode', 'active');
 
         // Semua statistik & daftar kelas mengikuti periode terpilih.
@@ -103,7 +107,7 @@ class DashboardController extends Controller
         ];
 
         $activeLabel = count($activeKeys) === 1
-            ? \App\Models\Semester::keyLabel($activeKeys[0])
+            ? Semester::keyLabel($activeKeys[0])
             : 'Semester aktif ('.count($activeKeys).')';
 
         return view('dashboard.dosen', compact(

@@ -42,6 +42,8 @@ Buka http://127.0.0.1:8000
 
 ### Memperbarui instalasi yang sudah memiliki data
 
+Admin masuk ke **Ringkasan admin** (`/admin`) setelah login. Ringkasan menampilkan pendaftaran dosen yang menunggu aktivasi, jumlah dosen aktif (tidak termasuk administrator), mahasiswa, dan kelas aktif. Navigasi mobile menyediakan Ringkasan, Dosen, Mahasiswa, dan Lainnya; menu Lainnya mengelompokkan pengaturan akademik, aplikasi, serta akun. **Ruang mengajar** membuka dashboard dosen milik admin tanpa mengubah role. Dosen biasa dan mahasiswa tidak dapat membuka panel admin.
+
 Cadangkan database terlebih dahulu. **Jangan jalankan `migrate:fresh` atau seeder pada database produksi.** Jalankan dari direktori aplikasi:
 
 ```bash

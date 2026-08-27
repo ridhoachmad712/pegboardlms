@@ -14,16 +14,16 @@
         <div class="card-body"><x-empty-state icon="ti-history" title="Belum ada aktivitas" description="Aktivitas membuat/menghapus kelas, tugas, materi, dan pengumuman akan tercatat di sini." /></div>
     @else
         <div class="table-responsive">
-            <table class="table table-vcenter card-table">
-                <thead><tr><th class="w-1">Aksi</th><th>Keterangan</th><th>Oleh</th><th>Waktu</th></tr></thead>
+            <table class="table table-vcenter card-table admin-table">
+                <thead><tr><th style="width:18%">Aksi</th><th>Keterangan</th><th style="width:20%">Oleh</th><th style="width:18%">Waktu</th></tr></thead>
                 <tbody>
                     @foreach ($logs as $log)
                         @php($color = $log->action === 'delete' ? 'red' : ($log->action === 'create' ? 'green' : 'blue'))
                         <tr>
                             <td><span class="badge bg-{{ $color }}-lt text-uppercase">{{ $log->action }}</span></td>
                             <td>{{ $log->description }}</td>
-                            <td class="text-secondary">{{ $log->user?->name ?? 'Sistem' }}</td>
-                            <td class="text-secondary small" title="{{ $log->created_at?->translatedFormat('d M Y H:i') }}">
+                            <td data-label="Oleh" class="text-secondary">{{ $log->user?->name ?? 'Sistem' }}</td>
+                            <td data-label="Waktu" class="text-secondary small" title="{{ $log->created_at?->translatedFormat('d M Y H:i') }}">
                                 {{ $log->created_at?->diffForHumans() }}
                             </td>
                         </tr>
@@ -32,7 +32,7 @@
             </table>
         </div>
         <div class="card-footer d-flex align-items-center">
-            {{ $logs->links() }}
+            {{ $logs->links('pagination.admin') }}
         </div>
     @endif
 </div>

@@ -33,9 +33,9 @@
                         <tbody>
                             <template x-for="(row, i) in rows" :key="i">
                                 <tr>
-                                    <td><input type="text" class="form-control" :name="`letter[${i}]`" x-model="row.letter" maxlength="5" placeholder="A" required></td>
-                                    <td><input type="number" class="form-control" :name="`min[${i}]`" x-model="row.min" min="0" max="100" step="0.01" placeholder="85" required></td>
-                                    <td class="text-end"><button type="button" class="btn btn-sm btn-ghost-danger" @click="remove(i)"><i class="ti ti-trash"></i></button></td>
+                                    <td><input type="text" class="form-control" :name="`letter[${i}]`" :aria-label="`Huruf baris ${i + 1}`" x-model="row.letter" maxlength="5" placeholder="A" required></td>
+                                    <td><input type="number" class="form-control" :name="`min[${i}]`" :aria-label="`Nilai minimum baris ${i + 1}`" x-model="row.min" min="0" max="100" step="0.01" placeholder="85" required></td>
+                                    <td class="text-end"><button type="button" class="btn btn-sm btn-ghost-danger" :aria-label="`Hapus baris ${i + 1}`" @click="remove(i)"><i class="ti ti-trash" aria-hidden="true"></i></button></td>
                                 </tr>
                             </template>
                         </tbody>

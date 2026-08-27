@@ -53,7 +53,7 @@
                                 <div class="input-group">
                                     <input :type="show ? 'text' : 'password'" name="{{ $keys[$key] }}" class="form-control" autocomplete="off"
                                            placeholder="{{ $p['has_key'] ? '•••••••• (terisi — kosongkan untuk tetap memakai yang ada)' : 'tempel API key di sini' }}">
-                                    <button type="button" class="btn" @click="show = !show" tabindex="-1"><i class="ti" :class="show ? 'ti-eye-off' : 'ti-eye'"></i></button>
+                                    <button type="button" class="btn" @click="show = !show" :aria-label="show ? 'Sembunyikan API key' : 'Tampilkan API key'"><i class="ti" :class="show ? 'ti-eye-off' : 'ti-eye'" aria-hidden="true"></i></button>
                                 </div>
                                 @if ($p['has_key'] && ! $p['key_from_env'])
                                     <label class="form-check mt-2">

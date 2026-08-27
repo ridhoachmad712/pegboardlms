@@ -47,9 +47,9 @@
         </div>
     @else
         <div class="table-responsive">
-            <table class="table table-vcenter card-table">
+            <table class="table table-vcenter card-table admin-table">
                 <thead><tr>
-                    <th class="w-1 text-center">Aktif</th>
+                    <th style="width:70px" class="text-center">Aktif</th>
                     <th>Periode</th>
                     <th class="text-center">Kelas</th>
                     <th class="text-center">Dosen</th>
@@ -60,7 +60,7 @@
                     @foreach ($periods as $p)
                         @php $isActive = in_array($p->key, $activeKeys, true); @endphp
                         <tr @class(['table-active' => $isActive])>
-                            <td class="text-center">
+                            <td class="text-center" data-label="Aktif">
                                 {{-- Terhubung ke form Simpan via atribut form= (hindari form bersarang) --}}
                                 <input class="form-check-input m-0" type="checkbox" name="periods[]"
                                        value="{{ $p->key }}" form="active-form" @checked($isActive)
@@ -72,16 +72,16 @@
                                     <span class="badge bg-green-lt ms-1"><i class="ti ti-circle-check-filled me-1"></i>Aktif</span>
                                 @endif
                             </td>
-                            <td class="text-center">{{ $p->courses_count }}</td>
-                            <td class="text-center">{{ $p->lecturers_count }}</td>
-                            <td class="text-center">{{ $p->students_count }}</td>
-                            <td>
+                            <td class="text-center" data-label="Kelas">{{ $p->courses_count }}</td>
+                            <td class="text-center" data-label="Dosen">{{ $p->lecturers_count }}</td>
+                            <td class="text-center" data-label="Mahasiswa">{{ $p->students_count }}</td>
+                            <td class="admin-table-actions">
                                 <div class="btn-list justify-content-end">
                                     @if ($p->id)
                                         <form method="POST" action="{{ route('admin.semesters.destroy', $p->id) }}"
                                               data-confirm="Hapus semester {{ $p->label }} dari daftar?@if ($p->courses_count > 0) (Akan ditolak karena masih ada {{ $p->courses_count }} kelas.)@endif">
                                             @csrf @method('DELETE')
-                                            <button class="btn btn-sm btn-ghost-danger" title="Hapus semester" data-bs-toggle="tooltip">
+                                            <button class="btn btn-sm btn-ghost-danger" title="Hapus semester" aria-label="Hapus semester {{ $p->label }}" data-bs-toggle="tooltip">
                                                 <i class="ti ti-trash"></i>
                                             </button>
                                         </form>
