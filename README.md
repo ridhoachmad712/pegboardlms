@@ -52,7 +52,15 @@ php artisan optimize:clear
 php artisan up
 ```
 
-Ganti email contoh dengan akun **dosen pemilik instalasi** yang benar-benar sudah ada. Perintah menolak akun mahasiswa dan email yang belum terdaftar. Migrasi mempertahankan akses mengajar seluruh dosen lama, tetapi tidak memberikan hak admin otomatis; tetapkan admin sebelum membuka registrasi untuk publik. Akun dosen baru tetap membutuhkan aktivasi.
+Ganti email contoh dengan akun **dosen pemilik instalasi** yang benar-benar sudah ada. Secara default, perintah menolak akun mahasiswa dan email yang belum terdaftar. Migrasi mempertahankan akses mengajar seluruh dosen lama, tetapi tidak memberikan hak admin otomatis; tetapkan admin sebelum membuka registrasi untuk publik. Akun dosen baru tetap membutuhkan aktivasi.
+
+Jika akun pemilik sudah terdaftar sebagai **mahasiswa** dan akan dipakai sebagai admin, cukup jalankan satu perintah berikut setelah backup database dan migrasi selesai:
+
+```bash
+php artisan lms:make-admin "email-pemilik@example.com" --promote-student
+```
+
+Opsi ini merupakan persetujuan eksplisit untuk mengubah **hanya akun yang disebutkan** menjadi dosen/admin aktif. ID, password, profil, dan riwayat akademik tetap tersimpan; akun tidak lagi menggunakan tampilan mahasiswa. Tidak membuat akun baru, tidak mengubah akun lain, dan tidak memerlukan Tinker, SQL manual, atau `shell_exec`. Perintah aman diulang dan perubahan dicatat dalam transaksi bersama log aktivitas. Logout lalu login kembali dengan password lama. Cukup tetapkan satu akun pemilik; dosen lain tetap pengguna biasa yang membutuhkan aktivasi, bukan admin.
 
 Jika email admin **belum memiliki akun** di database hosting, setelah migrasi gunakan perintah berikut sebagai pengganti `lms:make-admin`:
 
@@ -62,7 +70,7 @@ php artisan lms:create-admin "email-admin-anda@example.com" --name="Nama Admin"
 
 Ketik kata sandi saat diminta, lalu ulangi untuk konfirmasi. Masukan kata sandi disembunyikan dan tidak tersedia sebagai opsi command, sehingga tidak perlu menyimpannya di source code, `.env`, atau riwayat command shell. Gunakan 12–72 karakter (maksimal 72 byte). Perintah membuat akun admin aktif baru dan menolak email yang sudah terdaftar; akun, kata sandi, kelas, dan data mahasiswa lama tidak ditimpa.
 
-**Akun yang dibuat di lokal tidak ikut berpindah lewat Git atau `php artisan migrate`.** Jalankan `lms:create-admin` secara terpisah di hosting untuk email baru, atau `lms:make-admin` untuk akun dosen yang sudah ada. Tidak perlu mengganti database hosting dengan database contoh lokal.
+**Akun yang dibuat di lokal tidak ikut berpindah lewat Git atau `php artisan migrate`.** Jalankan `lms:create-admin` secara terpisah di hosting untuk email baru, atau `lms:make-admin` untuk akun yang sudah ada (tambahkan `--promote-student` bila akun pemilik masih mahasiswa). Tidak perlu mengganti database hosting dengan database contoh lokal.
 
 Pengaturan produksi di `.env`:
 
