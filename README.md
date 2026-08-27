@@ -54,6 +54,16 @@ php artisan up
 
 Ganti email contoh dengan akun **dosen pemilik instalasi** yang benar-benar sudah ada. Perintah menolak akun mahasiswa dan email yang belum terdaftar. Migrasi mempertahankan akses mengajar seluruh dosen lama, tetapi tidak memberikan hak admin otomatis; tetapkan admin sebelum membuka registrasi untuk publik. Akun dosen baru tetap membutuhkan aktivasi.
 
+Jika email admin **belum memiliki akun** di database hosting, setelah migrasi gunakan perintah berikut sebagai pengganti `lms:make-admin`:
+
+```bash
+php artisan lms:create-admin "email-admin-anda@example.com" --name="Nama Admin"
+```
+
+Ketik kata sandi saat diminta, lalu ulangi untuk konfirmasi. Masukan kata sandi disembunyikan dan tidak tersedia sebagai opsi command, sehingga tidak perlu menyimpannya di source code, `.env`, atau riwayat command shell. Gunakan 12–72 karakter (maksimal 72 byte). Perintah membuat akun admin aktif baru dan menolak email yang sudah terdaftar; akun, kata sandi, kelas, dan data mahasiswa lama tidak ditimpa.
+
+**Akun yang dibuat di lokal tidak ikut berpindah lewat Git atau `php artisan migrate`.** Jalankan `lms:create-admin` secara terpisah di hosting untuk email baru, atau `lms:make-admin` untuk akun dosen yang sudah ada. Tidak perlu mengganti database hosting dengan database contoh lokal.
+
 Pengaturan produksi di `.env`:
 
 ```dotenv
@@ -63,6 +73,14 @@ LICENSING_SUPPORT_EMAIL=admin@example.com
 ```
 
 Gunakan alamat bantuan yang sebenarnya, atau kosongkan untuk menyembunyikan tautan email. Jika menggunakan cache konfigurasi, bangun ulang dengan `php artisan config:cache` setelah perubahan `.env`. Mode demo menonaktifkan pendaftaran dosen dan penerbitan kode. Data kelas tetap dimiliki dosen masing-masing; pengaturan aplikasi, backup, dan pengelolaan akun mahasiswa global hanya untuk admin.
+
+### Pemulihan migrasi aktivasi yang sempat gagal
+
+Jika muncul `Duplicate column name 'is_admin'`, sebagian perubahan skema mungkin sudah tersimpan walaupun migrasi belum tercatat selesai. Cadangkan database, aktifkan maintenance (`php artisan down`), ambil perbaikan dari `main`, lalu jalankan `php artisan migrate --force` kembali. **Jangan hapus kolom, jangan menandai migrasi selesai secara manual, dan jangan gunakan `migrate:fresh`.**
+
+Migrasi memeriksa setiap kolom, indeks, dan foreign key sebelum menambahkannya. Tabel kode yang sudah ada tidak dibuat ulang, dan data akun maupun riwayat kode dipertahankan. Bila kolom aktivasi sudah ada, tanggal aktif yang tersimpan tidak diubah dan akun dengan tanggal kosong tetap menunggu aktivasi; migrasi tidak mengaktifkan seluruh dosen saat diulang. Jika akun dosen pemilik lama masih terkunci, tetapkan akun itu secara eksplisit dengan `lms:make-admin`, bukan mengaktifkan semua akun.
+
+Setelah migrasi berhasil, jalankan `lms:create-admin` untuk email baru atau `lms:make-admin` untuk dosen yang sudah ada, lalu `php artisan optimize:clear` dan `php artisan up`. Jalankan perintah satu per satu; jika muncul error baru, berhenti dan simpan pesan lengkapnya. Jika `lms:create-admin` belum dikenali setelah pull, jalankan `composer dump-autoload` lalu periksa `php artisan list`.
 
 ## Status fitur — FASE 1 (Fondasi & MVP) ✅
 
