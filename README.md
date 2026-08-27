@@ -82,6 +82,8 @@ Migrasi memeriksa setiap kolom, indeks, dan foreign key sebelum menambahkannya. 
 
 Setelah migrasi berhasil, jalankan `lms:create-admin` untuk email baru atau `lms:make-admin` untuk dosen yang sudah ada, lalu `php artisan optimize:clear` dan `php artisan up`. Jalankan perintah satu per satu; jika muncul error baru, berhenti dan simpan pesan lengkapnya. Jika `lms:create-admin` belum dikenali setelah pull, jalankan `composer dump-autoload` lalu periksa `php artisan list`.
 
+Ekspor SQLite → MySQL lama menggunakan `users.id` bertipe `BIGINT` bertanda (signed), sedangkan instalasi Laravel baru memakai `BIGINT UNSIGNED`. Migrasi membaca tipe ID yang sebenarnya dan menyamakan `user_id` serta `created_by` pada tabel kode, termasuk bila tabel itu sudah terbuat oleh percobaan sebelumnya. `users.id` dan tabel akademik tidak diubah. Sebelum menyesuaikan kolom, semua referensi diperiksa agar tidak ada nilai hilang atau terpotong. Jika ada referensi tanpa pengguna yang cocok, tipe ID yang tidak didukung, atau engine selain InnoDB, migrasi berhenti dengan pesan pemeriksaan; data tidak dibuang dan foreign key tidak dinonaktifkan.
+
 ## Status fitur — FASE 1 (Fondasi & MVP) ✅
 
 - [x] Autentikasi manual (login/logout) + middleware role (`dosen`/`mahasiswa`)
