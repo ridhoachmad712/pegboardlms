@@ -112,7 +112,7 @@
     .admin-stat-label{font-size:.72rem;gap:.3rem}
     .admin-stat strong{font-size:1.5rem;margin-top:.4rem}
     .admin-person-row{padding:1rem;gap:.7rem}
-    .admin-status-tabs{gap:.3rem;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+    .admin-status-tabs{gap:.4rem;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
     .admin-status-tabs .nav-link{justify-content:center;gap:.3rem;padding:.5rem .3rem;font-size:.73rem}
     .admin-status-tabs .badge{font-size:.65rem}
     .admin-detail-grid{grid-template-columns:minmax(0,1fr)}

@@ -63,6 +63,7 @@ class LecturerRegisterController extends Controller
 
         Auth::login($user);
         $request->session()->regenerate();
+        $request->session()->put('lecturer_session_version', (int) $user->lecturer_session_version);
         $request->session()->forget('url.intended');
 
         return redirect()->route('activation.show')->with('status', 'Pendaftaran berhasil. Akun Anda menunggu aktivasi admin.');

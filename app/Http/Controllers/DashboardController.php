@@ -32,7 +32,7 @@ class DashboardController extends Controller
     {
         $user = $request->user();
         $pendingLecturerCount = $user->isAdmin()
-            ? User::where('role', User::ROLE_DOSEN)->whereNull('lecturer_activated_at')->count()
+            ? User::where('role', User::ROLE_DOSEN)->whereNull('lecturer_disabled_at')->whereNull('lecturer_activated_at')->count()
             : 0;
 
         $courses = $user->teachingCourses()

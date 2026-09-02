@@ -5,10 +5,10 @@
 
 @section('content')
 <div class="row justify-content-center"><div class="col-lg-9">
-    <p class="admin-page-description">Pilih dosen untuk memeriksa akun dan mengelola kode aktivasi.</p>
+    <p class="admin-page-description">Kelola akses akun, kode aktivasi, dan password dosen.</p>
     <nav class="admin-status-tabs" aria-label="Status akun dosen">
-        @foreach (['pending' => 'Menunggu', 'active' => 'Aktif', 'all' => 'Semua'] as $key => $label)
-            <a class="nav-link {{ $status === $key ? 'active' : '' }}" href="{{ route('admin.lecturers.index', ['status' => $key, 'q' => $q]) }}" @if($status === $key) aria-current="page" @endif>{{ $label }} <span class="badge bg-secondary-lt">{{ $key === 'pending' ? $pendingCount : ($key === 'active' ? $activeCount : $pendingCount + $activeCount) }}</span></a>
+        @foreach (['pending' => 'Menunggu', 'active' => 'Aktif', 'disabled' => 'Nonaktif', 'all' => 'Semua'] as $key => $label)
+            <a class="nav-link {{ $status === $key ? 'active' : '' }}" href="{{ route('admin.lecturers.index', ['status' => $key, 'q' => $q]) }}" @if($status === $key) aria-current="page" @endif>{{ $label }} <span class="badge bg-secondary-lt">{{ ['pending' => $pendingCount, 'active' => $activeCount, 'disabled' => $disabledCount, 'all' => $pendingCount + $activeCount + $disabledCount][$key] }}</span></a>
         @endforeach
     </nav>
     <form method="GET" action="{{ route('admin.lecturers.index') }}" class="mb-3">
@@ -25,12 +25,12 @@
                         <span class="d-block fw-bold responsive-item-title">{{ $lecturer->name }}</span>
                         <span class="d-block small text-secondary">{{ $lecturer->email }}</span>
                         <span class="d-block small text-secondary">{{ $lecturer->institution ?: 'Institusi belum diisi' }}</span>
-                        <span class="badge bg-{{ $lecturer->needsLecturerActivation() ? 'orange' : 'green' }}-lt mt-2">{{ $lecturer->needsLecturerActivation() ? 'Menunggu aktivasi' : 'Aktif' }}</span>
+                        <span class="badge bg-{{ $lecturer->isLecturerDisabled() ? 'red' : ($lecturer->needsLecturerActivation() ? 'orange' : 'green') }}-lt mt-2">{{ $lecturer->isLecturerDisabled() ? 'Nonaktif' : ($lecturer->needsLecturerActivation() ? 'Menunggu aktivasi' : 'Aktif') }}</span>
                     </span>
                     <i class="ti ti-chevron-right text-secondary flex-shrink-0" aria-hidden="true"></i>
                 </a>
             @empty
-                <div class="card-body"><x-empty-state icon="ti-user-check" :title="$q !== '' ? 'Dosen tidak ditemukan' : ($status === 'pending' ? 'Tidak ada aktivasi tertunda' : 'Belum ada dosen pada daftar ini')" :description="$q !== '' ? 'Coba kata kunci lain atau hapus pencarian.' : 'Pendaftaran baru akan muncul pada tab Menunggu.'" /></div>
+                <div class="card-body"><x-empty-state icon="ti-user-check" :title="$q !== '' ? 'Dosen tidak ditemukan' : ($status === 'pending' ? 'Tidak ada aktivasi tertunda' : ($status === 'disabled' ? 'Tidak ada akun nonaktif' : 'Belum ada dosen pada daftar ini'))" :description="$q !== '' ? 'Coba kata kunci lain atau hapus pencarian.' : ($status === 'disabled' ? 'Akun yang dinonaktifkan admin akan muncul di sini.' : 'Pendaftaran baru akan muncul pada tab Menunggu.')" /></div>
             @endforelse
         </div>
     </div>

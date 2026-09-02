@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
 #[Fillable(['name', 'email', 'password', 'role', 'nim_nip', 'phone', 'avatar', 'institution', 'email_notifications', 'notification_preferences'])]
 #[Hidden(['password', 'remember_token'])]
@@ -20,6 +21,7 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     public const ROLE_DOSEN = 'dosen';
+
     public const ROLE_MAHASISWA = 'mahasiswa';
 
     /**
@@ -34,6 +36,9 @@ class User extends Authenticatable
             'notification_preferences' => 'array',
             'is_admin' => 'boolean',
             'lecturer_activated_at' => 'datetime',
+            'lecturer_disabled_at' => 'datetime',
+            'must_change_password' => 'boolean',
+            'lecturer_session_version' => 'integer',
         ];
     }
 
@@ -59,6 +64,11 @@ class User extends Authenticatable
         return $this->isDosen() && $this->lecturer_activated_at === null;
     }
 
+    public function isLecturerDisabled(): bool
+    {
+        return $this->isDosen() && $this->lecturer_disabled_at !== null;
+    }
+
     public function activationCodes(): HasMany
     {
         return $this->hasMany(LecturerActivationCode::class);
@@ -67,7 +77,7 @@ class User extends Authenticatable
     /** URL foto profil, atau null bila belum ada. */
     public function avatarUrl(): ?string
     {
-        return $this->avatar ? \Illuminate\Support\Facades\Storage::disk('public')->url($this->avatar) : null;
+        return $this->avatar ? Storage::disk('public')->url($this->avatar) : null;
     }
 
     public function initial(): string

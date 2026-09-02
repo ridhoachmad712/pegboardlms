@@ -30,6 +30,10 @@ class DemoGuard
         'admin.students.bulkReset',
         'admin.students.resetPassword',
         'admin.lecturers.issueCode',
+        'admin.lecturers.disable',
+        'admin.lecturers.enable',
+        'admin.lecturers.resetPassword',
+        'lecturer.password.update',
     ];
 
     public function handle(Request $request, Closure $next): Response

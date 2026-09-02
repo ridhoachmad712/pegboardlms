@@ -11,7 +11,7 @@ class DashboardController extends Controller
 {
     public function index(): View
     {
-        $lecturers = User::where('role', User::ROLE_DOSEN)->where('is_admin', false);
+        $lecturers = User::where('role', User::ROLE_DOSEN)->where('is_admin', false)->whereNull('lecturer_disabled_at');
         $pendingCount = (clone $lecturers)->whereNull('lecturer_activated_at')->count();
         $activeCount = (clone $lecturers)->whereNotNull('lecturer_activated_at')->count();
         $studentCount = User::where('role', User::ROLE_MAHASISWA)->count();

@@ -32,7 +32,21 @@ class LoginController extends Controller
             ]);
         }
 
+        if ($request->user()->isLecturerDisabled()) {
+            Auth::logoutCurrentDevice();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            throw ValidationException::withMessages(['email' => 'Akun dosen Anda dinonaktifkan. Hubungi admin untuk bantuan.']);
+        }
+
         $request->session()->regenerate();
+        $request->session()->put('lecturer_session_version', (int) $request->user()->lecturer_session_version);
+
+        if ($request->user()->isDosen() && $request->user()->must_change_password) {
+            $request->session()->forget('url.intended');
+
+            return redirect()->route('lecturer.password.edit');
+        }
 
         if ($request->user()->needsLecturerActivation()) {
             $request->session()->forget('url.intended');
@@ -71,6 +85,7 @@ class LoginController extends Controller
 
         Auth::login($user);
         $request->session()->regenerate();
+        $request->session()->put('lecturer_session_version', (int) $user->lecturer_session_version);
 
         return redirect()->route('dashboard');
     }

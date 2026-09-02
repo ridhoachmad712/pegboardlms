@@ -44,6 +44,15 @@ Buka http://127.0.0.1:8000
 
 Admin masuk ke **Ringkasan admin** (`/admin`) setelah login. Ringkasan menampilkan pendaftaran dosen yang menunggu aktivasi, jumlah dosen aktif (tidak termasuk administrator), mahasiswa, dan kelas aktif. Navigasi mobile menyediakan Ringkasan, Dosen, Mahasiswa, dan Lainnya; menu Lainnya mengelompokkan pengaturan akademik, aplikasi, serta akun. **Ruang mengajar** membuka dashboard dosen milik admin tanpa mengubah role. Dosen biasa dan mahasiswa tidak dapat membuka panel admin.
 
+### Kontrol akun dosen
+
+- Di **Admin → Dosen → detail dosen → Keamanan akun**, admin dapat menonaktifkan atau mengaktifkan kembali akun. Penonaktifan memblokir login dan sesi lama, tanpa menghapus kelas, materi, mahasiswa, atau riwayat aktivasi. Akses mahasiswa ke kelas tetap berjalan.
+- Status **Nonaktif** berbeda dari **Menunggu aktivasi**. Mengaktifkan kembali akun tidak mengubah status pembayaran: dosen yang sudah pernah aktif tidak membayar ulang; dosen yang belum aktif tetap perlu kode aktivasi. Kode belum dipakai dibatalkan ketika akun dinonaktifkan.
+- **Reset Password** membuat password sementara acak 20 karakter dan membatalkan password, sesi, serta token ingat-saya lama. Password sementara ditampilkan sekali kepada admin, disimpan sebagai hash pada akun, dan flash sesi admin dienkripsi. Admin harus membagikannya secara pribadi; belum ada pengiriman otomatis.
+- Dosen wajib mengganti password sementara (minimal 12 karakter) sebelum mengakses fitur lain. Reset password tidak mengaktifkan akun nonaktif atau melewati aktivasi pembayaran.
+- Kontrol ini hanya berlaku untuk dosen biasa; akun admin dilindungi dari penonaktifan/reset melalui menu ini. Tindakan dicatat dalam log aktivitas tanpa mencatat password.
+- Saat memperbarui hosting, jalankan `php artisan migrate --force` untuk menambahkan kolom kontrol akun. Migrasi tidak menonaktifkan akun lama atau mengganti password yang ada. Pembatalan sesi diperiksa pada permintaan berikutnya, termasuk bila sesi disimpan pada file.
+
 Cadangkan database terlebih dahulu. **Jangan jalankan `migrate:fresh` atau seeder pada database produksi.** Jalankan dari direktori aplikasi:
 
 ```bash

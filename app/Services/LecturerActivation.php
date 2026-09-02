@@ -14,12 +14,15 @@ class LecturerActivation
     /** Returns the plaintext once; only its SHA-256 hash is persisted in the code table. */
     public function issue(User $lecturer, User $admin): array
     {
-        abort_unless($admin->isAdmin() && ! $admin->needsLecturerActivation(), 403);
+        abort_unless($admin->isAdmin() && ! $admin->needsLecturerActivation() && ! $admin->isLecturerDisabled(), 403);
 
         return DB::transaction(function () use ($lecturer, $admin) {
             // Lock the account first in both issuance and redemption to serialize them.
             $account = User::whereKey($lecturer->id)->lockForUpdate()->firstOrFail();
             abort_unless($account->isDosen(), 404);
+            if ($account->isLecturerDisabled()) {
+                throw ValidationException::withMessages(['activation' => 'Aktifkan kembali akses akun sebelum menerbitkan kode.']);
+            }
             if (! $account->needsLecturerActivation()) {
                 throw ValidationException::withMessages(['activation' => 'Akun dosen ini sudah aktif.']);
             }
@@ -48,7 +51,7 @@ class LecturerActivation
             $code = LecturerActivationCode::where('user_id', $account->id)
                 ->where('code_hash', hash('sha256', $plain))->lockForUpdate()->first();
 
-            if (! $account->needsLecturerActivation() || ! $code || ! $code->isUsable()) {
+            if ($account->isLecturerDisabled() || $account->must_change_password || ! $account->needsLecturerActivation() || ! $code || ! $code->isUsable()) {
                 throw ValidationException::withMessages([
                     'activation_code' => 'Kode tidak valid atau tidak dapat digunakan. Pastikan kode diberikan untuk akun Anda; hubungi admin bila perlu kode baru.',
                 ]);

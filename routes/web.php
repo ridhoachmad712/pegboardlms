@@ -18,6 +18,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LecturerRegisterController;
+use App\Http\Controllers\Auth\LecturerPasswordController;
 use App\Http\Controllers\Auth\ActivationController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
@@ -62,6 +63,11 @@ Route::middleware('guest')->group(function () {
 // --- Authenticated ---
 Route::middleware(['auth', 'lecturer.active'])->group(function () {
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
+
+    Route::get('/lecturer/change-password', [LecturerPasswordController::class, 'edit'])
+        ->middleware('role:dosen')->name('lecturer.password.edit');
+    Route::put('/lecturer/change-password', [LecturerPasswordController::class, 'update'])
+        ->middleware(['role:dosen', 'throttle:6,1,lecturer-password-change:'])->name('lecturer.password.update');
 
     Route::get('/activation', [ActivationController::class, 'show'])->middleware('role:dosen')->name('activation.show');
     Route::post('/activation', [ActivationController::class, 'store'])
@@ -230,6 +236,12 @@ Route::middleware(['auth', 'lecturer.active'])->group(function () {
             Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
             Route::get('/lecturers', [AdminLecturerController::class, 'index'])->name('lecturers.index');
             Route::get('/lecturers/{lecturer}', [AdminLecturerController::class, 'show'])->name('lecturers.show');
+            Route::patch('/lecturers/{lecturer}/disable', [AdminLecturerController::class, 'disable'])
+                ->middleware('throttle:10,1,lecturer-access:')->name('lecturers.disable');
+            Route::patch('/lecturers/{lecturer}/enable', [AdminLecturerController::class, 'enable'])
+                ->middleware('throttle:10,1,lecturer-access:')->name('lecturers.enable');
+            Route::post('/lecturers/{lecturer}/reset-password', [AdminLecturerController::class, 'resetPassword'])
+                ->middleware('throttle:5,1,lecturer-password-reset:')->name('lecturers.resetPassword');
             Route::post('/lecturers/{lecturer}/activation-code', [AdminLecturerController::class, 'issueCode'])
                 ->middleware('throttle:10,1')->name('lecturers.issueCode');
             Route::get('/settings', [SettingController::class, 'edit'])->name('settings.edit');
