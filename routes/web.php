@@ -183,6 +183,7 @@ Route::middleware(['auth', 'lecturer.active'])->group(function () {
         Route::post('/courses/{course}/students', [EnrollmentController::class, 'store'])->name('enrollments.store');
         Route::post('/courses/{course}/students/import', [EnrollmentController::class, 'import'])->name('enrollments.import');
         Route::delete('/courses/{course}/students/{user}', [EnrollmentController::class, 'destroy'])->name('enrollments.destroy');
+        Route::post('/courses/{course}/students/bulk-destroy', [EnrollmentController::class, 'bulkDestroy'])->name('enrollments.bulkDestroy');
 
         // Pertemuan
         Route::post('/courses/{course}/meetings', [MeetingController::class, 'store'])->name('meetings.store');

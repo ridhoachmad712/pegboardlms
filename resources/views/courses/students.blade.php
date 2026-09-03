@@ -43,16 +43,28 @@
             @endunless
         </div>
 
+        @unless ($course->isCompleted() || $students->isEmpty())
+            <div id="bulk-bar" class="alert alert-primary d-none d-flex align-items-center gap-2 py-2 mb-3">
+                <span><strong id="bulk-count">0</strong> mahasiswa dipilih</span>
+                <form id="bulk-unenroll-form" method="POST" action="{{ route('enrollments.bulkDestroy', $course) }}" class="ms-auto mb-0" data-confirm="Keluarkan semua mahasiswa terpilih dari kelas?">
+                    @csrf
+                    <span id="bulk-ids"></span>
+                    <button type="submit" class="btn btn-sm btn-danger" data-loading="Memproses…"><i class="ti ti-user-minus me-1"></i>Keluarkan terpilih</button>
+                </form>
+            </div>
+        @endunless
+
         @if ($students->isEmpty())
             <x-empty-state icon="ti-users" title="Belum ada mahasiswa"
                 description="Tambahkan mahasiswa secara manual atau impor dari berkas CSV." />
         @else
             <div class="table-responsive">
                 <table id="tbl-students" class="table table-vcenter table-sortable">
-                    <thead><tr><th class="w-1 no-sort">#</th><th>Nama</th><th>NIM</th><th>Email</th><th class="no-sort"></th></tr></thead>
+                    <thead><tr>@unless ($course->isCompleted())<th class="w-1 no-sort"><input type="checkbox" id="check-all" class="form-check-input" aria-label="Pilih semua mahasiswa"></th>@endunless<th class="w-1 no-sort">#</th><th>Nama</th><th>NIM</th><th>Email</th><th class="no-sort"></th></tr></thead>
                     <tbody>
                         @foreach ($students as $i => $student)
                             <tr>
+                                @unless ($course->isCompleted())<td><input type="checkbox" class="form-check-input student-check" value="{{ $student->id }}" aria-label="Pilih {{ $student->name }}"></td>@endunless
                                 <td class="text-secondary">{{ $i + 1 }}</td>
                                 <td>
                                     <div class="d-flex align-items-center">
@@ -151,3 +163,36 @@
     </div>
 @endunless
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+    var bar = document.getElementById('bulk-bar');
+    if (!bar) return;
+    var all = document.getElementById('check-all');
+    var countEl = document.getElementById('bulk-count');
+    var idsBox = document.getElementById('bulk-ids');
+    function checks() { return Array.from(document.querySelectorAll('.student-check')); }
+    function sync() {
+        var sel = checks().filter(function (c) { return c.checked; });
+        countEl.textContent = sel.length;
+        bar.classList.toggle('d-none', sel.length === 0);
+        idsBox.innerHTML = '';
+        sel.forEach(function (c) {
+            var h = document.createElement('input');
+            h.type = 'hidden'; h.name = 'ids[]'; h.value = c.value;
+            idsBox.appendChild(h);
+        });
+        if (all) {
+            all.checked = sel.length > 0 && sel.length === checks().length;
+            all.indeterminate = sel.length > 0 && sel.length < checks().length;
+        }
+    }
+    document.addEventListener('change', function (e) {
+        if (e.target === all) { checks().forEach(function (c) { c.checked = all.checked; }); }
+        if (e.target === all || (e.target.classList && e.target.classList.contains('student-check'))) sync();
+    });
+    sync();
+})();
+</script>
+@endpush

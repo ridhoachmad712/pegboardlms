@@ -172,6 +172,23 @@ class EnrollmentController extends Controller
         return back()->with('status', 'Mahasiswa dikeluarkan dari kelas.');
     }
 
+    /** Keluarkan beberapa mahasiswa dari kelas sekaligus. */
+    public function bulkDestroy(Request $request, Course $course): RedirectResponse
+    {
+        $this->authorizeOwner($request, $course);
+
+        $data = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer'],
+        ]);
+
+        // Hanya detach id yang benar-benar terdaftar di kelas ini.
+        $ids = $course->students()->whereIn('users.id', $data['ids'])->pluck('users.id')->all();
+        $course->students()->detach($ids);
+
+        return back()->with('status', count($ids).' mahasiswa dikeluarkan dari kelas.');
+    }
+
     private function authorizeOwner(Request $request, Course $course): void
     {
         abort_unless($course->user_id === $request->user()->id, 403);
