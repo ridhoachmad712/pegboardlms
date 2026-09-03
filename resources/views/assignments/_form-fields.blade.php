@@ -64,27 +64,30 @@
 <div class="row">
     <div class="col-md-6 mb-3">
         <label class="form-label">Deadline</label>
-        <input type="datetime-local" name="deadline" class="form-control"
+        <input type="datetime-local" name="deadline" class="form-control @error('deadline') is-invalid @enderror"
                value="{{ old('deadline', isset($assignment->deadline) ? $assignment->deadline->format('Y-m-d\TH:i') : '') }}">
+        @error('deadline')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
     <div class="col-md-6 mb-3">
         <label class="form-label required">Nilai Maksimal</label>
-        <input type="number" name="max_score" class="form-control"
+        <input type="number" name="max_score" class="form-control @error('max_score') is-invalid @enderror"
                value="{{ old('max_score', $assignment->max_score ?? 100) }}" min="1" max="1000" required>
+        @error('max_score')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
 
     @if ($type === 'kuis')
         <div class="col-md-6 mb-3">
             <label class="form-label">Durasi Pengerjaan (menit)</label>
-            <input type="number" name="duration_minutes" class="form-control"
+            <input type="number" name="duration_minutes" class="form-control @error('duration_minutes') is-invalid @enderror"
                    value="{{ old('duration_minutes', $assignment->duration_minutes ?? '') }}" min="1" max="600"
                    placeholder="Kosongkan = tanpa batas">
+            @error('duration_minutes')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
     @endif
 
     <div class="col-md-6 mb-3">
         <label class="form-label">Komponen Nilai</label>
-        <select name="grade_component_id" class="form-select">
+        <select name="grade_component_id" class="form-select @error('grade_component_id') is-invalid @enderror">
             <option value="">— Tidak dikaitkan —</option>
             @foreach ($components as $c)
                 <option value="{{ $c->id }}" @selected(old('grade_component_id', $assignment->grade_component_id ?? '') == $c->id)>
@@ -92,6 +95,7 @@
                 </option>
             @endforeach
         </select>
+        @error('grade_component_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
         <small class="form-hint">Kaitkan agar nilai masuk ke rekap otomatis.</small>
     </div>
 </div>

@@ -206,6 +206,12 @@
             .mobile-more-link:hover,.mobile-more-link:focus{color:var(--tblr-primary);background:rgba(var(--tblr-primary-rgb),.08);border-color:rgba(var(--tblr-primary-rgb),.35);text-decoration:none;transform:translateY(-2px);}
             .mobile-more-logout{display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;min-height:2.75rem;margin-top:1rem;border:1px solid rgba(var(--tblr-danger-rgb),.25);border-radius:.875rem;background:transparent;color:var(--tblr-danger);font-weight:600;}
         }
+        /* Target sentuh & anti-zoom iOS untuk SEMUA peran (dosen/admin di HP juga, mis. buka QR / isi nilai) */
+        @media (max-width:575.98px){
+            .btn:not(.btn-sm):not(.btn-link),.form-select,.form-control:not(textarea){min-height:2.75rem;}
+            .btn-icon{min-width:2.75rem;min-height:2.75rem;}
+            input.form-control,select.form-select,textarea.form-control{font-size:16px;}
+        }
         @media (prefers-reduced-motion:reduce){
             .navbar .nav-link,.dropdown-item,.mobile-bottom-nav__item,.mobile-more-link{transition:none !important;transform:none !important;}
             .skip-link{transition:none !important;}
