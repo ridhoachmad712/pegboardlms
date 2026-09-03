@@ -5,6 +5,7 @@
 @section('page-title', 'Panduan Penggunaan')
 
 @section('content')
+@php($isAdmin = auth()->user()->isAdmin())
 @php($isDosen = auth()->user()->isDosen())
 
 <div class="row justify-content-center">
@@ -12,7 +13,11 @@
         <div class="card mb-3">
             <div class="card-body">
                 <p class="mb-0 text-secondary">
-                    @if ($isDosen)
+                    @if ($isAdmin)
+                        Panduan untuk admin. Kelola pengguna &amp; sistem dari <a href="{{ route('admin.dashboard') }}">Panel Admin</a>
+                        (Dosen · Mahasiswa · Semester · Skala Nilai · Tampilan · AI · Backup). Anda juga dapat mengajar lewat
+                        <strong>Ruang mengajar</strong> — langkah mengajar dijelaskan pada daftar di bawah.
+                    @elseif ($isDosen)
                         Panduan singkat untuk dosen. Hampir semua aktivitas dilakukan <strong>di dalam kelas</strong>:
                         buka <a href="{{ route('courses.index') }}">Kelas Saya</a> → pilih kelas → gunakan tab di bagian atas
                         (Materi · Tugas &amp; Kuis · Penilaian · Kehadiran · Forum · Pengumuman · RPS · Analitik).
@@ -24,7 +29,15 @@
             </div>
         </div>
 
-        @php($steps = $isDosen ? [
+        @php($steps = $isAdmin ? [
+            ['ti-school', 'Kelola dosen', 'Panel Admin → Dosen. Aktifkan dosen baru dengan satu klik, reset kata sandi, nonaktifkan, atau hapus akun yang tidak punya kelas.'],
+            ['ti-users', 'Kelola mahasiswa', 'Panel Admin → Mahasiswa. Tambah/import CSV, reset kata sandi (bisa massal), edit data, atau hapus akun.'],
+            ['ti-calendar-stats', 'Semester & skala nilai', 'Panel Admin → Semester untuk mengatur periode aktif; Skala Nilai untuk konversi angka ke huruf.'],
+            ['ti-palette', 'Tampilan & branding', 'Panel Admin → Tampilan aplikasi. Ubah nama, warna tema, logo, dan favicon aplikasi.'],
+            ['ti-sparkles', 'Integrasi AI', 'Panel Admin → Integrasi AI. Isi API key untuk mengaktifkan ringkasan materi & generate soal.'],
+            ['ti-database', 'Backup & audit', 'Panel Admin → Backup untuk mengunduh cadangan database; Riwayat Aktivitas untuk menelusuri tindakan penting.'],
+            ['ti-book', 'Ruang mengajar', 'Admin juga dapat mengajar: buka Ruang mengajar untuk membuat kelas dan mengelola perkuliahan seperti dosen.'],
+        ] : ($isDosen ? [
             ['ti-school', 'Buat kelas', 'Menu Kelas Saya → tombol Buat Kelas. Isi nama, kode MK, semester, tahun.'],
             ['ti-users', 'Tambahkan mahasiswa', 'Buka kelas → tab Mahasiswa → Tambah Mahasiswa (pilih) atau Import CSV (kolom: nama, email, nim).'],
             ['ti-folder', 'Pertemuan & materi', 'Tab Materi → Tambah Pertemuan, lalu tombol Materi pada pertemuan untuk unggah berkas / tautan / video.'],
@@ -39,7 +52,7 @@
             ['ti-qrcode', 'Absen', 'Saat dosen membuka sesi, pindai QR dengan kamera HP — kehadiran tercatat otomatis. Bila QR gagal, masukkan kode absen di halaman Kehadiran.'],
             ['ti-clipboard-check', 'Lihat nilai & kehadiran', 'Tab Penilaian menampilkan nilai per komponen & nilai akhir. Tab Kehadiran menampilkan persentase Anda (jaga di atas 75%).'],
             ['ti-messages', 'Forum, pengumuman & notifikasi', 'Ikut diskusi di Forum, baca Pengumuman dari dosen, dan cek lonceng notifikasi di kanan atas.'],
-        ])
+        ]))
 
         <div class="card">
             <div class="card-body">

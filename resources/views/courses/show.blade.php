@@ -88,6 +88,46 @@
 
 {{-- ============ PERTEMUAN & MATERI ============ --}}
 <div @class(['d-none' => ! $isDosen])>
+                {{-- Checklist onboarding: bantu dosen menyiapkan kelas baru --}}
+                @if ($isDosen && ! $course->isCompleted())
+                    @php($chkMeetings = $course->meetings->isNotEmpty())
+                    @php($chkMaterials = $course->meetings->contains(fn ($m) => $m->materials->isNotEmpty()))
+                    @php($chkAssignments = $course->meetings->contains(fn ($m) => $m->assignments->isNotEmpty()))
+                    @php($chkGrading = (bool) ($readiness['weight_ok'] ?? false))
+                    @php($setupSteps = [
+                        [$chkMeetings, 'Tambah pertemuan', 'Buat minimal satu pertemuan untuk mengisi materi & tugas.'],
+                        [$chkMaterials, 'Unggah materi', 'Tambahkan berkas, tautan, atau video pada pertemuan.'],
+                        [$chkAssignments, 'Buat tugas atau kuis', 'Beri tugas/kuis agar mahasiswa mulai belajar.'],
+                        [$chkGrading, 'Atur komponen nilai (total 100%)', 'Tab Penilaian → komponen berbobot agar nilai akhir otomatis.'],
+                    ])
+                    @unless (collect($setupSteps)->every(fn ($s) => $s[0]))
+                        <div x-data="{ show: localStorage.getItem('lms_setup_{{ $course->id }}') !== '1' }" x-show="show" x-cloak class="card border-primary mb-3">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start">
+                                    <span class="avatar bg-primary-lt text-primary me-3"><i class="ti ti-rocket fs-2"></i></span>
+                                    <div class="flex-fill min-w-0">
+                                        <h3 class="card-title mb-1">Lengkapi persiapan kelas</h3>
+                                        <p class="text-secondary small mb-3">Beberapa langkah lagi agar kelas siap untuk mahasiswa.</p>
+                                        <div class="row g-2">
+                                            @foreach ($setupSteps as [$done, $title, $desc])
+                                                <div class="col-md-6">
+                                                    <div class="d-flex align-items-start gap-2">
+                                                        <i class="ti {{ $done ? 'ti-circle-check text-green' : 'ti-circle-dashed text-secondary' }} fs-3 flex-shrink-0"></i>
+                                                        <div class="min-w-0">
+                                                            <div class="fw-semibold {{ $done ? 'text-decoration-line-through text-secondary' : '' }}">{{ $title }}</div>
+                                                            @unless ($done)<div class="text-secondary small">{{ $desc }}</div>@endunless
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn-close" aria-label="Sembunyikan" @click="show = false; localStorage.setItem('lms_setup_{{ $course->id }}','1')"></button>
+                                </div>
+                            </div>
+                        </div>
+                    @endunless
+                @endif
                 @if ($isDosen && ! $course->isCompleted())
                     @php($maxMeetings = \App\Http\Controllers\MeetingController::MAX_MEETINGS)
                     <div class="mb-3 d-flex align-items-center">

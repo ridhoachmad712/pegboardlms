@@ -21,10 +21,22 @@
                     <div class="text-secondary small">Sisa waktu</div>
                     <div class="h2 mb-0" :class="remaining <= 60 ? 'text-red' : ''" x-text="display"></div>
                 </div>
+                <span class="badge bg-red-lt ms-3" x-show="remaining !== null && remaining <= 60 && remaining > 0" x-cloak><i class="ti ti-alert-triangle me-1"></i>Waktu hampir habis</span>
                 <button type="submit" class="btn btn-primary ms-auto" data-loading="Mengirim…"><i class="ti ti-send me-1"></i>Kumpulkan</button>
             </div>
         </div>
     @endif
+
+    {{-- Progres pengerjaan --}}
+    <div class="card mb-3">
+        <div class="card-body py-2">
+            <div class="d-flex align-items-center justify-content-between mb-1">
+                <span class="text-secondary small">Progres pengerjaan</span>
+                <span class="small"><strong id="quiz-progress-count">0/{{ $assignment->questions->count() }}</strong> soal terjawab</span>
+            </div>
+            <div class="progress" style="height:.4rem"><div id="quiz-progress-bar" class="progress-bar" style="width:0" role="progressbar" aria-label="Progres pengerjaan kuis"></div></div>
+        </div>
+    </div>
 
     @foreach ($assignment->questions as $i => $q)
         <div class="card mb-3">
@@ -33,17 +45,20 @@
                     <span class="badge bg-{{ $q->isPg() ? 'blue' : 'purple' }}-lt me-2">Soal {{ $i + 1 }}</span>
                     <span class="text-secondary small ms-auto">{{ $q->points }} poin</span>
                 </div>
-                <div class="mb-3 content-prose" style="white-space:pre-line">{{ $q->question }}</div>
 
                 @if ($q->isPg())
-                    @foreach ($q->options as $key => $opt)
-                        <label class="quiz-option d-flex align-items-start gap-2 mb-2">
-                            <input type="radio" name="answers[{{ $q->id }}]" value="{{ $key }}" class="form-check-input mt-1 flex-shrink-0">
-                            <span class="responsive-item-main"><strong>{{ $key }}.</strong> {{ $opt }}</span>
-                        </label>
-                    @endforeach
+                    <fieldset class="border-0 p-0 m-0">
+                        <legend class="mb-3 content-prose" style="white-space:pre-line;font-size:1rem;float:none;width:100%;">{{ $q->question }}</legend>
+                        @foreach ($q->options as $key => $opt)
+                            <label class="quiz-option d-flex align-items-start gap-2 mb-2">
+                                <input type="radio" name="answers[{{ $q->id }}]" value="{{ $key }}" class="form-check-input mt-1 flex-shrink-0">
+                                <span class="responsive-item-main"><strong>{{ $key }}.</strong> {{ $opt }}</span>
+                            </label>
+                        @endforeach
+                    </fieldset>
                 @else
-                    <textarea name="answers[{{ $q->id }}]" class="form-control" rows="4" placeholder="Tulis jawaban Anda..."></textarea>
+                    <div class="mb-3 content-prose" style="white-space:pre-line">{{ $q->question }}</div>
+                    <textarea name="answers[{{ $q->id }}]" class="form-control" rows="4" placeholder="Tulis jawaban Anda..." aria-label="Jawaban soal {{ $i + 1 }}"></textarea>
                 @endif
             </div>
         </div>
@@ -102,5 +117,34 @@ function quizTimer(seconds) {
         },
     };
 }
+</script>
+<script>
+(function () {
+    var form = document.getElementById('quiz-form');
+    if (!form) return;
+    var total = {{ $assignment->questions->count() }};
+    var base = 'Kumpulkan jawaban sekarang? Jawaban tidak dapat diubah setelah dikirim.';
+    var counter = document.getElementById('quiz-progress-count');
+    var bar = document.getElementById('quiz-progress-bar');
+    function answered() {
+        var groups = {};
+        form.querySelectorAll('[name^="answers["]').forEach(function (el) {
+            if (el.type === 'radio') { if (el.checked) groups[el.name] = true; }
+            else if (el.value && el.value.trim() !== '') { groups[el.name] = true; }
+        });
+        return Object.keys(groups).length;
+    }
+    function update() {
+        var a = answered();
+        if (counter) counter.textContent = a + '/' + total;
+        if (bar) { bar.style.width = (total ? Math.round(a / total * 100) : 0) + '%'; bar.setAttribute('aria-valuenow', a); }
+        var left = total - a;
+        // Pesan konfirmasi (modal data-confirm) menyertakan jumlah soal yang belum dijawab.
+        form.setAttribute('data-confirm', base + (left > 0 ? ' Masih ada ' + left + ' soal belum dijawab.' : ''));
+    }
+    form.addEventListener('input', update);
+    form.addEventListener('change', update);
+    update();
+})();
 </script>
 @endpush

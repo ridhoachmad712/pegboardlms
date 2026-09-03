@@ -31,7 +31,7 @@
         @php($gradedAssignments = $assignments->filter(fn($a) => ($mySubs[$a->id] ?? null)?->isGraded())->sortByDesc(fn($a) => ($mySubs[$a->id] ?? null)?->updated_at))
         @php($defaultAssignmentTab = $todoAssignments->isNotEmpty() ? 'todo' : ($submittedAssignments->isNotEmpty() ? 'submitted' : 'graded'))
         @php($assignmentTabs = [['todo', 'Perlu dikerjakan', $todoAssignments, 'orange', 'ti-clock'], ['submitted', 'Menunggu nilai', $submittedAssignments, 'azure', 'ti-hourglass'], ['graded', 'Selesai', $gradedAssignments, 'green', 'ti-circle-check']])
-        <div class="d-md-none assignment-mobile-sections" x-data="{ tab: '{{ $defaultAssignmentTab }}' }">
+        <div class="assignment-sections" x-data="{ tab: '{{ $defaultAssignmentTab }}' }">
             <div class="assignment-tabs mb-3" role="tablist" aria-label="Status tugas">
                 @foreach ($assignmentTabs as [$tabKey, $tabLabel, $items, $tabColor, $tabIcon])
                     @if ($items->isNotEmpty())
@@ -75,9 +75,8 @@
                 @endif
             @endforeach
         </div>
-    @endif
-
-    <div @class(['row row-cards', 'd-none d-md-flex' => auth()->user()->isMahasiswa()])>
+    @else
+    <div class="row row-cards">
         @foreach ($assignments as $a)
             @php($sub = $mySubs[$a->id] ?? null)
             <div class="col-md-6">
@@ -112,17 +111,20 @@
             </div>
         @endforeach
     </div>
+    @endif
 @endif
 @endsection
 
 @push('styles')
 <style>
+.assignment-tabs{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;}
+.assignment-tab{display:inline-flex;align-items:center;gap:.4rem;min-height:2.6rem;padding:.45rem .85rem;border:1px solid var(--tblr-border-color);border-radius:.75rem;background:var(--tblr-bg-surface);color:var(--tblr-secondary-color);font-size:.8rem;font-weight:600;transition:color .15s ease,background-color .15s ease,border-color .15s ease;}
+.assignment-tab:hover,.assignment-tab:focus{color:var(--tblr-primary);border-color:rgba(var(--tblr-primary-rgb),.35);background:rgba(var(--tblr-primary-rgb),.06);}
+.assignment-tab.active{color:var(--tblr-primary);border-color:rgba(var(--tblr-primary-rgb),.45);background:rgba(var(--tblr-primary-rgb),.1);}
 @media (max-width:575.98px){
-    .assignment-tabs{display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.2rem;scrollbar-width:none;}
+    .assignment-tabs{flex-wrap:nowrap;overflow-x:auto;padding-bottom:.2rem;scrollbar-width:none;}
     .assignment-tabs::-webkit-scrollbar{display:none;}
-    .assignment-tab{display:inline-flex;align-items:center;gap:.35rem;min-height:2.75rem;padding:.45rem .7rem;flex:0 0 auto;border:1px solid var(--tblr-border-color);border-radius:.75rem;background:var(--tblr-bg-surface);color:var(--tblr-secondary-color);font-size:.75rem;font-weight:600;transition:color .15s ease,background-color .15s ease,border-color .15s ease;}
-    .assignment-tab:hover,.assignment-tab:focus{color:var(--tblr-primary);border-color:rgba(var(--tblr-primary-rgb),.35);background:rgba(var(--tblr-primary-rgb),.06);}
-    .assignment-tab.active{color:var(--tblr-primary);border-color:rgba(var(--tblr-primary-rgb),.45);background:rgba(var(--tblr-primary-rgb),.1);}
+    .assignment-tab{flex:0 0 auto;min-height:2.75rem;font-size:.75rem;}
 }
 </style>
 @endpush

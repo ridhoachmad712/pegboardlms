@@ -88,7 +88,16 @@
                                 <button class="btn btn-primary w-100 w-sm-auto" type="submit"><i class="ti ti-hand-click me-1"></i>Tandai Saya Hadir</button>
                             </form>
                         @elseif ($focusMeeting->attendanceOpen())
-                            <div class="alert alert-info mb-0 py-2"><i class="ti ti-qrcode me-1"></i>Scan QR atau masukkan kode yang ditampilkan dosen.</div>
+                            <div class="text-secondary small mb-2"><i class="ti ti-qrcode me-1"></i>Scan QR dari dosen, atau masukkan kodenya di sini:</div>
+                            <form class="row g-2 align-items-center" onsubmit="if(this.code.value.trim()){location.href='{{ url('/attend') }}/'+encodeURIComponent(this.code.value.trim());}return false;">
+                                <div class="col-7 col-sm-auto">
+                                    <input type="text" name="code" class="form-control text-uppercase font-monospace" maxlength="6" autocomplete="off"
+                                           aria-label="Kode absensi" placeholder="K7P2QX" style="letter-spacing:.15em" oninput="this.value=this.value.toUpperCase()">
+                                </div>
+                                <div class="col-5 col-sm-auto">
+                                    <button class="btn btn-primary w-100" type="submit"><i class="ti ti-check me-1"></i>Absen</button>
+                                </div>
+                            </form>
                         @endif
                     @else
                         <h2 class="h3 mt-1 mb-1">Tidak ada absensi aktif</h2>
