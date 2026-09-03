@@ -117,10 +117,10 @@
 
     {{-- Edit manual --}}
     <div class="col-lg-7">
-        <form class="card" method="POST" action="{{ route('attendance.update', $meeting) }}">
+        <form class="card" method="POST" action="{{ route('attendance.update', $meeting) }}" data-warn-unsaved>
             @csrf
             <div class="card-header"><h3 class="card-title">Daftar Hadir ({{ $students->count() }})</h3>
-                <div class="card-actions"><button class="btn btn-sm btn-primary">Simpan</button></div>
+                <div class="card-actions"><button class="btn btn-sm btn-primary" data-loading="Menyimpan…">Simpan</button></div>
             </div>
             <div class="table-responsive">
                 <table class="table table-vcenter card-table">
@@ -144,7 +144,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="card-footer text-end"><button class="btn btn-primary">Simpan Perubahan</button></div>
+            <div class="card-footer text-end"><button class="btn btn-primary" data-loading="Menyimpan…">Simpan Perubahan</button></div>
         </form>
     </div>
 </div>

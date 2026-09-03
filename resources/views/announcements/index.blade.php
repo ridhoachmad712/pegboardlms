@@ -24,7 +24,7 @@
                                 @if (auth()->user()->isDosen())
                                     <form method="POST" action="{{ route('announcements.destroy', $a) }}" class="ms-auto" data-confirm="Hapus pengumuman?">
                                         @csrf @method('DELETE')
-                                        <button class="btn btn-sm btn-ghost-danger"><i class="ti ti-trash"></i></button>
+                                        <button class="btn btn-sm btn-ghost-danger" title="Hapus pengumuman" aria-label="Hapus pengumuman"><i class="ti ti-trash"></i></button>
                                     </form>
                                 @endif
                             </div>

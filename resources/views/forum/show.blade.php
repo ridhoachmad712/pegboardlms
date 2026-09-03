@@ -60,7 +60,7 @@
                         </div>
                     </div>
                     @if ($thread->user_id === auth()->id() || $isOwner)
-                        <button type="button" class="btn btn-sm btn-ghost-secondary ms-auto" @click="edit = ! edit" title="Edit diskusi"><i class="ti ti-pencil"></i></button>
+                        <button type="button" class="btn btn-sm btn-ghost-secondary ms-auto" @click="edit = ! edit" title="Edit diskusi" aria-label="Edit diskusi"><i class="ti ti-pencil"></i></button>
                     @endif
                 </div>
                 <div x-show="!edit" class="content-prose" style="white-space:pre-line">{{ $thread->content }}</div>
@@ -91,9 +91,9 @@
                         <div class="min-w-0 flex-fill"><div class="fw-bold text-truncate">{{ $reply->author->name }} {!! $roleBadge($reply->author) !!}</div><div class="text-secondary small">{{ $reply->created_at->diffForHumans() }}@if ($reply->updated_at->gt($reply->created_at)) · disunting @endif</div></div>
                         @if ($canEditReply)
                             <div class="btn-list ms-auto">
-                                <button type="button" class="btn btn-sm btn-ghost-secondary" @click="edit = ! edit" title="Edit balasan"><i class="ti ti-pencil"></i></button>
+                                <button type="button" class="btn btn-sm btn-ghost-secondary" @click="edit = ! edit" title="Edit balasan" aria-label="Edit balasan"><i class="ti ti-pencil"></i></button>
                                 <form method="POST" action="{{ route('forum.replies.destroy', $reply) }}" data-confirm="Hapus balasan?">@csrf @method('DELETE')
-                                    <button class="btn btn-sm btn-ghost-danger" title="Hapus balasan"><i class="ti ti-trash"></i></button>
+                                    <button class="btn btn-sm btn-ghost-danger" title="Hapus balasan" aria-label="Hapus balasan"><i class="ti ti-trash"></i></button>
                                 </form>
                             </div>
                         @endif

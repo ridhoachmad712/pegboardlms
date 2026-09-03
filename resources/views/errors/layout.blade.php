@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <script>(function(){try{var t=localStorage.getItem('lms-theme');if(t){document.documentElement.setAttribute('data-bs-theme',t);}}catch(e){}})();</script>
     <title>@yield('code') — {{ config('app.name') }}</title>
     <link rel="stylesheet" href="{{ asset('tabler/css/tabler.min.css') }}">
     <link rel="stylesheet" href="{{ asset('tabler/css/tabler-icons.min.css') }}">

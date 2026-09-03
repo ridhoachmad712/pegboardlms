@@ -59,7 +59,7 @@
     {{-- Stat cards (dapat diklik ke halaman terkait) --}}
     @foreach ([
         ['Kelas Diikuti', $stats['courses'], 'ti-school', 'primary', route('courses.index')],
-        ['Tugas Pending', $stats['pending'], 'ti-checklist', 'orange', $pending->isNotEmpty() ? route('assignments.show', $pending->first()) : null],
+        ['Tugas Pending', $stats['pending'], 'ti-checklist', 'orange', route('activities.index')],
         ['Rata-rata Hadir', is_null($stats['attendance']) ? '—' : $stats['attendance'].'%', 'ti-qrcode', 'green', null],
         ['Notif Baru', $stats['unread'], 'ti-bell', 'azure', route('notifications.index')],
     ] as [$label, $value, $icon, $color, $href])

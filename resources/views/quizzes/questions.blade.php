@@ -41,10 +41,10 @@
                                     @endif
                                 </div>
                                 <div class="btn-list">
-                                    <button class="btn btn-sm" data-bs-toggle="modal" data-bs-target="#edit-q-{{ $q->id }}" title="Edit"><i class="ti ti-edit"></i></button>
+                                    <button class="btn btn-sm" data-bs-toggle="modal" data-bs-target="#edit-q-{{ $q->id }}" title="Edit soal" aria-label="Edit soal"><i class="ti ti-edit"></i></button>
                                     <form method="POST" action="{{ route('quizzes.questions.destroy', $q) }}" data-confirm="Hapus soal ini?">
                                         @csrf @method('DELETE')
-                                        <button class="btn btn-sm btn-ghost-danger"><i class="ti ti-trash"></i></button>
+                                        <button class="btn btn-sm btn-ghost-danger" title="Hapus soal" aria-label="Hapus soal"><i class="ti ti-trash"></i></button>
                                     </form>
                                 </div>
                             </div>

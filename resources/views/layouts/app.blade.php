@@ -382,6 +382,10 @@
                             </li>
                         @endif
                     </ul>
+                    <ul class="navbar-nav d-md-none border-top mt-2 pt-2">
+                        <li class="nav-item hide-theme-dark"><a class="nav-link" href="#" onclick="document.documentElement.setAttribute('data-bs-theme','dark');try{localStorage.setItem('lms-theme','dark');}catch(e){}return false;"><span class="nav-link-icon"><i class="ti ti-moon"></i></span><span class="nav-link-title">Mode gelap</span></a></li>
+                        <li class="nav-item hide-theme-light"><a class="nav-link" href="#" onclick="document.documentElement.setAttribute('data-bs-theme','light');try{localStorage.setItem('lms-theme','light');}catch(e){}return false;"><span class="nav-link-icon"><i class="ti ti-sun"></i></span><span class="nav-link-title">Mode terang</span></a></li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -395,6 +399,9 @@
             <div class="container-xl">
                 <div class="row g-2 align-items-center">
                     <div class="col-12 col-sm">
+                        @hasSection('breadcrumb')
+                            <ol class="breadcrumb breadcrumb-arrows" aria-label="breadcrumbs">@yield('breadcrumb')</ol>
+                        @endif
                         @hasSection('page-pretitle')
                             <div class="page-pretitle">@if(request()->routeIs('admin.*'))Administrasi @else @yield('page-pretitle') @endif</div>
                         @endif
@@ -442,7 +449,7 @@
         <a href="{{ route('calendar') }}" class="mobile-bottom-nav__item {{ $mobileCalendarActive ? 'active' : '' }}" aria-current="{{ $mobileCalendarActive ? 'page' : 'false' }}">
             <i class="ti ti-calendar"></i><span>Kalender</span>
         </a>
-        @php($mobileUnread = $user->notifications()->unread()->count())
+        @php($mobileUnread = $navUnreadCount)
         <button class="mobile-bottom-nav__item {{ $mobileMoreActive ? 'active' : '' }}" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobile-more-menu" aria-controls="mobile-more-menu" aria-current="{{ $mobileMoreActive ? 'page' : 'false' }}">
             <i class="ti ti-menu-2"></i><span>Lainnya</span>
             @if($mobileUnread)<span class="mobile-bottom-nav__badge">{{ $mobileUnread > 99 ? '99+' : $mobileUnread }}</span>@endif
@@ -472,6 +479,8 @@
             <div class="mobile-more-grid">
                 <a href="{{ route('profile.edit') }}" class="mobile-more-link"><i class="ti ti-user"></i><span>Profil</span></a>
                 <a href="{{ route('panduan') }}" class="mobile-more-link"><i class="ti ti-help-circle"></i><span>Panduan</span></a>
+                <button type="button" class="mobile-more-link hide-theme-dark" onclick="document.documentElement.setAttribute('data-bs-theme','dark');try{localStorage.setItem('lms-theme','dark');}catch(e){}"><i class="ti ti-moon"></i><span>Mode Gelap</span></button>
+                <button type="button" class="mobile-more-link hide-theme-light" onclick="document.documentElement.setAttribute('data-bs-theme','light');try{localStorage.setItem('lms-theme','light');}catch(e){}"><i class="ti ti-sun"></i><span>Mode Terang</span></button>
                 <button type="button" id="install-app" class="mobile-more-link d-none"><i class="ti ti-device-mobile-down"></i><span>Instal Aplikasi</span></button>
             </div>
             <button type="submit" form="mobile-logout-form" class="mobile-more-logout"><i class="ti ti-logout"></i><span>Keluar dari akun</span></button>

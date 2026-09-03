@@ -24,7 +24,7 @@
 <div class="d-flex align-items-center gap-2 mb-3"><span class="text-secondary small">Status:</span><x-learning-status :status="$pageStatus" :score="$submission?->score" /></div>
 
 <div class="row row-cards">
-    <div class="col-lg-7 order-2 order-lg-1">
+    <div class="col-lg-7 order-lg-1">
         <div class="card">
             <div class="card-header"><h3 class="card-title"><i class="ti ti-file-description me-1"></i>Petunjuk Tugas</h3></div>
             <div class="card-body">
@@ -117,7 +117,7 @@
         @endif
     </div>
 
-    <div class="col-lg-5 order-1 order-lg-2">
+    <div class="col-lg-5 order-lg-2">
         <div class="card">
             <div class="card-header"><h3 class="card-title">{{ $assignment->isGroup() ? 'Pengumpulan Kelompok' : 'Pengumpulan Anda' }}</h3></div>
             <div class="card-body">
@@ -228,7 +228,7 @@
                         @endif
 
                         <div class="student-submit-bar">
-                            <button class="btn btn-primary w-100 student-submit-action" @unless($submission) data-loading="Mengirim tugas…" @endunless>
+                            <button class="btn btn-primary w-100 student-submit-action" data-loading="{{ $submission ? 'Menyimpan…' : 'Mengirim tugas…' }}">
                                 <i class="ti ti-{{ $submission ? 'refresh' : 'upload' }} me-1"></i>{{ $submission ? 'Perbarui Jawaban' : 'Kumpulkan Tugas' }}
                             </button>
                             <small class="form-hint d-block mt-1 text-center">Bisa diperbarui selama belum dinilai dosen.</small>

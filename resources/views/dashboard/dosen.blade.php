@@ -188,9 +188,9 @@
                                     <td class="text-center">{{ $course->meetings_count }}</td>
                                     <td class="text-end">
                                         <div class="btn-list justify-content-end">
-                                            <a href="{{ route('assignments.index', $course) }}" class="btn btn-sm" title="Tugas & Kuis"><i class="ti ti-checklist"></i></a>
-                                            <a href="{{ route('attendance.index', $course) }}" class="btn btn-sm" title="Kehadiran"><i class="ti ti-qrcode"></i></a>
-                                            <a href="{{ route('grades.index', $course) }}" class="btn btn-sm" title="Penilaian"><i class="ti ti-clipboard-check"></i></a>
+                                            <a href="{{ route('assignments.index', $course) }}" class="btn btn-sm" title="Tugas & Kuis" aria-label="Tugas & Kuis"><i class="ti ti-checklist"></i></a>
+                                            <a href="{{ route('attendance.index', $course) }}" class="btn btn-sm" title="Kehadiran" aria-label="Kehadiran"><i class="ti ti-qrcode"></i></a>
+                                            <a href="{{ route('grades.index', $course) }}" class="btn btn-sm" title="Penilaian" aria-label="Penilaian"><i class="ti ti-clipboard-check"></i></a>
                                             <a href="{{ route('courses.show', $course) }}" class="btn btn-sm btn-primary">Kelola</a>
                                         </div>
                                     </td>

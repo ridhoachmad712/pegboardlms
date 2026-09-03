@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script>(function(){try{var t=localStorage.getItem('lms-theme');if(t){document.documentElement.setAttribute('data-bs-theme',t);}}catch(e){}})();</script>
     @if (config('demo.enabled'))<meta name="robots" content="noindex,nofollow">@endif
     <link rel="icon" href="{{ $faviconUrl }}">
     <title>{{ $appName }}</title>

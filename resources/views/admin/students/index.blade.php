@@ -101,7 +101,7 @@
                 <div class="mb-3"><label for="student-import-file" class="form-label required">Berkas CSV</label><input id="student-import-file" type="file" name="file" class="form-control" accept=".csv,.txt" required></div>
                 <div class="alert alert-info mb-0"><strong>Format:</strong> <code>nama, email, nim</code>. Akun baru otomatis dibuat (sandi = NIM). Email yang sudah ada dilewati.</div>
             </div>
-            <div class="modal-footer"><button type="button" class="btn btn-link" data-bs-dismiss="modal">Batal</button><button class="btn btn-primary">Import</button></div>
+            <div class="modal-footer"><button type="button" class="btn btn-link" data-bs-dismiss="modal">Batal</button><button class="btn btn-primary" data-loading="Mengimpor…">Import</button></div>
         </form>
     </div>
 </div>

@@ -51,7 +51,7 @@
         <div class="card-body"><x-empty-state icon="ti-users" title="Belum ada mahasiswa" /></div>
     @else
         @php($editable = ! $course->isCompleted())
-        <form method="POST" action="{{ route('grades.saveManual', $course) }}">
+        <form method="POST" action="{{ route('grades.saveManual', $course) }}" data-warn-unsaved>
             @csrf
             <div class="card-body py-2 border-bottom d-flex align-items-center gap-2 flex-wrap">
                 <input type="text" class="form-control form-control-sm" style="max-width:240px" placeholder="Cari mahasiswa…" data-table-search="#tbl-rekap">
@@ -115,7 +115,7 @@
             </div>
             @if ($editable)
                 <div class="card-footer text-end">
-                    <button class="btn btn-primary"><i class="ti ti-device-floppy me-1"></i>Simpan Nilai</button>
+                    <button class="btn btn-primary" data-loading="Menyimpan…"><i class="ti ti-device-floppy me-1"></i>Simpan Nilai</button>
                 </div>
             @endif
         </form>
