@@ -87,7 +87,7 @@ class LecturerActivationTest extends TestCase
         $this->withSession(['url.intended' => route('courses.create')])
             ->post(route('login'), ['email' => $lecturer->email, 'password' => 'password'])
             ->assertRedirect(route('activation.show'));
-        $this->get(route('activation.show'))->assertOk()->assertSee('Aktifkan akun dosen')
+        $this->get(route('activation.show'))->assertOk()->assertSee('persetujuan admin')
             ->assertDontSee('href="'.route('courses.create').'"', false);
         $this->post(route('logout'))->assertRedirect(route('login'));
         $this->assertGuest();

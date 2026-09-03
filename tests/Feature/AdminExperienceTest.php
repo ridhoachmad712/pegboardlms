@@ -95,14 +95,15 @@ class AdminExperienceTest extends TestCase
             ->assertViewHas('pendingCount', 0)->assertViewHas('activeCount', 0);
     }
 
-    public function test_lecturer_detail_keeps_payment_confirmation_and_private_code_handling(): void
+    public function test_lecturer_detail_offers_direct_activation_and_escapes_name(): void
     {
         $admin = User::factory()->admin()->create();
         $pending = User::factory()->create(['role' => 'dosen', 'name' => '<script>alert("unsafe")</script>']);
         $this->actingAs($admin)->get(route('admin.lecturers.show', $pending))->assertOk()
             ->assertHeader('Cache-Control', 'no-store, private')
-            ->assertSee('Pembayaran satu kali sudah saya verifikasi.')
-            ->assertSee('name="payment_confirmed"', false)->assertDontSee($pending->name, false);
+            ->assertSee('Aktifkan Akun Dosen')
+            ->assertSee('action="'.route('admin.lecturers.activate', $pending).'"', false)
+            ->assertDontSee('name="payment_confirmed"', false)->assertDontSee($pending->name, false);
         $active = User::factory()->activeLecturer()->create();
         $this->get(route('admin.lecturers.show', $active))->assertOk()
             ->assertSee('Tidak perlu kode tambahan')->assertDontSee('name="payment_confirmed"', false);

@@ -236,6 +236,8 @@ Route::middleware(['auth', 'lecturer.active'])->group(function () {
             Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
             Route::get('/lecturers', [AdminLecturerController::class, 'index'])->name('lecturers.index');
             Route::get('/lecturers/{lecturer}', [AdminLecturerController::class, 'show'])->name('lecturers.show');
+            Route::patch('/lecturers/{lecturer}/activate', [AdminLecturerController::class, 'activate'])
+                ->middleware('throttle:10,1,lecturer-access:')->name('lecturers.activate');
             Route::patch('/lecturers/{lecturer}/disable', [AdminLecturerController::class, 'disable'])
                 ->middleware('throttle:10,1,lecturer-access:')->name('lecturers.disable');
             Route::patch('/lecturers/{lecturer}/enable', [AdminLecturerController::class, 'enable'])

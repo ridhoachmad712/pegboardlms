@@ -57,6 +57,13 @@ class LecturerController extends Controller
         ]);
     }
 
+    public function activate(Request $request, User $lecturer, LecturerAccount $accounts): RedirectResponse
+    {
+        $accounts->activate($lecturer, $request->user());
+
+        return redirect()->route('admin.lecturers.show', $lecturer)->with('status', 'Akses dosen diaktifkan. Dosen dapat langsung masuk tanpa kode aktivasi.');
+    }
+
     public function disable(Request $request, User $lecturer, LecturerAccount $accounts): RedirectResponse
     {
         $accounts->setDisabled($lecturer, $request->user(), true);
@@ -68,7 +75,7 @@ class LecturerController extends Controller
     {
         $accounts->setDisabled($lecturer, $request->user(), false);
 
-        return redirect()->route('admin.lecturers.show', $lecturer)->with('status', 'Penonaktifan dicabut. Akun yang belum diaktivasi tetap memerlukan kode aktivasi.');
+        return redirect()->route('admin.lecturers.show', $lecturer)->with('status', 'Penonaktifan dicabut. Akun yang belum diaktivasi masih perlu diaktifkan admin.');
     }
 
     public function resetPassword(Request $request, User $lecturer, LecturerAccount $accounts): RedirectResponse

@@ -68,12 +68,13 @@ class LecturerAccountTest extends TestCase
     public function test_only_admin_can_use_account_controls(): void
     {
         $lecturer = User::factory()->activeLecturer()->create();
-        foreach (['disable', 'enable', 'resetPassword'] as $action) {
+        foreach (['activate', 'disable', 'enable', 'resetPassword'] as $action) {
             $method = $action === 'resetPassword' ? 'post' : 'patch';
             $this->$method(route('admin.lecturers.'.$action, $lecturer))->assertRedirect(route('login'));
         }
         foreach ([User::factory()->create(), User::factory()->activeLecturer()->create()] as $user) {
             $this->actingAs($user);
+            $this->patch(route('admin.lecturers.activate', $lecturer))->assertForbidden();
             $this->patch(route('admin.lecturers.disable', $lecturer))->assertForbidden();
             $this->patch(route('admin.lecturers.enable', $lecturer))->assertForbidden();
             $this->post(route('admin.lecturers.resetPassword', $lecturer))->assertForbidden();
@@ -176,6 +177,43 @@ class LecturerAccountTest extends TestCase
         $this->assertTrue($lecturer->fresh()->needsLecturerActivation());
         $this->freshLogin($lecturer, 'password')->assertRedirect(route('activation.show'));
         $this->get(route('dashboard'))->assertRedirect(route('activation.show'));
+    }
+
+    public function test_admin_activates_pending_lecturer_directly_without_any_code(): void
+    {
+        $this->admin();
+        $lecturer = User::factory()->create(['role' => 'dosen']);
+        $this->assertTrue($lecturer->needsLecturerActivation());
+
+        // Halaman detail kini menampilkan aktivasi langsung, bukan penerbitan kode.
+        $this->get(route('admin.lecturers.show', $lecturer))->assertOk()
+            ->assertSee('Aktifkan Akun Dosen')->assertDontSee('name="payment_confirmed"', false);
+
+        $this->patch(route('admin.lecturers.activate', $lecturer))
+            ->assertRedirect(route('admin.lecturers.show', $lecturer));
+
+        $activated = $lecturer->fresh();
+        $this->assertFalse($activated->needsLecturerActivation());
+        $this->assertNotNull($activated->lecturer_activated_at);
+        $this->assertDatabaseCount('lecturer_activation_codes', 0);
+        $this->assertSame(1, ActivityLog::where('action', 'lecturer_activation')->count());
+
+        // Dosen langsung dapat masuk tanpa kode aktivasi.
+        $this->freshLogin($activated, 'password')->assertRedirect(route('dashboard'));
+        $this->get(route('dashboard.dosen'))->assertOk();
+    }
+
+    public function test_activate_is_idempotent_and_does_not_move_activation_time(): void
+    {
+        $this->admin();
+        $lecturer = User::factory()->create(['role' => 'dosen']);
+        $this->patch(route('admin.lecturers.activate', $lecturer))->assertRedirect();
+        $firstActivatedAt = $lecturer->fresh()->lecturer_activated_at;
+
+        $this->travel(1)->hours();
+        $this->patch(route('admin.lecturers.activate', $lecturer))->assertRedirect();
+        $this->assertTrue($lecturer->fresh()->lecturer_activated_at->equalTo($firstActivatedAt));
+        $this->assertSame(1, ActivityLog::where('action', 'lecturer_activation')->count());
     }
 
     public function test_disabled_login_is_rejected_even_with_correct_password(): void

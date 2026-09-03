@@ -61,15 +61,13 @@
     @elseif ($lecturer->needsLecturerActivation())
         <div class="card mb-3">
             <div class="card-body">
-                <h2 class="h3">{{ $codes->total() ? 'Kelola kode aktivasi' : 'Aktifkan akses dosen' }}</h2>
-                <p class="text-secondary small">Verifikasi pembayaran, lalu terbitkan kode. Dosen membuka akses dengan menukarkan kode di akunnya.</p>
-                <form method="POST" action="{{ route('admin.lecturers.issueCode', $lecturer) }}" data-confirm="Terbitkan kode untuk dosen ini? Seluruh kode sebelumnya yang belum dipakai akan dibatalkan.">
-                    @csrf
-                    <label class="form-check mb-3"><input type="checkbox" name="payment_confirmed" value="1" class="form-check-input @error('payment_confirmed') is-invalid @enderror" required @checked(old('payment_confirmed'))><span class="form-check-label">Pembayaran satu kali sudah saya verifikasi.</span></label>
-                    @error('payment_confirmed')<p class="text-danger small" role="alert">{{ $message }}</p>@enderror
-                    <button class="btn btn-primary w-100" type="submit" data-loading="Menerbitkan kode…">{{ $codes->total() ? 'Terbitkan Kode Baru' : 'Terbitkan Kode Aktivasi' }}</button>
+                <h2 class="h3">Aktifkan akses dosen</h2>
+                <p class="text-secondary small">Dosen ini menunggu persetujuan. Setelah diaktifkan, dosen langsung dapat masuk dan mengelola kelas — tanpa kode aktivasi.</p>
+                <form method="POST" action="{{ route('admin.lecturers.activate', $lecturer) }}" data-confirm="Aktifkan akses dosen ini sekarang? Dosen dapat langsung masuk setelahnya.">
+                    @csrf @method('PATCH')
+                    <button class="btn btn-primary w-100" type="submit" data-loading="Mengaktifkan…"><i class="ti ti-user-check me-1" aria-hidden="true"></i>Aktifkan Akun Dosen</button>
                 </form>
-                <p class="small text-secondary mt-2 mb-0">Kode berlaku {{ config('licensing.code_valid_days') }} hari, hanya sekali pakai, dan tidak bisa dipakai akun lain. Penerbitan ulang membatalkan kode lama.</p>
+                <p class="small text-secondary mt-2 mb-0">Aktivasi berlaku tanpa perpanjangan atau tagihan berkala. Anda tetap dapat menonaktifkan akun ini nanti bila diperlukan.</p>
             </div>
         </div>
     @else
@@ -87,7 +85,7 @@
             </form>
             <hr class="my-3">
             @if($lecturer->isLecturerDisabled())
-                <p class="small text-secondary">{{ $lecturer->needsLecturerActivation() ? 'Setelah akses dibuka kembali, dosen tetap harus menukarkan kode aktivasi pembayaran.' : 'Buka kembali akses dosen tanpa perlu pembayaran atau kode aktivasi baru.' }}</p>
+                <p class="small text-secondary">{{ $lecturer->needsLecturerActivation() ? 'Setelah akses dibuka kembali, akun masih perlu diaktifkan admin sebelum dosen dapat masuk.' : 'Buka kembali akses dosen tanpa perlu aktivasi ulang.' }}</p>
                 <form method="POST" action="{{ route('admin.lecturers.enable', $lecturer) }}" data-confirm="Aktifkan kembali akses akun dosen ini? Status pembayaran sebelumnya tetap berlaku.">
                     @csrf @method('PATCH')
                     <button type="submit" class="btn btn-primary w-100" data-loading="Mengaktifkan akses…"><i class="ti ti-user-check me-1" aria-hidden="true"></i>Aktifkan Kembali Akun</button>

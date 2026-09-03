@@ -30,6 +30,24 @@ class LecturerAccount
         });
     }
 
+    /**
+     * Aktivasi langsung oleh admin, tanpa kode. Idempoten: akun yang sudah aktif tidak berubah.
+     */
+    public function activate(User $lecturer, User $admin): void
+    {
+        $this->authorize($admin);
+        DB::transaction(function () use ($lecturer) {
+            $account = $this->lockedLecturer($lecturer);
+            if (! $account->needsLecturerActivation()) {
+                return;
+            }
+            $account->forceFill(['lecturer_activated_at' => now()])->save();
+            // Tidak ada kode lagi; batalkan sisa kode lama yang belum terpakai bila ada.
+            $account->activationCodes()->whereNull('used_at')->whereNull('revoked_at')->update(['revoked_at' => now()]);
+            Activity::log('lecturer_activation', 'Admin mengaktifkan akses dosen #'.$account->id.' secara langsung.');
+        });
+    }
+
     public function resetPassword(User $lecturer, User $admin): string
     {
         $this->authorize($admin);
