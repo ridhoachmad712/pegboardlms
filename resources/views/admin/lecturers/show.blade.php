@@ -97,6 +97,18 @@
                     <button type="submit" class="btn btn-outline-danger w-100" data-loading="Menonaktifkan akun…"><i class="ti ti-user-off me-1" aria-hidden="true"></i>Nonaktifkan Akun</button>
                 </form>
             @endif
+            <hr class="my-3">
+            <h3 class="h4 text-danger">Hapus akun permanen</h3>
+            @if(($courseCount ?? 0) > 0)
+                <p class="small text-secondary mb-2">Dosen ini masih memiliki <strong>{{ $courseCount }} kelas</strong>. Untuk menjaga data mahasiswa (nilai, kehadiran, tugas), akun hanya bisa dihapus setelah tidak memiliki kelas. Gunakan <strong>Nonaktifkan</strong> di atas, atau hapus/pindahkan kelasnya lebih dulu.</p>
+                <button type="button" class="btn btn-outline-danger w-100" disabled><i class="ti ti-trash me-1" aria-hidden="true"></i>Hapus Akun Dosen</button>
+            @else
+                <p class="small text-secondary mb-2">Menghapus akun bersifat <strong>permanen dan tidak dapat dibatalkan</strong>. Hanya untuk dosen tanpa kelas. Riwayat aktivitas tetap tercatat tanpa nama akun.</p>
+                <form method="POST" action="{{ route('admin.lecturers.destroy', $lecturer) }}" data-confirm="Hapus akun dosen ini secara permanen? Tindakan ini tidak dapat dibatalkan.">
+                    @csrf @method('DELETE')
+                    <button type="submit" class="btn btn-danger w-100" data-loading="Menghapus…"><i class="ti ti-trash me-1" aria-hidden="true"></i>Hapus Akun Dosen</button>
+                </form>
+            @endif
         </div></section>
     @endunless
     </div>

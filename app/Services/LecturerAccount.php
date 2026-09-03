@@ -4,7 +4,9 @@ namespace App\Services;
 
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class LecturerAccount
 {
@@ -64,6 +66,34 @@ class LecturerAccount
             Activity::log('lecturer_password_reset', 'Mereset kata sandi dosen #'.$account->id.' dan membatalkan sesi lama.');
 
             return $plain;
+        });
+    }
+
+    /**
+     * Hapus permanen akun dosen. Diblokir bila dosen masih memiliki kelas,
+     * untuk mencegah kehilangan data mahasiswa (nilai, kehadiran, submission)
+     * lewat cascade. Kode aktivasi & notifikasi ikut terhapus (cascade FK);
+     * riwayat aktivitas dipertahankan (user_id di-null-kan).
+     */
+    public function delete(User $lecturer, User $admin): void
+    {
+        $this->authorize($admin);
+        DB::transaction(function () use ($lecturer, $admin) {
+            $account = $this->lockedLecturer($lecturer);
+            if ($account->id === $admin->id) {
+                throw ValidationException::withMessages(['lecturer' => 'Anda tidak dapat menghapus akun Anda sendiri.']);
+            }
+            if ($account->teachingCourses()->exists()) {
+                throw ValidationException::withMessages([
+                    'lecturer' => 'Dosen ini masih memiliki kelas. Nonaktifkan akun, atau hapus/pindahkan kelasnya terlebih dahulu.',
+                ]);
+            }
+            $avatar = $account->avatar;
+            Activity::log('lecturer_deleted', 'Menghapus akun dosen #'.$account->id.' ('.$account->email.').');
+            $account->delete();
+            if ($avatar) {
+                Storage::disk('public')->delete($avatar);
+            }
         });
     }
 

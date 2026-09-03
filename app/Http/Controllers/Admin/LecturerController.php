@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class LecturerController extends Controller
@@ -39,8 +40,9 @@ class LecturerController extends Controller
     {
         abort_unless($lecturer->isDosen(), 404);
         $codes = $lecturer->activationCodes()->with('creator')->latest('id')->paginate(10);
+        $courseCount = $lecturer->teachingCourses()->count();
 
-        return response()->view('admin.lecturers.show', compact('lecturer', 'codes'))->header('Cache-Control', 'private, no-store');
+        return response()->view('admin.lecturers.show', compact('lecturer', 'codes', 'courseCount'))->header('Cache-Control', 'private, no-store');
     }
 
     public function issueCode(Request $request, User $lecturer, LecturerActivation $activation): RedirectResponse
@@ -76,6 +78,17 @@ class LecturerController extends Controller
         $accounts->setDisabled($lecturer, $request->user(), false);
 
         return redirect()->route('admin.lecturers.show', $lecturer)->with('status', 'Penonaktifan dicabut. Akun yang belum diaktivasi masih perlu diaktifkan admin.');
+    }
+
+    public function destroy(Request $request, User $lecturer, LecturerAccount $accounts): RedirectResponse
+    {
+        try {
+            $accounts->delete($lecturer, $request->user());
+        } catch (ValidationException $e) {
+            return redirect()->route('admin.lecturers.show', $lecturer)->with('error', $e->validator->errors()->first());
+        }
+
+        return redirect()->route('admin.lecturers.index')->with('status', 'Akun dosen dihapus permanen.');
     }
 
     public function resetPassword(Request $request, User $lecturer, LecturerAccount $accounts): RedirectResponse

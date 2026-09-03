@@ -68,8 +68,8 @@ class LecturerAccountTest extends TestCase
     public function test_only_admin_can_use_account_controls(): void
     {
         $lecturer = User::factory()->activeLecturer()->create();
-        foreach (['activate', 'disable', 'enable', 'resetPassword'] as $action) {
-            $method = $action === 'resetPassword' ? 'post' : 'patch';
+        foreach (['activate', 'disable', 'enable', 'resetPassword', 'destroy'] as $action) {
+            $method = match ($action) { 'resetPassword' => 'post', 'destroy' => 'delete', default => 'patch' };
             $this->$method(route('admin.lecturers.'.$action, $lecturer))->assertRedirect(route('login'));
         }
         foreach ([User::factory()->create(), User::factory()->activeLecturer()->create()] as $user) {
@@ -78,6 +78,7 @@ class LecturerAccountTest extends TestCase
             $this->patch(route('admin.lecturers.disable', $lecturer))->assertForbidden();
             $this->patch(route('admin.lecturers.enable', $lecturer))->assertForbidden();
             $this->post(route('admin.lecturers.resetPassword', $lecturer))->assertForbidden();
+            $this->delete(route('admin.lecturers.destroy', $lecturer))->assertForbidden();
         }
         $this->assertFalse($lecturer->fresh()->isLecturerDisabled());
         $this->assertTrue(Hash::check('password', $lecturer->fresh()->password));
@@ -105,6 +106,8 @@ class LecturerAccountTest extends TestCase
             $this->patch(route('admin.lecturers.disable', $target))->assertStatus($expected);
             $this->patch(route('admin.lecturers.enable', $target))->assertStatus($expected);
             $this->post(route('admin.lecturers.resetPassword', $target))->assertStatus($expected);
+            $this->delete(route('admin.lecturers.destroy', $target))->assertStatus($expected);
+            $this->assertNotNull($target->fresh());
             $this->assertNull($target->fresh()->lecturer_disabled_at);
             $this->assertTrue(Hash::check('password', $target->fresh()->password));
         }
@@ -535,7 +538,50 @@ class LecturerAccountTest extends TestCase
         $this->patch(route('admin.lecturers.disable', $lecturer))->assertSessionHas('error');
         $this->patch(route('admin.lecturers.enable', $lecturer))->assertSessionHas('error');
         $this->post(route('admin.lecturers.resetPassword', $lecturer))->assertSessionHas('error');
+        $this->delete(route('admin.lecturers.destroy', $lecturer))->assertSessionHas('error');
+        $this->assertNotNull($lecturer->fresh());
         $this->assertFalse($lecturer->fresh()->isLecturerDisabled());
         $this->assertTrue(Hash::check('password', $lecturer->fresh()->password));
+    }
+
+    public function test_admin_deletes_lecturer_without_courses_and_cascades_codes(): void
+    {
+        $admin = $this->admin();
+        $lecturer = User::factory()->create(['role' => 'dosen']);
+        $lecturer->activationCodes()->create([
+            'created_by' => $admin->id, 'code_hash' => hash('sha256', 'dummy'), 'expires_at' => now()->addDay(),
+        ]);
+
+        $this->get(route('admin.lecturers.show', $lecturer))->assertOk()->assertSee('Hapus Akun Dosen');
+        $this->delete(route('admin.lecturers.destroy', $lecturer))
+            ->assertRedirect(route('admin.lecturers.index'))->assertSessionHas('status');
+
+        $this->assertNull(User::find($lecturer->id));
+        $this->assertDatabaseCount('lecturer_activation_codes', 0);
+        $this->assertSame(1, ActivityLog::where('action', 'lecturer_deleted')->count());
+    }
+
+    public function test_delete_is_blocked_while_lecturer_still_has_courses(): void
+    {
+        $this->admin();
+        $lecturer = User::factory()->activeLecturer()->create();
+        $this->course($lecturer);
+
+        $this->get(route('admin.lecturers.show', $lecturer))->assertOk()
+            ->assertSee('masih memiliki')
+            ->assertDontSee('action="'.route('admin.lecturers.destroy', $lecturer).'"', false);
+        $this->delete(route('admin.lecturers.destroy', $lecturer))
+            ->assertRedirect(route('admin.lecturers.show', $lecturer))->assertSessionHas('error');
+
+        $this->assertNotNull(User::find($lecturer->id));
+        $this->assertDatabaseHas('courses', ['user_id' => $lecturer->id]);
+    }
+
+    public function test_admin_cannot_delete_their_own_account(): void
+    {
+        $admin = $this->admin();
+        // Admin accounts are guarded before the self-check; a 403 keeps the account intact.
+        $this->delete(route('admin.lecturers.destroy', $admin))->assertForbidden();
+        $this->assertNotNull(User::find($admin->id));
     }
 }

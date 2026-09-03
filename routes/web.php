@@ -244,6 +244,8 @@ Route::middleware(['auth', 'lecturer.active'])->group(function () {
                 ->middleware('throttle:10,1,lecturer-access:')->name('lecturers.enable');
             Route::post('/lecturers/{lecturer}/reset-password', [AdminLecturerController::class, 'resetPassword'])
                 ->middleware('throttle:5,1,lecturer-password-reset:')->name('lecturers.resetPassword');
+            Route::delete('/lecturers/{lecturer}', [AdminLecturerController::class, 'destroy'])
+                ->middleware('throttle:10,1,lecturer-access:')->name('lecturers.destroy');
             Route::post('/lecturers/{lecturer}/activation-code', [AdminLecturerController::class, 'issueCode'])
                 ->middleware('throttle:10,1')->name('lecturers.issueCode');
             Route::get('/settings', [SettingController::class, 'edit'])->name('settings.edit');

@@ -31,6 +31,7 @@ class DemoGuard
         'admin.students.resetPassword',
         'admin.lecturers.issueCode',
         'admin.lecturers.activate',
+        'admin.lecturers.destroy',
         'admin.lecturers.disable',
         'admin.lecturers.enable',
         'admin.lecturers.resetPassword',
