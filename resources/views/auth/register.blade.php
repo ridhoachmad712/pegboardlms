@@ -12,7 +12,7 @@
     <div class="card-body">
         <h2 class="h2 text-center mb-1">Daftar Akun Mahasiswa</h2>
         <p class="text-secondary text-center mb-4">
-            Masukkan <strong>kode kelas</strong> dari dosen Anda untuk membuat akun dan langsung tergabung ke kelas.
+            Buat akun mahasiswa Anda. Gabung ke kelas dilakukan setelah masuk, dengan kode dari dosen.
         </p>
 
         @if ($errors->any())
@@ -22,17 +22,10 @@
         @endif
 
         <div class="mb-3">
-            <label class="form-label required">Kode Kelas</label>
-            <input type="text" name="join_code" value="{{ old('join_code') }}"
-                   class="form-control text-uppercase @error('join_code') is-invalid @enderror"
-                   placeholder="mis. X7K9PQ" maxlength="12" required autofocus>
-        </div>
-
-        <div class="mb-3">
             <label class="form-label required">Nama Lengkap</label>
             <input type="text" name="name" value="{{ old('name') }}"
                    class="form-control @error('name') is-invalid @enderror"
-                   placeholder="Nama sesuai data kampus" required>
+                   placeholder="Nama sesuai data kampus" required autofocus>
         </div>
 
         <div class="row">
@@ -66,7 +59,7 @@
 
         <div class="form-footer">
             <button type="submit" class="btn btn-primary w-100">
-                <i class="ti ti-user-plus me-1"></i>Daftar &amp; Gabung Kelas
+                <i class="ti ti-user-plus me-1"></i>Daftar Akun
             </button>
         </div>
     </div>

@@ -10,7 +10,14 @@
     @csrf
     <div class="card-body">
         <h1 class="h2 mb-2">Daftar Akun Dosen</h1>
-        <p class="text-secondary mb-3">Buat akun terlebih dahulu. Akses mengajar terbuka setelah pembayaran satu kali dikonfirmasi dan kode admin ditukar.</p>
+        <div class="alert alert-info" role="alert">
+            <div class="fw-bold mb-1"><i class="ti ti-info-circle me-1" aria-hidden="true"></i>Sebelum mendaftar</div>
+            <ul class="mb-0 ps-3">
+                <li>Isi data di bawah untuk membuat akun dosen.</li>
+                <li>Setelah mendaftar, akun <strong>belum aktif</strong>.</li>
+                <li>Akun menjadi aktif setelah <strong>diaktivasi oleh admin</strong>.</li>
+            </ul>
+        </div>
         @if ($errors->any())
             <div class="alert alert-danger" role="alert">{{ $errors->first() }}</div>
         @endif
@@ -46,7 +53,7 @@
             <input id="lecturer-password-confirmation" name="password_confirmation" type="password" class="form-control" autocomplete="new-password" minlength="8" maxlength="128" required>
         </div>
         <button class="btn btn-primary w-100" type="submit"><i class="ti ti-user-plus me-1" aria-hidden="true"></i>Buat Akun Dosen</button>
-        <p class="text-secondary small mt-3 mb-0">Pendaftaran tidak langsung mengaktifkan akun. Pembayaran dan pemberian kode dilakukan melalui admin.</p>
+        <p class="text-secondary small mt-3 mb-0">Setelah mendaftar, tunggu admin mengaktifkan akun Anda sebelum dapat mengajar.</p>
     </div>
     <div class="card-footer text-center">Sudah punya akun? <a href="{{ route('login') }}">Masuk</a></div>
 </form>
