@@ -112,7 +112,7 @@ class LecturerAccountTest extends TestCase
             $this->assertTrue(Hash::check('password', $target->fresh()->password));
         }
         $this->get(route('admin.lecturers.show', $admin))->assertOk()
-            ->assertDontSee('Keamanan akun')->assertDontSee('Nonaktifkan Akun')->assertDontSee('Reset Password');
+            ->assertDontSee('Keamanan akun')->assertDontSee('Nonaktifkan Akun')->assertDontSee('Reset Kata Sandi');
     }
 
     public function test_disable_preserves_academic_data_payment_and_student_access(): void
@@ -263,7 +263,7 @@ class LecturerAccountTest extends TestCase
         $this->assertStringNotContainsString($plain, json_encode(session()->all()));
         $this->assertDatabaseHas('activity_logs', ['user_id' => $admin->id, 'action' => 'lecturer_password_reset']);
         $this->get(route('admin.lecturers.show', $lecturer))->assertOk()->assertSee($plain)
-            ->assertHeader('Cache-Control', 'no-store, private')->assertSee('Password hanya ditampilkan kali ini.');
+            ->assertHeader('Cache-Control', 'no-store, private')->assertSee('Kata sandi hanya ditampilkan kali ini.');
         $this->get(route('admin.lecturers.show', $lecturer))->assertOk()->assertDontSee($plain);
     }
 
@@ -364,7 +364,7 @@ class LecturerAccountTest extends TestCase
         $course = $this->course($lecturer);
         $plain = app(LecturerAccount::class)->resetPassword($lecturer, $admin);
         $this->freshLogin($lecturer, $plain)->assertRedirect(route('lecturer.password.edit'));
-        $this->get(route('lecturer.password.edit'))->assertOk()->assertSee('Ganti password sementara')
+        $this->get(route('lecturer.password.edit'))->assertOk()->assertSee('Ganti kata sandi sementara')
             ->assertHeader('Cache-Control', 'no-store, private');
         foreach ([route('dashboard'), route('profile.edit'), route('courses.show', $course), route('activation.show')] as $url) {
             $this->get($url)->assertRedirect(route('lecturer.password.edit'));

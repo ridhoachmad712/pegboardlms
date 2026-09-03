@@ -9,7 +9,7 @@
 
 {{-- Di HP, mata kuliah adalah pintu masuk utama. --}}
 <section class="d-md-none mb-3" aria-labelledby="mobile-courses-title">
-    <x-section-heading id="mobile-courses-title" title="Mata Kuliah Saya"
+    <x-section-heading id="mobile-courses-title" title="Kelas Saya"
         :href="route('courses.index')" action="Lihat semua" />
     @if ($courses->isEmpty())
         <div class="card"><div class="card-body text-center py-4">

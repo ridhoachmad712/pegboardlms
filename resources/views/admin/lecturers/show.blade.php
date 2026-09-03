@@ -42,11 +42,11 @@
     @php($passwordReset = session('lecturer_password_reset'))
     @if ($passwordReset && (int) $passwordReset['lecturer_id'] === $lecturer->id && ! $lecturer->isAdmin())
         <section class="card border-primary mb-3" aria-labelledby="reset-password-title"><div class="card-body">
-            <h2 class="h3" id="reset-password-title">Password sementara dibuat</h2>
-            <p class="text-secondary small">Kirim secara pribadi kepada {{ $lecturer->name }}. <strong>Password hanya ditampilkan kali ini.</strong> Dosen wajib menggantinya setelah login.</p>
-            <label for="temporary-password" class="form-label">Password sementara</label>
+            <h2 class="h3" id="reset-password-title">Kata sandi sementara dibuat</h2>
+            <p class="text-secondary small">Kirim secara pribadi kepada {{ $lecturer->name }}. <strong>Kata sandi hanya ditampilkan kali ini.</strong> Dosen wajib menggantinya setelah login.</p>
+            <label for="temporary-password" class="form-label">Kata sandi sementara</label>
             <input id="temporary-password" class="form-control font-monospace mb-2" type="text" readonly value="{{ \Illuminate\Support\Facades\Crypt::decryptString($passwordReset['encrypted_password']) }}" autocomplete="off" spellcheck="false">
-            <button data-copy-target="temporary-password" data-copy-status="copy-password-status" class="btn btn-primary w-100" type="button"><i class="ti ti-copy me-1" aria-hidden="true"></i>Salin Password</button>
+            <button data-copy-target="temporary-password" data-copy-status="copy-password-status" class="btn btn-primary w-100" type="button"><i class="ti ti-copy me-1" aria-hidden="true"></i>Salin Kata Sandi</button>
             <div id="copy-password-status" class="small text-secondary mt-2" role="status"></div>
             @if($lecturer->isLecturerDisabled())<p class="small text-secondary mt-2 mb-0">Akun masih nonaktif. Aktifkan kembali aksesnya sebelum dosen dapat login.</p>@endif
         </div></section>
@@ -77,11 +77,11 @@
     @unless($lecturer->isAdmin())
         <section class="card mt-3" aria-labelledby="account-security-title"><div class="card-body">
             <h2 class="h3" id="account-security-title">Keamanan akun</h2>
-            <p class="small text-secondary">Reset password membatalkan sesi login lama dan membuat password sementara baru. Status aktivasi akun tidak berubah.</p>
-            @if($lecturer->must_change_password)<p class="small text-secondary"><i class="ti ti-key me-1" aria-hidden="true"></i>Dosen belum mengganti password sementara.</p>@endif
-            <form method="POST" action="{{ route('admin.lecturers.resetPassword', $lecturer) }}" data-confirm="Reset password dosen ini? Password dan sesi login lama tidak dapat digunakan lagi. Password sementara baru akan ditampilkan sekali untuk Anda bagikan secara pribadi.">
+            <p class="small text-secondary">Reset kata sandi membatalkan sesi login lama dan membuat kata sandi sementara baru. Status aktivasi akun tidak berubah.</p>
+            @if($lecturer->must_change_password)<p class="small text-secondary"><i class="ti ti-key me-1" aria-hidden="true"></i>Dosen belum mengganti kata sandi sementara.</p>@endif
+            <form method="POST" action="{{ route('admin.lecturers.resetPassword', $lecturer) }}" data-confirm="Reset kata sandi dosen ini? Kata sandi dan sesi login lama tidak dapat digunakan lagi. Kata sandi sementara baru akan ditampilkan sekali untuk Anda bagikan secara pribadi.">
                 @csrf
-                <button type="submit" class="btn w-100" data-loading="Mereset password…"><i class="ti ti-key me-1" aria-hidden="true"></i>Reset Password</button>
+                <button type="submit" class="btn w-100" data-loading="Mereset kata sandi…"><i class="ti ti-key me-1" aria-hidden="true"></i>Reset Kata Sandi</button>
             </form>
             <hr class="my-3">
             @if($lecturer->isLecturerDisabled())

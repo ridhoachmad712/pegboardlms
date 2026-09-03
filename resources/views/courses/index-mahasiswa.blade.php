@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Mata Kuliah Saya')
+@section('title', 'Kelas Saya')
 @section('page-pretitle', 'Perkuliahan')
-@section('page-title', 'Mata Kuliah Saya')
+@section('page-title', 'Kelas Saya')
 
 @section('content')
 @if ($courses->isEmpty())

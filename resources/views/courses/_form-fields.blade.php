@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-md-8 mb-3">
-        <label class="form-label required">Nama Mata Kuliah</label>
+        <label class="form-label required">Nama Kelas</label>
         <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
                value="{{ old('name', $course->name ?? '') }}" placeholder="Manajemen Keuangan" required>
         @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror

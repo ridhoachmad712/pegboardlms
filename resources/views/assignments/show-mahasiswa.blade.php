@@ -5,7 +5,7 @@
 @section('page-title', $assignment->title)
 
 @section('breadcrumb')
-    <li class="breadcrumb-item"><a href="{{ route('courses.index') }}">Mata Kuliah</a></li>
+    <li class="breadcrumb-item"><a href="{{ route('courses.index') }}">Kelas</a></li>
     <li class="breadcrumb-item"><a href="{{ route('courses.show', $assignment->course) }}">{{ $assignment->course->name }}</a></li>
     <li class="breadcrumb-item"><a href="{{ route('assignments.index', $assignment->course) }}">Tugas & Kuis</a></li>
     <li class="breadcrumb-item active" aria-current="page">{{ \Illuminate\Support\Str::limit($assignment->title, 24) }}</li>

@@ -118,7 +118,7 @@
 @php($statCards = [
     ['Kelas Aktif', $stats['active_courses'], 'ti-school', 'primary', route('courses.index', ['periode' => $periode])],
     ['Mahasiswa', $stats['students'], 'ti-users', 'green', auth()->user()->isAdmin() ? route('admin.students.index') : route('courses.index')],
-    ['Mata Kuliah', $stats['subjects'], 'ti-book', 'azure', route('courses.index', ['periode' => $periode])],
+    ['Kelas', $stats['subjects'], 'ti-book', 'azure', route('courses.index', ['periode' => $periode])],
     ['Tugas & Kuis', $stats['assignments'], 'ti-checklist', 'purple', null],
 ])
 

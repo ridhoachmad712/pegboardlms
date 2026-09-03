@@ -23,7 +23,7 @@
     @if ($q !== '' && $total === 0)<div class="card"><div class="card-body"><x-empty-state icon="ti-search-off" title="Tidak ada hasil" description="Coba kata kunci, jenis konten, atau mata kuliah lain." /></div></div>@endif
 
     @php($sections = [
-        ['Mata Kuliah',$courses,'ti-school','primary',fn($item)=>route('courses.show',$item),fn($item)=>$item->name,fn($item)=>$item->code],
+        ['Kelas',$courses,'ti-school','primary',fn($item)=>route('courses.show',$item),fn($item)=>$item->name,fn($item)=>$item->code],
         ['Tugas & Kuis',$assignments,'ti-checklist','orange',fn($item)=>route('assignments.show',$item),fn($item)=>$item->title,fn($item)=>$item->course->name],
         ['Materi',$materials,'ti-folder','blue',fn($item)=>route('materials.preview',$item),fn($item)=>$item->title,fn($item)=>$item->meeting->course->name.' · P'.$item->meeting->number],
         ['Pertemuan',$meetings,'ti-calendar-event','azure',fn($item)=>route('courses.show',$item->course),fn($item)=>$item->topic,fn($item)=>$item->course->name.' · Pertemuan '.$item->number],
