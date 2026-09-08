@@ -41,6 +41,22 @@ class StudentRegistrationTest extends TestCase
         $this->assertSame(0, $user->enrolledCourses()->count());
     }
 
+    public function test_dashboard_renders_for_a_student_with_no_courses(): void
+    {
+        $this->withoutExceptionHandling();
+        $student = User::factory()->create(['role' => 'mahasiswa']);
+        $this->actingAs($student)->get(route('dashboard.mahasiswa'))->assertOk();
+    }
+
+    public function test_full_registration_flow_reaches_dashboard_without_error(): void
+    {
+        $this->withoutExceptionHandling();
+        $this->followingRedirects()->post(route('register'), [
+            'name' => 'Mahasiswa Baru', 'email' => 'flow@contoh.ac.id', 'nim_nip' => '2107777777',
+            'password' => 'rahasia123', 'password_confirmation' => 'rahasia123',
+        ])->assertOk();
+    }
+
     public function test_registration_still_rejects_duplicate_nim_and_email(): void
     {
         User::factory()->create(['email' => 'ada@contoh.ac.id', 'nim_nip' => '2100000001', 'role' => 'mahasiswa']);
