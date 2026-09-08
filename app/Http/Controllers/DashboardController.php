@@ -121,7 +121,7 @@ class DashboardController extends Controller
         $user = $request->user();
 
         $courses = $user->enrolledCourses()
-            ->where('status', Course::STATUS_ACTIVE)
+            ->where('courses.status', Course::STATUS_ACTIVE)
             ->with('lecturer')
             ->withCount('meetings')
             ->get();

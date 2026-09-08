@@ -13,7 +13,7 @@ class StudentActivity
     public function forStudent(User $user): array
     {
         $courses = $user->enrolledCourses()
-            ->where('status', 'active')
+            ->where('courses.status', 'active')
             ->get(['courses.id', 'courses.name']);
         $courseIds = $courses->pluck('id');
 

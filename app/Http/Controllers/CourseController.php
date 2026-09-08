@@ -86,7 +86,7 @@ class CourseController extends Controller
         }
 
         $courses = $user->enrolledCourses()
-            ->where('status', Course::STATUS_ACTIVE)
+            ->where('courses.status', Course::STATUS_ACTIVE)
             ->with('lecturer')
             ->withCount('meetings')
             ->get();
