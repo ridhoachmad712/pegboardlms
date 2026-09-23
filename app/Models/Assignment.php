@@ -9,20 +9,28 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'course_id', 'meeting_id', 'grade_component_id', 'title', 'description',
-    'type', 'mode', 'group_max', 'submission_mode', 'deadline', 'max_score', 'duration_minutes', 'published',
+    'type', 'delivery_mode', 'external_url', 'mode', 'group_max', 'submission_mode', 'deadline', 'max_score', 'duration_minutes', 'published',
 ])]
 class Assignment extends Model
 {
     public const TYPE_TUGAS = 'tugas';
+
     public const TYPE_KUIS = 'kuis';
+
+    public const DELIVERY_INTERNAL = 'internal';
+
+    public const DELIVERY_EXTERNAL = 'external';
 
     /** Bentuk pengerjaan tugas. */
     public const MODE_INDIVIDU = 'individu';
+
     public const MODE_KELOMPOK = 'kelompok';
 
     /** Bentuk jawaban tugas. */
     public const SUBMISSION_FILE = 'file';
+
     public const SUBMISSION_TEXT = 'text';
+
     public const SUBMISSION_BOTH = 'both';
 
     public const SUBMISSION_MODES = [
@@ -113,6 +121,16 @@ class Assignment extends Model
     public function isQuiz(): bool
     {
         return $this->type === self::TYPE_KUIS;
+    }
+
+    public function isExternalQuiz(): bool
+    {
+        return $this->isQuiz() && $this->delivery_mode === self::DELIVERY_EXTERNAL;
+    }
+
+    public function isInternalQuiz(): bool
+    {
+        return $this->isQuiz() && ! $this->isExternalQuiz();
     }
 
     /** Apakah tugas ini dinilai dengan rubrik (punya kriteria). */

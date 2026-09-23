@@ -112,7 +112,7 @@ class AiController extends Controller
     {
         $assignment->load('course');
         $this->ensureCourseOwner($request, $assignment->course);
-        abort_unless($assignment->isQuiz(), 404);
+        abort_unless($assignment->isInternalQuiz(), 404);
 
         if (config('demo.enabled')) {
             $count = max(1, min(10, (int) $request->input('count', 3)));
@@ -182,7 +182,7 @@ class AiController extends Controller
             ."• Materi ini membahas konsep dasar beserta penerapannya dalam studi kasus nyata.\n"
             ."• Poin penting: definisi, tujuan, serta langkah-langkah penerapan di lapangan.\n"
             ."• Mahasiswa diharapkan mampu menjelaskan konsep dan menganalisis contoh kasus.\n\n"
-            ."Catatan: ini hasil contoh pada mode demo. Pada aplikasi penuh, ringkasan dibuat otomatis dari isi PDF oleh AI.";
+            .'Catatan: ini hasil contoh pada mode demo. Pada aplikasi penuh, ringkasan dibuat otomatis dari isi PDF oleh AI.';
     }
 
     private function demoMaterial(string $topic): string
@@ -200,7 +200,7 @@ class AiController extends Controller
             ."3. Contoh penerapan serta studi kasus.\n\n"
             ."## Rangkuman\n"
             ."{$topic} merupakan pokok bahasan penting yang menjadi dasar bagi materi berikutnya.\n\n"
-            ."> Catatan: ini materi contoh pada mode demo. Pada aplikasi penuh, materi dibuat otomatis oleh AI sesuai RPS & materi sumber.";
+            .'> Catatan: ini materi contoh pada mode demo. Pada aplikasi penuh, materi dibuat otomatis oleh AI sesuai RPS & materi sumber.';
     }
 
     /** @return array<int, array{question:string, options:array<string,string>, correct_answer:string, points:int}> */
@@ -240,7 +240,7 @@ class AiController extends Controller
             return null;
         }
 
-        $parser = new Parser();
+        $parser = new Parser;
         $pdf = $parser->parseFile($fullPath);
 
         return $pdf->getText();

@@ -3,23 +3,23 @@
 use App\Http\Controllers\Admin\ActivityController as AdminActivityController;
 use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\LecturerController as AdminLecturerController;
 use App\Http\Controllers\Admin\SemesterController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\StudentController as AdminStudentController;
-use App\Http\Controllers\Admin\LecturerController as AdminLecturerController;
 use App\Http\Controllers\AiController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AnnouncementController;
-use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\AssignmentGroupController;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\Auth\ActivationController;
+use App\Http\Controllers\Auth\LecturerPasswordController;
+use App\Http\Controllers\Auth\LecturerRegisterController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\Auth\LecturerRegisterController;
-use App\Http\Controllers\Auth\LecturerPasswordController;
-use App\Http\Controllers\Auth\ActivationController;
+use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EnrollmentController;
@@ -34,8 +34,8 @@ use App\Http\Controllers\QuizController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RubricController;
 use App\Http\Controllers\SearchController;
-use App\Http\Controllers\SubmissionController;
 use App\Http\Controllers\StudentActivityController;
+use App\Http\Controllers\SubmissionController;
 use App\Http\Controllers\SyllabusController;
 use Illuminate\Support\Facades\Route;
 
@@ -218,6 +218,7 @@ Route::middleware(['auth', 'lecturer.active'])->group(function () {
         Route::put('/quiz-questions/{question}', [QuizController::class, 'updateQuestion'])->name('quizzes.questions.update');
         Route::delete('/quiz-questions/{question}', [QuizController::class, 'destroyQuestion'])->name('quizzes.questions.destroy');
         Route::post('/submissions/{submission}/grade-essays', [QuizController::class, 'gradeEssays'])->name('quizzes.gradeEssays');
+        Route::post('/assignments/{assignment}/external-scores', [QuizController::class, 'saveExternalScores'])->name('quizzes.externalScores');
 
         // Komponen nilai + input nilai manual
         Route::post('/courses/{course}/grades/manual', [GradeController::class, 'saveManual'])->name('grades.saveManual');

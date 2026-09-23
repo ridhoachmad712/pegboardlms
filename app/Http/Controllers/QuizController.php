@@ -4,10 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\ChecksCourseAccess;
 use App\Models\Assignment;
+use App\Models\Material;
 use App\Models\QuizQuestion;
 use App\Models\Submission;
+use App\Services\AiService;
+use App\Services\Notifier;
+use App\Support\Grades;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class QuizController extends Controller
@@ -19,17 +25,17 @@ class QuizController extends Controller
     public function questions(Request $request, Assignment $assignment): View
     {
         $this->ensureCourseOwner($request, $assignment->course);
-        abort_unless($assignment->isQuiz(), 404);
+        abort_unless($assignment->isInternalQuiz(), 404);
 
         $assignment->load('questions');
 
         // Materi PDF di kelas yang sama (untuk generate soal AI)
-        $pdfMaterials = \App\Models\Material::whereHas('meeting', fn ($q) => $q->where('course_id', $assignment->course_id))
+        $pdfMaterials = Material::whereHas('meeting', fn ($q) => $q->where('course_id', $assignment->course_id))
             ->where('type', 'file')
             ->where('path', 'like', '%.pdf')
             ->get(['id', 'title']);
 
-        $aiEnabled = app(\App\Services\AiService::class)->isConfigured();
+        $aiEnabled = app(AiService::class)->isConfigured();
 
         return view('quizzes.questions', compact('assignment', 'pdfMaterials', 'aiEnabled'));
     }
@@ -37,7 +43,7 @@ class QuizController extends Controller
     public function storeQuestion(Request $request, Assignment $assignment): RedirectResponse
     {
         $this->ensureCourseOwner($request, $assignment->course);
-        abort_unless($assignment->isQuiz(), 404);
+        abort_unless($assignment->isInternalQuiz(), 404);
 
         $data = $request->validate([
             'type' => ['required', 'in:pg,essay'],
@@ -59,7 +65,7 @@ class QuizController extends Controller
             $options = array_filter($data['options'], fn ($o) => trim((string) $o) !== '');
 
             if (count($options) < 2 || ! array_key_exists($data['correct_answer'], $options)) {
-                throw \Illuminate\Validation\ValidationException::withMessages([
+                throw ValidationException::withMessages([
                     'options' => 'Isi minimal 2 opsi dan pastikan opsi jawaban benar terisi.',
                 ]);
             }
@@ -76,6 +82,7 @@ class QuizController extends Controller
     public function updateQuestion(Request $request, QuizQuestion $question): RedirectResponse
     {
         $this->ensureCourseOwner($request, $question->assignment->course);
+        abort_unless($question->assignment->isInternalQuiz(), 404);
 
         $data = $request->validate([
             'type' => ['required', 'in:pg,essay'],
@@ -97,7 +104,7 @@ class QuizController extends Controller
         if ($data['type'] === QuizQuestion::TYPE_PG) {
             $options = array_filter($data['options'], fn ($o) => trim((string) $o) !== '');
             if (count($options) < 2 || ! array_key_exists($data['correct_answer'], $options)) {
-                throw \Illuminate\Validation\ValidationException::withMessages([
+                throw ValidationException::withMessages([
                     'options' => 'Isi minimal 2 opsi dan pastikan opsi jawaban benar terisi.',
                 ]);
             }
@@ -113,6 +120,7 @@ class QuizController extends Controller
     public function destroyQuestion(Request $request, QuizQuestion $question): RedirectResponse
     {
         $this->ensureCourseOwner($request, $question->assignment->course);
+        abort_unless($question->assignment->isInternalQuiz(), 404);
         $question->delete();
 
         return back()->with('status', 'Soal dihapus.');
@@ -122,7 +130,7 @@ class QuizController extends Controller
     public function exportQuestions(Request $request, Assignment $assignment)
     {
         $this->ensureCourseOwner($request, $assignment->course);
-        abort_unless($assignment->isQuiz(), 404);
+        abort_unless($assignment->isInternalQuiz(), 404);
 
         $assignment->load('questions');
 
@@ -138,7 +146,7 @@ class QuizController extends Controller
             ])->values(),
         ];
 
-        $name = 'soal-'.\Illuminate\Support\Str::slug($assignment->title).'.json';
+        $name = 'soal-'.Str::slug($assignment->title).'.json';
 
         return response()->json($payload, 200, [
             'Content-Disposition' => 'attachment; filename="'.$name.'"',
@@ -149,7 +157,7 @@ class QuizController extends Controller
     public function importQuestions(Request $request, Assignment $assignment): RedirectResponse
     {
         $this->ensureCourseOwner($request, $assignment->course);
-        abort_unless($assignment->isQuiz(), 404);
+        abort_unless($assignment->isInternalQuiz(), 404);
 
         $request->validate(['file' => ['required', 'file', 'mimes:json,txt', 'max:1024']]);
 
@@ -212,7 +220,7 @@ class QuizController extends Controller
         $this->ensureCourseAccess($request, $assignment->course);
         $user = $request->user();
         abort_unless($user->isMahasiswa(), 403);
-        abort_unless($assignment->isQuiz(), 404);
+        abort_unless($assignment->isInternalQuiz(), 404);
         abort_if($assignment->questions->isEmpty(), 404, 'Kuis belum memiliki soal.');
 
         $submission = $assignment->submissionFor($user);
@@ -244,6 +252,7 @@ class QuizController extends Controller
         $this->ensureCourseAccess($request, $assignment->course);
         $user = $request->user();
         abort_unless($user->isMahasiswa(), 403);
+        abort_unless($assignment->isInternalQuiz(), 404);
 
         $submission = $assignment->submissionFor($user);
         abort_if(! $submission, 404);
@@ -276,6 +285,7 @@ class QuizController extends Controller
     {
         $submission->load(['assignment.course', 'assignment.questions', 'answers']);
         $assignment = $submission->assignment;
+        abort_unless($assignment->isInternalQuiz(), 404);
 
         $user = $request->user();
         $isOwnerStudent = $submission->user_id === $user->id;
@@ -292,6 +302,7 @@ class QuizController extends Controller
     {
         $submission->load('assignment.course', 'assignment.questions');
         $this->ensureCourseOwner($request, $submission->assignment->course);
+        abort_unless($submission->assignment->isInternalQuiz(), 404);
 
         $scores = $request->input('scores', []); // [answer_id => score]
 
@@ -305,6 +316,57 @@ class QuizController extends Controller
         $this->recalculateScore($submission->fresh('answers'), $submission->assignment);
 
         return back()->with('status', 'Nilai esai tersimpan.');
+    }
+
+    /** Simpan nilai peserta untuk kuis yang dikerjakan di platform eksternal. */
+    public function saveExternalScores(Request $request, Assignment $assignment): RedirectResponse
+    {
+        $assignment->load('course');
+        $this->ensureCourseOwner($request, $assignment->course);
+        abort_unless($assignment->isExternalQuiz(), 404);
+
+        $data = $request->validate([
+            'scores' => ['nullable', 'array'],
+            'scores.*' => ['nullable', 'numeric', 'min:0', 'max:'.$assignment->max_score],
+        ], [
+            'scores.*.max' => 'Nilai tidak boleh melebihi nilai maksimal kuis ('.$assignment->max_score.').',
+        ]);
+
+        $studentIds = $assignment->course->students()->pluck('users.id')->map(fn ($id) => (int) $id)->all();
+
+        foreach (($data['scores'] ?? []) as $userId => $value) {
+            $userId = (int) $userId;
+            if (! in_array($userId, $studentIds, true)) {
+                continue;
+            }
+
+            if ($value === null || $value === '') {
+                $assignment->submissions()->where('user_id', $userId)->delete();
+
+                continue;
+            }
+
+            $submission = $assignment->submissions()->firstOrNew(['user_id' => $userId]);
+            $oldScore = $submission->exists ? (float) $submission->score : null;
+            $newScore = (float) $value;
+            $submission->fill([
+                'score' => $newScore,
+                'status' => 'ontime',
+                'submitted_at' => $submission->submitted_at ?? now(),
+            ])->save();
+
+            if ($oldScore === null || $oldScore !== $newScore) {
+                Notifier::toUser(
+                    $userId,
+                    'grade',
+                    'Nilai kuis tersedia',
+                    $assignment->title.' telah dinilai: '.Grades::num($newScore),
+                    route('assignments.show', $assignment),
+                );
+            }
+        }
+
+        return back()->with('status', 'Nilai kuis eksternal tersimpan.');
     }
 
     /** Hitung skor akhir submission = (poin diperoleh / total poin) * max_score. */

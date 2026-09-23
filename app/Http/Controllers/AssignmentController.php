@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class AssignmentController extends Controller
@@ -66,9 +67,14 @@ class AssignmentController extends Controller
         $data = $this->validateData($request, $course);
         $assignment = $course->assignments()->create($data);
 
-        if ($assignment->isQuiz()) {
+        if ($assignment->isInternalQuiz()) {
             return redirect()->route('quizzes.questions', $assignment)
                 ->with('status', 'Kuis dibuat. Tambahkan soal sekarang.');
+        }
+
+        if ($assignment->isExternalQuiz()) {
+            return redirect()->route('assignments.show', $assignment)
+                ->with('status', 'Kuis eksternal dibuat. Nilai peserta dapat diinput dari halaman ini.');
         }
 
         return redirect()->route('assignments.show', $assignment)
@@ -108,7 +114,7 @@ class AssignmentController extends Controller
     {
         $this->ensureCourseOwner($request, $assignment->course);
 
-        $assignment->update($this->validateData($request, $assignment->course));
+        $assignment->update($this->validateData($request, $assignment->course, $assignment));
 
         return redirect()->route('assignments.show', $assignment)
             ->with('status', 'Berhasil diperbarui.');
@@ -207,6 +213,19 @@ class AssignmentController extends Controller
     {
         $user = $request->user();
 
+        if ($assignment->isExternalQuiz()) {
+            if ($user->isDosen()) {
+                $assignment->load('course.students');
+                $submissions = $assignment->submissions()->get()->keyBy('user_id');
+
+                return view('quizzes.show-external-dosen', compact('assignment', 'submissions'));
+            }
+
+            $submission = $assignment->submissionFor($user);
+
+            return view('quizzes.show-external-mahasiswa', compact('assignment', 'submission'));
+        }
+
         if ($user->isDosen()) {
             $assignment->loadCount('questions', 'submissions');
             $submissions = $assignment->submissions()->with('student')->get()->sortBy('student.name');
@@ -219,8 +238,13 @@ class AssignmentController extends Controller
         return view('quizzes.show-mahasiswa', compact('assignment', 'submission'));
     }
 
-    private function validateData(Request $request, Course $course): array
+    private function validateData(Request $request, Course $course, ?Assignment $assignment = null): array
     {
+        if ($request->input('type') === Assignment::TYPE_KUIS && ! $request->filled('delivery_mode')) {
+            // Permintaan dari form/klien lama tetap membuat kuis internal.
+            $request->merge(['delivery_mode' => Assignment::DELIVERY_INTERNAL]);
+        }
+
         $rules = [
             'meeting_id' => ['required', 'integer', Rule::exists('meetings', 'id')->where('course_id', $course->id)],
             'title' => ['required', 'string', 'max:255'],
@@ -228,9 +252,20 @@ class AssignmentController extends Controller
             'type' => ['required', 'in:tugas,kuis'],
             'deadline' => ['nullable', 'date'],
             'max_score' => ['required', 'integer', 'min:1', 'max:1000'],
-            'grade_component_id' => ['nullable', 'integer', 'exists:grade_components,id'],
+            'grade_component_id' => ['nullable', 'integer', Rule::exists('grade_components', 'id')->where('course_id', $course->id)],
             'duration_minutes' => ['nullable', 'integer', 'min:1', 'max:600'],
         ];
+
+        if ($request->input('type') === Assignment::TYPE_KUIS) {
+            $rules['delivery_mode'] = ['required', Rule::in([Assignment::DELIVERY_INTERNAL, Assignment::DELIVERY_EXTERNAL])];
+            $rules['external_url'] = [
+                'nullable',
+                'required_if:delivery_mode,'.Assignment::DELIVERY_EXTERNAL,
+                'url',
+                'max:2048',
+                'starts_with:http://,https://',
+            ];
+        }
 
         // Bentuk jawaban & bentuk pengerjaan hanya untuk tugas (kuis punya alur soal sendiri).
         if ($request->input('type') !== Assignment::TYPE_KUIS) {
@@ -244,6 +279,24 @@ class AssignmentController extends Controller
         if (($data['type'] ?? null) === Assignment::TYPE_KUIS) {
             $data['submission_mode'] = Assignment::SUBMISSION_FILE;
             $data['mode'] = Assignment::MODE_INDIVIDU; // kuis selalu individu
+
+            if (($data['delivery_mode'] ?? Assignment::DELIVERY_INTERNAL) === Assignment::DELIVERY_EXTERNAL) {
+                $data['duration_minutes'] = null;
+            } else {
+                $data['external_url'] = null;
+            }
+        } else {
+            $data['delivery_mode'] = Assignment::DELIVERY_INTERNAL;
+            $data['external_url'] = null;
+        }
+
+        if ($assignment
+            && $assignment->isQuiz()
+            && $assignment->delivery_mode !== ($data['delivery_mode'] ?? Assignment::DELIVERY_INTERNAL)
+            && ($assignment->questions()->exists() || $assignment->submissions()->exists())) {
+            throw ValidationException::withMessages([
+                'delivery_mode' => 'Metode kuis tidak dapat diubah setelah soal atau hasil peserta tersimpan.',
+            ]);
         }
 
         if (($data['mode'] ?? Assignment::MODE_INDIVIDU) !== Assignment::MODE_KELOMPOK) {

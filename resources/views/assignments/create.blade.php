@@ -14,7 +14,7 @@
             </div>
             <div class="card-footer text-end">
                 <a href="{{ route('courses.show', $course) }}" class="btn btn-link">Batal</a>
-                <button class="btn btn-primary"><i class="ti ti-check me-1"></i>{{ $type === 'kuis' ? 'Lanjut: Tambah Soal' : 'Simpan' }}</button>
+                <button class="btn btn-primary"><i class="ti ti-check me-1"></i>{{ $type === 'kuis' ? 'Simpan Kuis' : 'Simpan' }}</button>
             </div>
         </form>
     </div>

@@ -55,7 +55,7 @@
                                         <div class="min-w-0 flex-fill">
                                             <div class="d-flex align-items-start gap-1"><span class="fw-bold line-clamp-2">{{ $a->title }}</span>@if($a->isGroup())<i class="ti ti-users text-secondary flex-shrink-0 mt-1" title="Tugas kelompok" aria-label="Tugas kelompok"></i>@endif</div>
                                             <div class="d-flex flex-wrap align-items-center gap-1 mt-1">
-                                                <span class="badge bg-{{ $a->isQuiz() ? 'purple' : 'blue' }}-lt">{{ $a->isQuiz() ? 'Kuis' : 'Tugas' }}</span>
+                                                <span class="badge bg-{{ $a->isQuiz() ? 'purple' : 'blue' }}-lt">{{ $a->isExternalQuiz() ? 'Kuis eksternal' : ($a->isQuiz() ? 'Kuis' : 'Tugas') }}</span>
                                                 <x-learning-status :status="$learningStatus" :score="$sub?->score" />
                                             </div>
                                             <div class="text-secondary small mt-1">
@@ -87,7 +87,7 @@
                             <div class="flex-fill">
                                 <div class="d-flex">
                                     <a href="{{ route('assignments.show', $a) }}" class="fw-bold text-reset">{{ $a->title }}</a>
-                                    <span class="badge bg-{{ $a->isQuiz() ? 'purple' : 'blue' }}-lt ms-auto text-uppercase">{{ $a->type }}</span>
+                                    <span class="badge bg-{{ $a->isQuiz() ? 'purple' : 'blue' }}-lt ms-auto">{{ $a->isExternalQuiz() ? 'Kuis eksternal' : ucfirst($a->type) }}</span>
                                 </div>
                                 <div class="mt-1 d-flex align-items-center gap-2">
                                     <x-due :date="$a->deadline" />
@@ -95,7 +95,7 @@
                                 </div>
                                 <div class="mt-2">
                                     @if (auth()->user()->isDosen() && ! $course->isCompleted())
-                                        <span class="text-secondary small"><i class="ti ti-users"></i> {{ $a->submissions_count }} pengumpulan</span>
+                                        <span class="text-secondary small"><i class="ti ti-users"></i> {{ $a->submissions_count }} {{ $a->isExternalQuiz() ? 'nilai diinput' : 'pengumpulan' }}</span>
                                     @else
                                         @php($learningStatus = $sub?->isGraded() ? 'graded' : ($sub?->submitted_at ? ($sub->isLate() ? 'late' : 'submitted') : ($a->isPastDeadline() ? 'overdue' : 'not_started')))
                                         <x-learning-status :status="$learningStatus" :score="$sub?->score" />

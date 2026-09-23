@@ -1,5 +1,7 @@
 <input type="hidden" name="type" value="{{ $type }}">
 
+<div x-data="{ deliveryMode: '{{ old('delivery_mode', $assignment->delivery_mode ?? \App\Models\Assignment::DELIVERY_INTERNAL) }}' }">
+
 <div class="mb-3">
     <label class="form-label required">Pertemuan</label>
     <select name="meeting_id" class="form-select @error('meeting_id') is-invalid @enderror" required>
@@ -20,6 +22,44 @@
            value="{{ old('title', $assignment->title ?? '') }}" required>
     @error('title')<div class="invalid-feedback">{{ $message }}</div>@enderror
 </div>
+
+@if ($type === 'kuis')
+    <div class="mb-3">
+        <label class="form-label required">Metode Kuis</label>
+        <div class="row g-2">
+            <div class="col-md-6">
+                <label class="form-selectgroup-item w-100">
+                    <input type="radio" name="delivery_mode" value="internal" class="form-selectgroup-input"
+                           x-model="deliveryMode" @checked(old('delivery_mode', $assignment->delivery_mode ?? 'internal') === 'internal')>
+                    <span class="form-selectgroup-label d-flex align-items-start gap-2 h-100">
+                        <i class="ti ti-device-laptop fs-2 text-primary"></i>
+                        <span><strong class="d-block">Di LMS</strong><span class="small text-secondary">Soal dan pengerjaan dikelola di sini.</span></span>
+                    </span>
+                </label>
+            </div>
+            <div class="col-md-6">
+                <label class="form-selectgroup-item w-100">
+                    <input type="radio" name="delivery_mode" value="external" class="form-selectgroup-input"
+                           x-model="deliveryMode" @checked(old('delivery_mode', $assignment->delivery_mode ?? 'internal') === 'external')>
+                    <span class="form-selectgroup-label d-flex align-items-start gap-2 h-100">
+                        <i class="ti ti-external-link fs-2 text-purple"></i>
+                        <span><strong class="d-block">Platform eksternal</strong><span class="small text-secondary">Wayground, Google Forms, atau platform lain.</span></span>
+                    </span>
+                </label>
+            </div>
+        </div>
+        @error('delivery_mode')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+    </div>
+
+    <div class="mb-3" x-show="deliveryMode === 'external'" x-cloak>
+        <label class="form-label required">Tautan Kuis</label>
+        <input type="url" name="external_url" class="form-control @error('external_url') is-invalid @enderror"
+               value="{{ old('external_url', $assignment->external_url ?? '') }}" placeholder="https://wayground.com/..."
+               :required="deliveryMode === 'external'">
+        @error('external_url')<div class="invalid-feedback">{{ $message }}</div>@enderror
+        <small class="form-hint">Mahasiswa akan membuka kuis melalui tautan ini. Nilainya diinput dosen setelah kuis selesai.</small>
+    </div>
+@endif
 
 <div class="mb-3">
     <label class="form-label">Instruksi / Deskripsi</label>
@@ -76,7 +116,7 @@
     </div>
 
     @if ($type === 'kuis')
-        <div class="col-md-6 mb-3">
+        <div class="col-md-6 mb-3" x-show="deliveryMode === 'internal'" x-cloak>
             <label class="form-label">Durasi Pengerjaan (menit)</label>
             <input type="number" name="duration_minutes" class="form-control @error('duration_minutes') is-invalid @enderror"
                    value="{{ old('duration_minutes', $assignment->duration_minutes ?? '') }}" min="1" max="600"
@@ -98,4 +138,5 @@
         @error('grade_component_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
         <small class="form-hint">Kaitkan agar nilai masuk ke rekap otomatis.</small>
     </div>
+</div>
 </div>
