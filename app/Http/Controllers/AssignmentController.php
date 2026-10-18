@@ -8,9 +8,13 @@ use App\Models\Course;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AssignmentController extends Controller
 {
@@ -65,7 +69,23 @@ class AssignmentController extends Controller
         $this->ensureCourseOwner($request, $course);
 
         $data = $this->validateData($request, $course);
-        $assignment = $course->assignments()->create($data);
+        $newPath = null;
+
+        if (($data['type'] ?? null) === Assignment::TYPE_TUGAS && $request->hasFile('instruction_file')) {
+            $file = $request->file('instruction_file');
+            $newPath = $file->store('assignment-instructions/'.$course->id, 'local');
+            $data = array_merge($data, $this->instructionFileData($file, $newPath));
+        }
+
+        try {
+            $assignment = $course->assignments()->create($data);
+        } catch (\Throwable $exception) {
+            if ($newPath) {
+                Storage::disk('local')->delete($newPath);
+            }
+
+            throw $exception;
+        }
 
         if ($assignment->isInternalQuiz()) {
             return redirect()->route('quizzes.questions', $assignment)
@@ -114,7 +134,38 @@ class AssignmentController extends Controller
     {
         $this->ensureCourseOwner($request, $assignment->course);
 
-        $assignment->update($this->validateData($request, $assignment->course, $assignment));
+        $data = $this->validateData($request, $assignment->course, $assignment);
+        $oldPath = $assignment->instruction_file_path;
+        $newPath = null;
+        $shouldRemoveInstruction = ($data['type'] ?? null) !== Assignment::TYPE_TUGAS
+            || $request->boolean('remove_instruction_file');
+
+        if (($data['type'] ?? null) === Assignment::TYPE_TUGAS && $request->hasFile('instruction_file')) {
+            $file = $request->file('instruction_file');
+            $newPath = $file->store('assignment-instructions/'.$assignment->course_id, 'local');
+            $data = array_merge($data, $this->instructionFileData($file, $newPath));
+        } elseif ($shouldRemoveInstruction) {
+            $data = array_merge($data, [
+                'instruction_file_path' => null,
+                'instruction_file_name' => null,
+                'instruction_file_mime' => null,
+                'instruction_file_size' => null,
+            ]);
+        }
+
+        try {
+            $assignment->update($data);
+        } catch (\Throwable $exception) {
+            if ($newPath) {
+                Storage::disk('local')->delete($newPath);
+            }
+
+            throw $exception;
+        }
+
+        if ($oldPath && ($newPath || $shouldRemoveInstruction)) {
+            Storage::disk('local')->delete($oldPath);
+        }
 
         return redirect()->route('assignments.show', $assignment)
             ->with('status', 'Berhasil diperbarui.');
@@ -128,6 +179,25 @@ class AssignmentController extends Controller
 
         return redirect()->route('courses.show', $course)
             ->with('status', 'Berhasil dihapus.');
+    }
+
+    public function downloadInstruction(Request $request, Assignment $assignment): StreamedResponse
+    {
+        $assignment->load('course');
+        $this->ensureCourseAccess($request, $assignment->course);
+        abort_unless($assignment->hasInstructionFile(), 404);
+
+        $disk = Storage::disk('local');
+        abort_unless($disk->exists($assignment->instruction_file_path), 404, 'Berkas instruksi tidak ditemukan.');
+
+        return $disk->download(
+            $assignment->instruction_file_path,
+            $assignment->instruction_file_name ?: 'instruksi-'.Str::slug($assignment->title),
+            [
+                'Content-Type' => $assignment->instruction_file_mime ?: 'application/octet-stream',
+                'Cache-Control' => 'private, no-store',
+            ],
+        );
     }
 
     // --- helpers ---
@@ -272,9 +342,23 @@ class AssignmentController extends Controller
             $rules['submission_mode'] = ['required', Rule::in(array_keys(Assignment::SUBMISSION_MODES))];
             $rules['mode'] = ['required', 'in:individu,kelompok'];
             $rules['group_max'] = ['nullable', 'integer', 'min:2', 'max:20', 'required_if:mode,kelompok'];
+            $rules['instruction_file'] = [
+                'nullable', 'file', 'max:20480',
+                'mimes:pdf,doc,docx,ppt,pptx,xls,xlsx,csv,txt,jpg,jpeg,png,zip',
+            ];
+            $rules['remove_instruction_file'] = ['nullable', 'boolean'];
+        } else {
+            $rules['instruction_file'] = ['prohibited'];
+            $rules['remove_instruction_file'] = ['prohibited'];
         }
 
-        $data = $request->validate($rules);
+        $data = $request->validate($rules, [
+            'instruction_file.mimes' => 'Format lampiran harus PDF, Word, PowerPoint, Excel, CSV, TXT, gambar JPG/PNG, atau ZIP.',
+            'instruction_file.max' => 'Ukuran lampiran instruksi maksimal 20 MB.',
+            'instruction_file.prohibited' => 'Lampiran instruksi hanya tersedia untuk tugas, bukan kuis.',
+            'remove_instruction_file.prohibited' => 'Lampiran instruksi hanya tersedia untuk tugas, bukan kuis.',
+        ]);
+        unset($data['instruction_file'], $data['remove_instruction_file']);
 
         if (($data['type'] ?? null) === Assignment::TYPE_KUIS) {
             $data['submission_mode'] = Assignment::SUBMISSION_FILE;
@@ -304,5 +388,18 @@ class AssignmentController extends Controller
         }
 
         return $data;
+    }
+
+    private function instructionFileData(UploadedFile $file, string $path): array
+    {
+        $name = basename(str_replace('\\', '/', $file->getClientOriginalName()));
+        $name = preg_replace('/[\x00-\x1F\x7F]/u', '', $name) ?: 'lampiran-instruksi';
+
+        return [
+            'instruction_file_path' => $path,
+            'instruction_file_name' => Str::limit($name, 255, ''),
+            'instruction_file_mime' => Str::limit((string) $file->getMimeType(), 255, ''),
+            'instruction_file_size' => $file->getSize(),
+        ];
     }
 }

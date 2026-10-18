@@ -46,8 +46,17 @@
                     <hr>
                     <div class="text-secondary small mb-1">Instruksi</div>
                     <div class="assignment-instructions content-prose" style="white-space:pre-line">{{ $assignment->description }}</div>
-                @else
+                @elseif (! $assignment->hasInstructionFile())
                     <div class="text-secondary">Tidak ada instruksi tambahan dari dosen.</div>
+                @endif
+                @if ($assignment->hasInstructionFile())
+                    <div class="{{ $assignment->description ? 'mt-3' : '' }}">
+                        <a href="{{ route('assignments.instruction.download', $assignment) }}" class="list-group-item list-group-item-action border rounded d-flex align-items-center gap-2 py-2 px-3">
+                            <span class="avatar avatar-sm bg-blue-lt"><i class="ti ti-file-download" aria-hidden="true"></i></span>
+                            <span class="flex-fill min-w-0"><span class="d-block fw-semibold text-truncate">{{ $assignment->instruction_file_name }}</span><span class="d-block small text-secondary">Lampiran instruksi{{ $assignment->instructionFileSizeLabel() ? ' · '.$assignment->instructionFileSizeLabel() : '' }}</span></span>
+                            <i class="ti ti-download text-secondary" aria-hidden="true"></i>
+                        </a>
+                    </div>
                 @endif
             </div>
         </div>

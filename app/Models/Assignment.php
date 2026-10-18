@@ -6,9 +6,11 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 #[Fillable([
     'course_id', 'meeting_id', 'grade_component_id', 'title', 'description',
+    'instruction_file_path', 'instruction_file_name', 'instruction_file_mime', 'instruction_file_size',
     'type', 'delivery_mode', 'external_url', 'mode', 'group_max', 'submission_mode', 'deadline', 'max_score', 'duration_minutes', 'published',
 ])]
 class Assignment extends Model
@@ -57,6 +59,7 @@ class Assignment extends Model
             'deadline' => 'datetime',
             'published' => 'boolean',
             'group_max' => 'integer',
+            'instruction_file_size' => 'integer',
         ];
     }
 
@@ -65,7 +68,28 @@ class Assignment extends Model
     {
         static::deleting(function (Assignment $assignment) {
             $assignment->groups()->get()->each->delete();
+            if ($assignment->instruction_file_path) {
+                Storage::disk('local')->delete($assignment->instruction_file_path);
+            }
         });
+    }
+
+    public function hasInstructionFile(): bool
+    {
+        return filled($this->instruction_file_path);
+    }
+
+    public function instructionFileSizeLabel(): ?string
+    {
+        if (! $this->instruction_file_size) {
+            return null;
+        }
+
+        $kilobytes = $this->instruction_file_size / 1024;
+
+        return $kilobytes >= 1024
+            ? number_format($kilobytes / 1024, 1, ',', '.').' MB'
+            : number_format($kilobytes, 0, ',', '.').' KB';
     }
 
     /** Tugas dikerjakan berkelompok (bukan individu). */

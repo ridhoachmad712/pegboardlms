@@ -63,10 +63,38 @@
 
 <div class="mb-3">
     <label class="form-label">Instruksi / Deskripsi</label>
-    <textarea name="description" class="form-control" rows="4">{{ old('description', $assignment->description ?? '') }}</textarea>
+    <textarea name="description" class="form-control @error('description') is-invalid @enderror" rows="4">{{ old('description', $assignment->description ?? '') }}</textarea>
+    @error('description')<div class="invalid-feedback">{{ $message }}</div>@enderror
 </div>
 
 @if ($type !== 'kuis')
+    <div class="mb-3" x-data="{ fileName: '' }">
+        <label for="instruction-file" class="form-label">Lampiran Instruksi <span class="text-secondary">(opsional)</span></label>
+        @if(isset($assignment) && $assignment->hasInstructionFile())
+            <div class="list-group mb-2">
+                <a href="{{ route('assignments.instruction.download', $assignment) }}" class="list-group-item list-group-item-action d-flex align-items-center gap-2 py-2">
+                    <span class="avatar avatar-sm bg-blue-lt"><i class="ti ti-file-download" aria-hidden="true"></i></span>
+                    <span class="flex-fill min-w-0">
+                        <span class="d-block fw-semibold text-truncate">{{ $assignment->instruction_file_name }}</span>
+                        <span class="d-block text-secondary small">{{ $assignment->instructionFileSizeLabel() ?: 'Berkas instruksi' }} · ketuk untuk mengunduh</span>
+                    </span>
+                    <i class="ti ti-download text-secondary" aria-hidden="true"></i>
+                </a>
+            </div>
+            <label class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" name="remove_instruction_file" value="1" @checked(old('remove_instruction_file'))>
+                <span class="form-check-label">Hapus lampiran saat disimpan</span>
+            </label>
+        @endif
+        <input id="instruction-file" type="file" name="instruction_file"
+               accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.csv,.txt,.jpg,.jpeg,.png,.zip"
+               class="form-control @error('instruction_file') is-invalid @enderror"
+               @change="fileName = $event.target.files[0]?.name || ''">
+        @error('instruction_file')<div class="invalid-feedback">{{ $message }}</div>@enderror
+        <div x-show="fileName" x-cloak class="small text-blue mt-2"><i class="ti ti-file-check me-1" aria-hidden="true"></i><span x-text="fileName"></span></div>
+        <small class="form-hint">PDF, Word, PowerPoint, Excel, CSV, TXT, JPG/PNG, atau ZIP. Maksimal 20 MB. File baru akan mengganti lampiran lama.</small>
+    </div>
+
     <div class="mb-3">
         <label class="form-label required">Bentuk Jawaban</label>
         <select name="submission_mode" class="form-select @error('submission_mode') is-invalid @enderror">

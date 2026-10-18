@@ -116,6 +116,7 @@ Route::middleware(['auth', 'lecturer.active'])->group(function () {
 
     // ===== Tugas & Kuis (kedua role; otorisasi di controller) =====
     Route::get('/courses/{course}/assignments', [AssignmentController::class, 'index'])->name('assignments.index');
+    Route::get('/assignments/{assignment}/instruction-file', [AssignmentController::class, 'downloadInstruction'])->name('assignments.instruction.download');
     Route::get('/assignments/{assignment}', [AssignmentController::class, 'show'])->name('assignments.show');
     Route::post('/assignments/{assignment}/submit', [SubmissionController::class, 'store'])
         ->middleware('throttle:20,1')->name('submissions.store');

@@ -7,7 +7,7 @@
 @section('content')
 <div class="row justify-content-center">
     <div class="col-lg-8">
-        <form class="card" method="POST" data-warn-unsaved action="{{ route('assignments.update', $assignment) }}">
+        <form class="card" method="POST" enctype="multipart/form-data" data-warn-unsaved action="{{ route('assignments.update', $assignment) }}">
             @csrf @method('PUT')
             <div class="card-body">
                 @include('assignments._form-fields')

@@ -93,6 +93,10 @@ LICENSING_SUPPORT_EMAIL=admin@example.com
 
 Gunakan alamat bantuan yang sebenarnya, atau kosongkan untuk menyembunyikan tautan email. Jika menggunakan cache konfigurasi, bangun ulang dengan `php artisan config:cache` setelah perubahan `.env`. Mode demo menonaktifkan pendaftaran dosen dan penerbitan kode. Data kelas tetap dimiliki dosen masing-masing; pengaturan aplikasi, backup, dan pengelolaan akun mahasiswa global hanya untuk admin.
 
+### Lampiran instruksi tugas
+
+Dosen dapat menambahkan satu **Lampiran Instruksi** saat membuat atau mengedit tugas. Format yang diterima: PDF, Word, PowerPoint, Excel, CSV, TXT, JPG/PNG, atau ZIP, maksimal 20 MB. Lampiran disimpan secara privat dan hanya dapat diunduh oleh dosen pengampu serta mahasiswa yang terdaftar di kelas. Mengunggah file baru mengganti file lama; dosen juga dapat menghapus lampiran tanpa menghapus tugas. Fitur ini berlaku untuk tugas, bukan kuis. Setelah memperbarui instalasi, jalankan `php artisan migrate --force` untuk menambahkan metadata lampiran tanpa mengubah tugas lama.
+
 ### Pemulihan migrasi aktivasi yang sempat gagal
 
 Jika muncul `Duplicate column name 'is_admin'`, sebagian perubahan skema mungkin sudah tersimpan walaupun migrasi belum tercatat selesai. Cadangkan database, aktifkan maintenance (`php artisan down`), ambil perbaikan dari `main`, lalu jalankan `php artisan migrate --force` kembali. **Jangan hapus kolom, jangan menandai migrasi selesai secara manual, dan jangan gunakan `migrate:fresh`.**
