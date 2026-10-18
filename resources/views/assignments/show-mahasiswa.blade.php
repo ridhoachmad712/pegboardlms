@@ -164,8 +164,12 @@
                             <div class="border rounded p-2 mt-1 content-prose" style="white-space:pre-line">{{ $submission->answer_text }}</div>
                         </div>
                     @endif
-                    @if ($submission->file_path)
-                        <a href="{{ route('submissions.download', $submission) }}" class="btn btn-sm mb-3"><i class="ti ti-download me-1"></i>Unduh berkas saya</a>
+                    @if ($submission->hasFiles())
+                        <div class="btn-list mb-3">
+                            @foreach ($submission->filePaths() as $slot => $path)
+                                <a href="{{ route('submissions.download', [$submission, 'slot' => $slot]) }}" class="btn btn-sm"><i class="ti ti-download me-1"></i>Unduh berkas {{ $slot }}</a>
+                            @endforeach
+                        </div>
                     @endif
                     <hr>
                     <div class="mb-2"><span class="text-secondary">Nilai</span>
@@ -185,7 +189,7 @@
                     @endif
 
                     <form method="POST" action="{{ route('submissions.store', $assignment) }}" enctype="multipart/form-data" data-warn-unsaved data-autosave="assignment-{{ $assignment->id }}"
-                          x-data="{ fileName: '' }" @if($submission) data-confirm="Perbarui pengumpulan ini? Jawaban sebelumnya akan diganti dengan versi terbaru." @endif>
+                          x-data="{ fileNames: [] }" @if($submission) data-confirm="Perbarui pengumpulan ini? Berkas baru akan mengganti seluruh berkas yang sudah dikirim." @endif>
                         @csrf
 
                         @if ($assignment->allowsText())
@@ -201,25 +205,32 @@
 
                         @if ($assignment->allowsFile())
                             <div class="mb-3">
-                                <label class="form-label @if ($mode === 'file' && ! $submission) required @endif">
-                                    {{ $submission && $submission->file_path ? 'Ganti berkas' : 'Unggah berkas' }}
+                                <label class="form-label @if ($mode === 'file' && ! $submission?->hasFiles()) required @endif">
+                                    {{ $submission?->hasFiles() ? 'Ganti berkas' : 'Unggah berkas' }}
                                 </label>
-                                @if ($submission && $submission->file_path)
-                                    <a href="{{ route('submissions.download', $submission) }}" class="d-flex align-items-center gap-2 border rounded p-2 mb-2 text-reset text-decoration-none">
-                                        <span class="avatar avatar-sm bg-blue-lt"><i class="ti ti-file-text"></i></span>
-                                        <span class="flex-fill"><span class="d-block fw-bold">Berkas yang sudah dikirim</span><span class="d-block text-secondary small">Ketuk untuk mengunduh</span></span>
-                                        <i class="ti ti-download text-secondary"></i>
-                                    </a>
+                                @if ($submission?->hasFiles())
+                                    <div class="list-group mb-2">
+                                        @foreach ($submission->filePaths() as $slot => $path)
+                                            <a href="{{ route('submissions.download', [$submission, 'slot' => $slot]) }}" class="list-group-item list-group-item-action d-flex align-items-center gap-2 py-2">
+                                                <span class="avatar avatar-sm bg-blue-lt"><i class="ti ti-file-text"></i></span>
+                                                <span class="flex-fill"><span class="d-block fw-bold">Berkas {{ $slot }}</span><span class="d-block text-secondary small">{{ strtoupper(pathinfo($path, PATHINFO_EXTENSION)) }} · ketuk untuk mengunduh</span></span>
+                                                <i class="ti ti-download text-secondary"></i>
+                                            </a>
+                                        @endforeach
+                                    </div>
                                 @endif
-                                <input type="file" name="file" accept=".pdf,.doc,.docx,.zip,.ppt,.pptx,.xls,.xlsx"
-                                       class="form-control @error('file') is-invalid @enderror"
-                                       @change="fileName = $event.target.files[0]?.name || ''"
-                                       @if ($mode === 'file' && ! $submission) required @endif>
-                                @error('file')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                                <div x-show="fileName" x-cloak class="d-flex align-items-center gap-2 bg-blue-lt rounded p-2 mt-2">
-                                    <i class="ti ti-file-check text-blue fs-2"></i><span class="small fw-bold text-truncate" x-text="fileName"></span>
+                                <input type="file" name="files[]" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.csv,.txt,.jpg,.jpeg,.png,.zip"
+                                       class="form-control @error('files') is-invalid @enderror @error('files.*') is-invalid @enderror"
+                                       @change="fileNames = Array.from($event.target.files).slice(0, 2).map(file => file.name); if ($event.target.files.length > 2) { $event.target.value = ''; fileNames = []; alert('Maksimal dua berkas.'); }"
+                                       @if ($mode === 'file' && ! $submission?->hasFiles()) required @endif>
+                                @error('files')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                @error('files.*')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                <div x-show="fileNames.length" x-cloak class="bg-blue-lt rounded p-2 mt-2">
+                                    <template x-for="(name, index) in fileNames" :key="name">
+                                        <div class="d-flex align-items-center gap-2"><i class="ti ti-file-check text-blue"></i><span class="small fw-bold text-truncate" x-text="'Berkas ' + (index + 1) + ': ' + name"></span></div>
+                                    </template>
                                 </div>
-                                <small class="form-hint">PDF/Word/PPT/Excel/ZIP, maks 20 MB.@if ($submission) Kosongkan bila tidak ingin mengganti berkas.@endif</small>
+                                <small class="form-hint">Maksimal 2 berkas. PDF, Word, PPT, Excel, CSV, TXT, JPG/PNG, atau ZIP; maks 20 MB per berkas.@if ($submission?->hasFiles()) Kosongkan bila tidak ingin mengganti berkas yang sudah ada.@endif</small>
                             </div>
                         @endif
 

@@ -13,7 +13,7 @@
 
 @section('page-actions')
     <div class="btn-list">
-        @if ($submissions->whereNotNull('file_path')->isNotEmpty())
+        @if ($submissions->contains(fn ($submission) => $submission->hasFiles()))
             <a href="{{ route('submissions.downloadAll', $assignment) }}" class="btn btn-outline-green"><i class="ti ti-file-zip me-1"></i>Unduh semua (ZIP)</a>
         @endif
         <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#modal-rubrik">
@@ -128,19 +128,8 @@
                             <td>{!! $sub && $sub->isGraded() ? '<span class="fw-bold">'.\App\Support\Grades::num($sub->score).'</span>' : '<span class="text-secondary">—</span>' !!}</td>
                             <td class="text-end">
                                 <div class="btn-list justify-content-end">
-                                    @if ($sub && $sub->file_path)
-                                        @php($sext = strtolower(pathinfo($sub->file_path, PATHINFO_EXTENSION)))
-                                        @php($spreview = $sext === 'pdf'
-                                            ? route('submissions.preview', $sub)
-                                            : (in_array($sext, ['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'])
-                                                ? 'https://view.officeapps.live.com/op/embed.aspx?src='.urlencode(asset('storage/'.$sub->file_path))
-                                                : null))
-                                        @if ($spreview)
-                                            <button type="button" class="btn btn-sm" title="Lihat berkas" data-bs-toggle="modal" data-bs-target="#modal-preview"
-                                                    data-preview-url="{{ $spreview }}" data-download-url="{{ route('submissions.download', $sub) }}" data-preview-title="{{ $g->name }}"><i class="ti ti-eye"></i></button>
-                                        @else
-                                            <a href="{{ route('submissions.download', $sub) }}" class="btn btn-sm" title="Unduh berkas"><i class="ti ti-download"></i></a>
-                                        @endif
+                                    @if ($sub?->hasFiles())
+                                        @include('assignments._submission-file-actions', ['submission' => $sub, 'title' => $g->name])
                                     @endif
                                     @if ($sub)
                                         <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#grade-{{ $sub->id }}">Nilai</button>
@@ -218,22 +207,8 @@
                             <td>{!! $sub->isGraded() ? '<span class="fw-bold">'.\App\Support\Grades::num($sub->score).'</span>' : '<span class="text-secondary">—</span>' !!}</td>
                             <td class="text-end">
                                 <div class="btn-list justify-content-end">
-                                    @if ($sub->file_path)
-                                        @php($sext = strtolower(pathinfo($sub->file_path, PATHINFO_EXTENSION)))
-                                        @php($spreview = $sext === 'pdf'
-                                            ? route('submissions.preview', $sub)
-                                            : (in_array($sext, ['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'])
-                                                ? 'https://view.officeapps.live.com/op/embed.aspx?src='.urlencode(asset('storage/'.$sub->file_path))
-                                                : null))
-                                        @if ($spreview)
-                                            <button type="button" class="btn btn-sm" title="Lihat berkas"
-                                                    data-bs-toggle="modal" data-bs-target="#modal-preview"
-                                                    data-preview-url="{{ $spreview }}"
-                                                    data-download-url="{{ route('submissions.download', $sub) }}"
-                                                    data-preview-title="{{ $sub->student->name }}"><i class="ti ti-eye"></i></button>
-                                        @else
-                                            <a href="{{ route('submissions.download', $sub) }}" class="btn btn-sm" title="Unduh berkas"><i class="ti ti-download"></i></a>
-                                        @endif
+                                    @if ($sub->hasFiles())
+                                        @include('assignments._submission-file-actions', ['submission' => $sub, 'title' => $sub->student->name])
                                     @endif
                                     <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#grade-{{ $sub->id }}">Nilai</button>
                                     <form method="POST" action="{{ route('submissions.reopen', $sub) }}" data-confirm="Buka kembali pengumpulan {{ $sub->student->name }}? Berkas saat ini akan dihapus dan mahasiswa bisa mengumpulkan ulang.">
@@ -359,19 +334,9 @@
                             <div class="border rounded p-2" style="white-space:pre-line;max-height:240px;overflow:auto">{{ $sub->answer_text }}</div>
                         </div>
                     @endif
-                    @if ($sub->file_path)
-                        @php($gext = strtolower(pathinfo($sub->file_path, PATHINFO_EXTENSION)))
-                        @php($gpreview = $gext === 'pdf'
-                            ? route('submissions.preview', $sub)
-                            : (in_array($gext, ['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'])
-                                ? 'https://view.officeapps.live.com/op/embed.aspx?src='.urlencode(asset('storage/'.$sub->file_path))
-                                : null))
-                        <div class="mb-3">
-                            @if ($gpreview)
-                                <a href="{{ $gpreview }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary"><i class="ti ti-eye me-1"></i>Lihat berkas jawaban</a>
-                            @else
-                                <a href="{{ route('submissions.download', $sub) }}" class="btn btn-sm btn-outline-secondary"><i class="ti ti-download me-1"></i>Unduh berkas jawaban</a>
-                            @endif
+                    @if ($sub->hasFiles())
+                        <div class="mb-3 btn-list">
+                            @include('assignments._submission-file-actions', ['submission' => $sub, 'title' => $isGroup ? ($sub->group?->name ?? 'Kelompok') : $sub->student->name, 'buttonClass' => 'btn-outline-secondary', 'showLabels' => true])
                         </div>
                     @endif
                     @if ($assignment->rubricCriteria->isNotEmpty())

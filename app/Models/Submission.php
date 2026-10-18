@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
-    'assignment_id', 'user_id', 'assignment_group_id', 'file_path', 'answer_text', 'score',
+    'assignment_id', 'user_id', 'assignment_group_id', 'file_path', 'file_path_2', 'answer_text', 'score',
     'feedback', 'status', 'started_at', 'submitted_at',
 ])]
 class Submission extends Model
@@ -56,5 +56,24 @@ class Submission extends Model
     public function isLate(): bool
     {
         return $this->status === 'late';
+    }
+
+    /** @return array<int, string> Nomor slot => path berkas. */
+    public function filePaths(): array
+    {
+        return array_filter([
+            1 => $this->file_path,
+            2 => $this->file_path_2,
+        ]);
+    }
+
+    public function filePath(int $slot): ?string
+    {
+        return $slot === 2 ? $this->file_path_2 : $this->file_path;
+    }
+
+    public function hasFiles(): bool
+    {
+        return $this->file_path !== null || $this->file_path_2 !== null;
     }
 }

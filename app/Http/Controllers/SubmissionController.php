@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\ChecksCourseAccess;
 use App\Models\Assignment;
+use App\Models\RubricScore;
 use App\Models\Submission;
+use App\Models\User;
 use App\Services\Notifier;
+use App\Support\Grades;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -43,9 +46,15 @@ class SubmissionController extends Controller
         // Aturan validasi mengikuti bentuk jawaban yang diatur dosen.
         $rules = [];
         if ($assignment->allowsFile()) {
-            $rules['file'] = [
-                $assignment->submission_mode === Assignment::SUBMISSION_FILE ? 'required' : 'nullable',
-                'file', 'max:20480', 'mimes:pdf,doc,docx,zip,ppt,pptx,xls,xlsx',
+            $fileRequired = $assignment->submission_mode === Assignment::SUBMISSION_FILE
+                && ! $existing?->hasFiles();
+            $rules['files'] = [
+                $fileRequired ? 'required' : 'nullable',
+                'array', 'max:2',
+            ];
+            $rules['files.*'] = [
+                'file', 'max:20480',
+                'mimes:pdf,doc,docx,ppt,pptx,xls,xlsx,csv,txt,jpg,jpeg,png,zip',
             ];
         }
         if ($assignment->allowsText()) {
@@ -56,14 +65,16 @@ class SubmissionController extends Controller
         }
 
         $request->validate($rules, [
-            'file.mimes' => 'Berkas harus PDF, Word, PowerPoint, Excel, atau ZIP.',
-            'file.max' => 'Ukuran maksimal 20 MB.',
+            'files.required' => 'Unggah minimal satu berkas.',
+            'files.max' => 'Maksimal dua berkas dalam satu pengumpulan.',
+            'files.*.mimes' => 'Format berkas harus PDF, Word, PowerPoint, Excel, CSV, TXT, gambar JPG/PNG, atau ZIP.',
+            'files.*.max' => 'Ukuran setiap berkas maksimal 20 MB.',
             'answer_text.required' => 'Jawaban tidak boleh kosong.',
         ]);
 
         // Mode "keduanya": minimal salah satu (teks atau berkas) harus diisi.
         if ($assignment->submission_mode === Assignment::SUBMISSION_BOTH
-            && ! $request->filled('answer_text') && ! $request->hasFile('file')) {
+            && ! $request->filled('answer_text') && ! $request->hasFile('files') && ! $existing?->hasFiles()) {
             throw ValidationException::withMessages([
                 'answer_text' => 'Isi jawaban teks atau unggah berkas (minimal salah satu).',
             ]);
@@ -71,20 +82,33 @@ class SubmissionController extends Controller
 
         $status = $assignment->isPastDeadline() ? 'late' : 'ontime';
         $payload = ['status' => $status, 'submitted_at' => now()];
+        $oldPaths = [];
 
         if ($assignment->allowsText()) {
             $payload['answer_text'] = $request->input('answer_text');
         }
 
-        if ($assignment->allowsFile() && $request->hasFile('file')) {
-            if ($existing && $existing->file_path) {
-                Storage::disk('public')->delete($existing->file_path);
+        if ($assignment->allowsFile() && $request->hasFile('files')) {
+            $uploaded = collect($request->file('files'))->take(2)->values();
+            $newPaths = [];
+
+            try {
+                foreach ($uploaded as $file) {
+                    $newPaths[] = $file->store('submissions/'.$assignment->id, 'public');
+                }
+            } catch (\Throwable $exception) {
+                Storage::disk('public')->delete($newPaths);
+                throw $exception;
             }
-            $payload['file_path'] = $request->file('file')->store('submissions/'.$assignment->id, 'public');
+
+            $oldPaths = $existing ? array_values($existing->filePaths()) : [];
+            $payload['file_path'] = $newPaths[0] ?? null;
+            $payload['file_path_2'] = $newPaths[1] ?? null;
         }
 
         if ($existing) {
             $existing->update($payload);
+            Storage::disk('public')->delete($oldPaths);
 
             return back()->with('status', 'Pengumpulan berhasil diperbarui.');
         }
@@ -109,9 +133,7 @@ class SubmissionController extends Controller
         abort_if($submission->assignment->isQuiz(), 404);
         abort_if($submission->isGraded(), 403, 'Tugas sudah dinilai, tidak bisa dihapus.');
 
-        if ($submission->file_path) {
-            Storage::disk('public')->delete($submission->file_path);
-        }
+        Storage::disk('public')->delete(array_values($submission->filePaths()));
         $submission->delete();
 
         return back()->with('status', 'Pengumpulan dihapus. Anda dapat mengumpulkan ulang.');
@@ -128,9 +150,7 @@ class SubmissionController extends Controller
             ? $submission->group()->first()?->members()->pluck('users.id')->all() ?? []
             : [$submission->user_id];
 
-        if ($submission->file_path) {
-            Storage::disk('public')->delete($submission->file_path);
-        }
+        Storage::disk('public')->delete(array_values($submission->filePaths()));
         $submission->delete();
 
         foreach ($recipients as $userId) {
@@ -152,21 +172,26 @@ class SubmissionController extends Controller
         $assignment->load('course');
         $this->ensureCourseOwner($request, $assignment->course);
 
-        $subs = $assignment->submissions()->with('student')->whereNotNull('file_path')->get();
+        $subs = $assignment->submissions()->with('student')
+            ->where(fn ($query) => $query->whereNotNull('file_path')->orWhereNotNull('file_path_2'))
+            ->get();
         abort_if($subs->isEmpty(), 404, 'Belum ada berkas untuk diunduh.');
 
         $disk = Storage::disk('public');
         $tmp = storage_path('app/zip-'.uniqid().'.zip');
-        $zip = new \ZipArchive();
+        $zip = new \ZipArchive;
         $zip->open($tmp, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
 
         foreach ($subs as $sub) {
-            if (! $sub->file_path || ! $disk->exists($sub->file_path)) {
-                continue;
+            foreach ($sub->filePaths() as $slot => $path) {
+                if (! $disk->exists($path)) {
+                    continue;
+                }
+                $ext = pathinfo($path, PATHINFO_EXTENSION);
+                $base = Str::slug(($sub->student->nim_nip ?: 'mhs').'-'.$sub->student->name);
+                $name = $base.'-berkas-'.$slot.($ext ? '.'.$ext : '');
+                $zip->addFile($disk->path($path), $name);
             }
-            $ext = pathinfo($sub->file_path, PATHINFO_EXTENSION);
-            $name = Str::slug(($sub->student->nim_nip ?: 'mhs').'-'.$sub->student->name).($ext ? '.'.$ext : '');
-            $zip->addFile($disk->path($sub->file_path), $name);
         }
         $zip->close();
 
@@ -192,7 +217,7 @@ class SubmissionController extends Controller
             foreach ($assignment->rubricCriteria as $crit) {
                 $pts = max(0, min((float) ($input[$crit->id] ?? 0), (float) $crit->max_points));
                 $total += $pts;
-                \App\Models\RubricScore::updateOrCreate(
+                RubricScore::updateOrCreate(
                     ['submission_id' => $submission->id, 'rubric_criterion_id' => $crit->id],
                     ['points' => $pts],
                 );
@@ -222,7 +247,7 @@ class SubmissionController extends Controller
                 $uid,
                 'grade',
                 'Nilai tugas tersedia',
-                $submission->assignment->title.' telah dinilai: '.\App\Support\Grades::num($data['score']),
+                $submission->assignment->title.' telah dinilai: '.Grades::num($data['score']),
                 route('assignments.show', $submission->assignment),
             );
         }
@@ -231,7 +256,7 @@ class SubmissionController extends Controller
     }
 
     /** Sajikan berkas pengumpulan secara inline agar bisa dipreview (dosen pemilik / mahasiswa pemilik). */
-    public function preview(Request $request, Submission $submission): StreamedResponse
+    public function preview(Request $request, Submission $submission, int $slot = 1): StreamedResponse
     {
         $submission->load('assignment.course');
         $user = $request->user();
@@ -240,13 +265,14 @@ class SubmissionController extends Controller
         abort_unless($isOwnerDosen || $isOwnerStudent, 403);
 
         $disk = Storage::disk('public');
-        abort_unless($submission->file_path && $disk->exists($submission->file_path), 404);
+        $path = $submission->filePath($slot);
+        abort_unless($path && $disk->exists($path), 404);
 
         // Disposisi "inline" → browser menampilkan (PDF/gambar), bukan mengunduh.
-        return $disk->response($submission->file_path);
+        return $disk->response($path);
     }
 
-    public function download(Request $request, Submission $submission): StreamedResponse
+    public function download(Request $request, Submission $submission, int $slot = 1): StreamedResponse
     {
         $submission->load('assignment.course');
         // Dosen pemilik atau mahasiswa pemilik submission
@@ -256,16 +282,17 @@ class SubmissionController extends Controller
         abort_unless($isOwnerDosen || $isOwnerStudent, 403);
 
         $disk = Storage::disk('public');
-        abort_unless($submission->file_path && $disk->exists($submission->file_path), 404);
+        $path = $submission->filePath($slot);
+        abort_unless($path && $disk->exists($path), 404);
 
-        $ext = pathinfo($submission->file_path, PATHINFO_EXTENSION);
-        $name = Str::slug($submission->assignment->title.'-'.$submission->student->name).($ext ? '.'.$ext : '');
+        $ext = pathinfo($path, PATHINFO_EXTENSION);
+        $name = Str::slug($submission->assignment->title.'-'.$submission->student->name).'-berkas-'.$slot.($ext ? '.'.$ext : '');
 
-        return $disk->download($submission->file_path, $name);
+        return $disk->download($path, $name);
     }
 
     /** Mahasiswa berhak atas pengumpulan: pengumpul itu sendiri, atau (tugas kelompok) sesama anggota. */
-    private function studentOwns(Submission $submission, \App\Models\User $user): bool
+    private function studentOwns(Submission $submission, User $user): bool
     {
         if ($submission->user_id === $user->id) {
             return true;

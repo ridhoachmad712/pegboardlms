@@ -119,8 +119,8 @@ Route::middleware(['auth', 'lecturer.active'])->group(function () {
     Route::get('/assignments/{assignment}', [AssignmentController::class, 'show'])->name('assignments.show');
     Route::post('/assignments/{assignment}/submit', [SubmissionController::class, 'store'])
         ->middleware('throttle:20,1')->name('submissions.store');
-    Route::get('/submissions/{submission}/preview', [SubmissionController::class, 'preview'])->name('submissions.preview');
-    Route::get('/submissions/{submission}/download', [SubmissionController::class, 'download'])->name('submissions.download');
+    Route::get('/submissions/{submission}/preview/{slot?}', [SubmissionController::class, 'preview'])->where('slot', '[12]')->name('submissions.preview');
+    Route::get('/submissions/{submission}/download/{slot?}', [SubmissionController::class, 'download'])->where('slot', '[12]')->name('submissions.download');
     Route::delete('/submissions/{submission}', [SubmissionController::class, 'destroy'])->name('submissions.destroy');
 
     // Kelompok tugas (mahasiswa membentuk; dosen boleh mengatur — otorisasi di controller)

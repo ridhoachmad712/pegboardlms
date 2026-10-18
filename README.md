@@ -117,7 +117,7 @@ Ekspor SQLite → MySQL lama menggunakan `users.id` bertipe `BIGINT` bertanda (s
 
 ## Status fitur — FASE 2 (Pengajaran) ✅
 
-- [x] **Tugas:** dosen CRUD; mahasiswa submit berkas (status tepat waktu/terlambat, sekali kumpul); dosen input nilai + feedback
+- [x] **Tugas:** dosen CRUD; mahasiswa dapat mengirim teks dan/atau maksimal 2 berkas (PDF, Office, Excel/CSV, TXT, gambar, ZIP), dengan status tepat waktu/terlambat; dosen input nilai + feedback
 - [x] **Kuis:** kuis internal dengan soal PG/esai, timer, auto-score dan review; atau kuis eksternal (mis. Wayground/Google Forms) dengan tautan dan input nilai massal oleh dosen
 - [x] **Penilaian:** komponen berbobot (validasi total ≤100%), nilai akhir otomatis, konversi huruf (A/B+/B/C+/C/D/E), rekap kelas + transparansi nilai mahasiswa
 - [x] **Forum:** thread + balasan, pin (dosen), hapus (penulis/dosen)

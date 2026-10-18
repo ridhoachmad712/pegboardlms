@@ -159,9 +159,7 @@ class AssignmentGroupController extends Controller
         // Hapus pengumpulan bersama (beserta berkasnya) bila ada.
         $sub = $group->submission()->first();
         if ($sub) {
-            if ($sub->file_path) {
-                Storage::disk('public')->delete($sub->file_path);
-            }
+            Storage::disk('public')->delete(array_values($sub->filePaths()));
             $sub->delete();
         }
         $group->members()->detach();
