@@ -35,7 +35,7 @@ class MaterialController extends Controller
 
         if ($validated['type'] === Material::TYPE_FILE) {
             $file = $request->file('file');
-            $path = $file->store('materials/'.$meeting->course_id, 'public');
+            $path = $file->store('materials/'.$meeting->course_id, 'local');
 
             $attributes['path'] = $path;
             $attributes['mime'] = $file->getClientMimeType();
@@ -74,7 +74,7 @@ class MaterialController extends Controller
             return redirect()->away($material->url);
         }
 
-        $disk = Storage::disk('public');
+        $disk = Storage::disk('local');
         abort_unless($disk->exists($material->path), 404, 'Berkas tidak ditemukan.');
 
         // response() memakai disposisi "inline" sehingga browser menampilkan, bukan mengunduh.
@@ -89,7 +89,7 @@ class MaterialController extends Controller
             return redirect()->away($material->url);
         }
 
-        $disk = Storage::disk('public');
+        $disk = Storage::disk('local');
         abort_unless($disk->exists($material->path), 404, 'Berkas tidak ditemukan.');
 
         $ext = pathinfo($material->path, PATHINFO_EXTENSION);
@@ -103,7 +103,7 @@ class MaterialController extends Controller
         $this->authorizeOwner($request, $material->meeting);
 
         if ($material->isFile() && $material->path) {
-            Storage::disk('public')->delete($material->path);
+            Storage::disk('local')->delete($material->path);
         }
 
         $material->delete();

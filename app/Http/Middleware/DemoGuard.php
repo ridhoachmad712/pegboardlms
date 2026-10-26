@@ -21,6 +21,7 @@ class DemoGuard
 {
     private const BLOCKED = [
         'profile.update',
+        'profile.password',
         'admin.settings.update',
         'admin.ai.update',
         'admin.backups.run',

@@ -16,7 +16,7 @@ class AnthropicProvider implements AiProvider
     public function __construct()
     {
         // ai_key_anthropic baru; ai_api_key lama dipertahankan utk kompatibilitas; lalu .env
-        $this->key = Setting::get('ai_key_anthropic') ?: Setting::get('ai_api_key') ?: config('services.anthropic.key');
+        $this->key = Setting::secret('ai_key_anthropic') ?: Setting::secret('ai_api_key') ?: config('services.anthropic.key');
         $this->model = Setting::get('ai_model_anthropic') ?: Setting::get('ai_model') ?: config('services.anthropic.model');
         $this->baseUrl = rtrim(config('services.anthropic.base_url'), '/');
         $this->version = config('services.anthropic.version');

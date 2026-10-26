@@ -14,7 +14,7 @@ class GeminiProvider implements AiProvider
 
     public function __construct()
     {
-        $this->key = Setting::get('ai_key_gemini') ?: config('services.gemini.key');
+        $this->key = Setting::secret('ai_key_gemini') ?: config('services.gemini.key');
         $this->model = Setting::get('ai_model_gemini') ?: config('services.gemini.model', 'gemini-2.5-flash');
         $this->baseUrl = rtrim(config('services.gemini.base_url', 'https://generativelanguage.googleapis.com'), '/');
     }

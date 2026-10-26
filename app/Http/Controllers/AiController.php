@@ -235,7 +235,7 @@ class AiController extends Controller
             return null;
         }
 
-        $fullPath = Storage::disk('public')->path($material->path);
+        $fullPath = Storage::disk('local')->path($material->path);
         if (! is_file($fullPath)) {
             return null;
         }

@@ -100,7 +100,7 @@ class SettingController extends Controller
 
         $providers = [];
         foreach (\App\Services\Ai\AiProviderFactory::labels() as $key => $label) {
-            $dbKey = Setting::get('ai_key_'.$key);
+            $dbKey = Setting::secret('ai_key_'.$key);
             $envKey = config($cfgKey[$key]);
             $providers[$key] = [
                 'label' => $label,
@@ -141,7 +141,7 @@ class SettingController extends Controller
             if ($request->boolean('remove_key_'.$p)) {
                 Setting::put('ai_key_'.$p, '');
             } elseif (! empty(trim((string) $request->input('key_'.$p, '')))) {
-                Setting::put('ai_key_'.$p, trim($request->input('key_'.$p)));
+                Setting::putSecret('ai_key_'.$p, trim($request->input('key_'.$p)));
             }
         }
 

@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
 
 #[Fillable(['meeting_id', 'title', 'type', 'path', 'url', 'content', 'mime', 'size', 'summary'])]
 class Material extends Model
@@ -30,11 +29,11 @@ class Material extends Model
         return $this->type === self::TYPE_TEXT;
     }
 
-    /** URL publik untuk diakses mahasiswa (file lokal atau link eksternal). */
+    /** URL untuk diakses mahasiswa: route preview berotorisasi (berkas privat) atau link eksternal. */
     public function getLinkAttribute(): ?string
     {
         return $this->isFile()
-            ? ($this->path ? Storage::disk('public')->url($this->path) : null)
+            ? ($this->path ? route('materials.preview', $this) : null)
             : $this->url;
     }
 

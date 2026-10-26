@@ -14,7 +14,7 @@ class OpenAiProvider implements AiProvider
 
     public function __construct()
     {
-        $this->key = Setting::get('ai_key_openai') ?: config('services.openai.key');
+        $this->key = Setting::secret('ai_key_openai') ?: config('services.openai.key');
         $this->model = Setting::get('ai_model_openai') ?: config('services.openai.model', 'gpt-4o-mini');
         $this->baseUrl = rtrim(config('services.openai.base_url', 'https://api.openai.com'), '/');
     }

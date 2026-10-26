@@ -44,7 +44,7 @@ class SubmissionFilesTest extends TestCase
 
     public function test_student_can_submit_two_files_including_excel_and_csv(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
         $context = $this->context();
 
         $this->actingAs($context['student'])
@@ -59,13 +59,13 @@ class SubmissionFilesTest extends TestCase
         $this->assertCount(2, $submission->filePaths());
         $this->assertStringEndsWith('.xls', $submission->file_path);
         $this->assertStringEndsWith('.csv', $submission->file_path_2);
-        Storage::disk('public')->assertExists($submission->file_path);
-        Storage::disk('public')->assertExists($submission->file_path_2);
+        Storage::disk('local')->assertExists($submission->file_path);
+        Storage::disk('local')->assertExists($submission->file_path_2);
     }
 
     public function test_submission_rejects_more_than_two_files(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
         $context = $this->context();
 
         $this->actingAs($context['student'])
@@ -82,10 +82,10 @@ class SubmissionFilesTest extends TestCase
 
     public function test_new_upload_replaces_both_old_files_and_empty_upload_keeps_them(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
         $context = $this->context();
-        Storage::disk('public')->put('submissions/old-one.pdf', 'old');
-        Storage::disk('public')->put('submissions/old-two.csv', 'old');
+        Storage::disk('local')->put('submissions/old-one.pdf', 'old');
+        Storage::disk('local')->put('submissions/old-two.csv', 'old');
         $submission = $context['assignment']->submissions()->create([
             'user_id' => $context['student']->id,
             'file_path' => 'submissions/old-one.pdf',
@@ -108,17 +108,17 @@ class SubmissionFilesTest extends TestCase
         $submission->refresh();
         $this->assertNotNull($submission->file_path);
         $this->assertNull($submission->file_path_2);
-        Storage::disk('public')->assertMissing('submissions/old-one.pdf');
-        Storage::disk('public')->assertMissing('submissions/old-two.csv');
-        Storage::disk('public')->assertExists($submission->file_path);
+        Storage::disk('local')->assertMissing('submissions/old-one.pdf');
+        Storage::disk('local')->assertMissing('submissions/old-two.csv');
+        Storage::disk('local')->assertExists($submission->file_path);
     }
 
     public function test_each_file_can_be_downloaded_only_by_student_or_course_lecturer(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
         $context = $this->context();
-        Storage::disk('public')->put('submissions/one.pdf', 'first');
-        Storage::disk('public')->put('submissions/two.csv', 'second');
+        Storage::disk('local')->put('submissions/one.pdf', 'first');
+        Storage::disk('local')->put('submissions/two.csv', 'second');
         $submission = $context['assignment']->submissions()->create([
             'user_id' => $context['student']->id,
             'file_path' => 'submissions/one.pdf',
@@ -140,10 +140,10 @@ class SubmissionFilesTest extends TestCase
 
     public function test_deleting_submission_removes_both_files(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
         $context = $this->context();
-        Storage::disk('public')->put('submissions/one.pdf', 'first');
-        Storage::disk('public')->put('submissions/two.csv', 'second');
+        Storage::disk('local')->put('submissions/one.pdf', 'first');
+        Storage::disk('local')->put('submissions/two.csv', 'second');
         $submission = $context['assignment']->submissions()->create([
             'user_id' => $context['student']->id,
             'file_path' => 'submissions/one.pdf',
@@ -156,8 +156,8 @@ class SubmissionFilesTest extends TestCase
             ->delete(route('submissions.destroy', $submission))
             ->assertRedirect();
 
-        Storage::disk('public')->assertMissing('submissions/one.pdf');
-        Storage::disk('public')->assertMissing('submissions/two.csv');
+        Storage::disk('local')->assertMissing('submissions/one.pdf');
+        Storage::disk('local')->assertMissing('submissions/two.csv');
         $this->assertDatabaseMissing('submissions', ['id' => $submission->id]);
     }
 }

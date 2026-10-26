@@ -272,7 +272,7 @@
                                 @php($previewUrl = $isPdf
                                     ? route('materials.preview', $material)
                                     : (in_array($ext, ['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'])
-                                        ? 'https://view.officeapps.live.com/op/embed.aspx?src='.urlencode(asset('storage/'.$material->path))
+                                        ? 'https://view.officeapps.live.com/op/embed.aspx?src='.urlencode(\Illuminate\Support\Facades\Storage::disk('local')->temporaryUrl($material->path, now()->addMinutes(30)))
                                         : null))
                                 <div class="list-group-item">
                                     <div class="d-flex align-items-center">

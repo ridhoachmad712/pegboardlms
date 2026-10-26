@@ -94,10 +94,10 @@ class SubmissionController extends Controller
 
             try {
                 foreach ($uploaded as $file) {
-                    $newPaths[] = $file->store('submissions/'.$assignment->id, 'public');
+                    $newPaths[] = $file->store('submissions/'.$assignment->id, 'local');
                 }
             } catch (\Throwable $exception) {
-                Storage::disk('public')->delete($newPaths);
+                Storage::disk('local')->delete($newPaths);
                 throw $exception;
             }
 
@@ -108,7 +108,7 @@ class SubmissionController extends Controller
 
         if ($existing) {
             $existing->update($payload);
-            Storage::disk('public')->delete($oldPaths);
+            Storage::disk('local')->delete($oldPaths);
 
             return back()->with('status', 'Pengumpulan berhasil diperbarui.');
         }
@@ -133,7 +133,7 @@ class SubmissionController extends Controller
         abort_if($submission->assignment->isQuiz(), 404);
         abort_if($submission->isGraded(), 403, 'Tugas sudah dinilai, tidak bisa dihapus.');
 
-        Storage::disk('public')->delete(array_values($submission->filePaths()));
+        Storage::disk('local')->delete(array_values($submission->filePaths()));
         $submission->delete();
 
         return back()->with('status', 'Pengumpulan dihapus. Anda dapat mengumpulkan ulang.');
@@ -150,7 +150,7 @@ class SubmissionController extends Controller
             ? $submission->group()->first()?->members()->pluck('users.id')->all() ?? []
             : [$submission->user_id];
 
-        Storage::disk('public')->delete(array_values($submission->filePaths()));
+        Storage::disk('local')->delete(array_values($submission->filePaths()));
         $submission->delete();
 
         foreach ($recipients as $userId) {
@@ -177,7 +177,7 @@ class SubmissionController extends Controller
             ->get();
         abort_if($subs->isEmpty(), 404, 'Belum ada berkas untuk diunduh.');
 
-        $disk = Storage::disk('public');
+        $disk = Storage::disk('local');
         $tmp = storage_path('app/zip-'.uniqid().'.zip');
         $zip = new \ZipArchive;
         $zip->open($tmp, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
@@ -264,7 +264,7 @@ class SubmissionController extends Controller
         $isOwnerStudent = $this->studentOwns($submission, $user);
         abort_unless($isOwnerDosen || $isOwnerStudent, 403);
 
-        $disk = Storage::disk('public');
+        $disk = Storage::disk('local');
         $path = $submission->filePath($slot);
         abort_unless($path && $disk->exists($path), 404);
 
@@ -281,7 +281,7 @@ class SubmissionController extends Controller
         $isOwnerStudent = $this->studentOwns($submission, $user);
         abort_unless($isOwnerDosen || $isOwnerStudent, 403);
 
-        $disk = Storage::disk('public');
+        $disk = Storage::disk('local');
         $path = $submission->filePath($slot);
         abort_unless($path && $disk->exists($path), 404);
 

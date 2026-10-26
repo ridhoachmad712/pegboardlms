@@ -3,7 +3,7 @@
     @php($previewUrl = $extension === 'pdf'
         ? route('submissions.preview', [$submission, 'slot' => $slot])
         : (in_array($extension, ['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'])
-            ? 'https://view.officeapps.live.com/op/embed.aspx?src='.urlencode(asset('storage/'.$path))
+            ? 'https://view.officeapps.live.com/op/embed.aspx?src='.urlencode(\Illuminate\Support\Facades\Storage::disk('local')->temporaryUrl($path, now()->addMinutes(30)))
             : null))
     @php($downloadUrl = route('submissions.download', [$submission, 'slot' => $slot]))
     @if ($previewUrl)
