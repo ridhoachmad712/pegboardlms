@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Material;
 use App\Models\Meeting;
 use Illuminate\Http\RedirectResponse;
+use App\Support\Monitoring;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -142,6 +143,6 @@ class MaterialController extends Controller
             return;
         }
 
-        abort(403);
+        abort_unless(Monitoring::allows($request, $course), 403);
     }
 }

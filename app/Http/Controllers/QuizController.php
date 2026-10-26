@@ -10,6 +10,7 @@ use App\Models\Submission;
 use App\Services\AiService;
 use App\Services\Notifier;
 use App\Support\Grades;
+use App\Support\Monitoring;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -290,6 +291,8 @@ class QuizController extends Controller
         $user = $request->user();
         $isOwnerStudent = $submission->user_id === $user->id;
         $isDosen = $user->isDosen() && $assignment->course->user_id === $user->id;
+        // Admin pemantau melihat tampilan dosen (tanpa bisa menilai).
+        $isDosen = $isDosen || (! $isOwnerStudent && Monitoring::allows($request, $assignment->course));
         abort_unless($isOwnerStudent || $isDosen, 403);
 
         $answers = $submission->answers->keyBy('quiz_question_id');

@@ -3,6 +3,7 @@
         ['route' => 'admin.dashboard', 'match' => 'admin.dashboard', 'label' => 'Ringkasan', 'icon' => 'ti-layout-dashboard'],
         ['route' => 'admin.lecturers.index', 'match' => 'admin.lecturers.*', 'label' => 'Dosen', 'icon' => 'ti-school'],
         ['route' => 'admin.students.index', 'match' => 'admin.students.*', 'label' => 'Mahasiswa', 'icon' => 'ti-users'],
+        ['route' => 'admin.courses.index', 'match' => 'admin.courses.*', 'label' => 'Kelas', 'icon' => 'ti-books'],
     ];
     $adminMenuGroups = [
         'Akademik' => [
@@ -16,7 +17,7 @@
             ['route' => 'admin.backups.index', 'match' => 'admin.backups.*', 'label' => 'Backup database', 'icon' => 'ti-database'],
         ],
     ];
-    $adminMenuActive = !request()->routeIs('admin.dashboard', 'admin.lecturers.*', 'admin.students.*');
+    $adminMenuActive = !request()->routeIs('admin.dashboard', 'admin.lecturers.*', 'admin.students.*', 'admin.courses.*');
 @endphp
 <header class="admin-header d-print-none">
     <div class="container-xl admin-header-inner">

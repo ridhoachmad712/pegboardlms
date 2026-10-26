@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\LecturerController as AdminLecturerController;
 use App\Http\Controllers\Admin\SemesterController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\CourseController as AdminCourseController;
 use App\Http\Controllers\Admin\StudentController as AdminStudentController;
 use App\Http\Controllers\AiController;
 use App\Http\Controllers\AnalyticsController;
@@ -266,6 +267,7 @@ Route::middleware(['auth', 'lecturer.active'])->group(function () {
             Route::put('/semesters/active', [SemesterController::class, 'updateActive'])->name('semesters.updateActive');
             Route::delete('/semesters/{semester}', [SemesterController::class, 'destroy'])->name('semesters.destroy');
 
+            Route::get('/courses', [AdminCourseController::class, 'index'])->name('courses.index');
             Route::get('/students', [AdminStudentController::class, 'index'])->name('students.index');
             Route::get('/students/create', [AdminStudentController::class, 'create'])->name('students.create');
             Route::post('/students', [AdminStudentController::class, 'store'])->name('students.store');

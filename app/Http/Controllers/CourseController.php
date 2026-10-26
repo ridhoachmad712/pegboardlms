@@ -8,6 +8,7 @@ use App\Models\Setting;
 use App\Models\Syllabus;
 use App\Models\User;
 use App\Services\GradeCalculator;
+use App\Support\Monitoring;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -394,11 +395,19 @@ class CourseController extends Controller
             return;
         }
 
+        if (Monitoring::allows($request, $course)) {
+            return;
+        }
+
         abort(403, 'Anda tidak memiliki akses ke kelas ini.');
     }
 
     private function authorizeOwner(Request $request, Course $course): void
     {
+        if (Monitoring::allows($request, $course)) {
+            return;
+        }
+
         abort_unless($course->user_id === $request->user()->id, 403);
     }
 }

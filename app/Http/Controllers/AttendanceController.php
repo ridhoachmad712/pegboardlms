@@ -7,6 +7,7 @@ use App\Models\Attendance;
 use App\Models\Course;
 use App\Models\Meeting;
 use App\Services\AttendanceService;
+use App\Support\Monitoring;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Writer\SvgWriter;
 use Illuminate\Http\RedirectResponse;
@@ -47,7 +48,8 @@ class AttendanceController extends Controller
         $this->ensureCourseOwner($request, $meeting->course);
 
         // Selama jendela terjadwal terbuka, pastikan token otomatis tersedia (QR/kode langsung siap).
-        $token = $meeting->ensureActiveToken();
+        // Admin yang memantau hanya melihat; jangan membuat token baru.
+        $token = Monitoring::active($request) ? $meeting->activeToken() : $meeting->ensureActiveToken();
         $qr = null;
         if ($token && $meeting->isTatapMuka()) {
             $url = route('attendance.attend', $token->token);

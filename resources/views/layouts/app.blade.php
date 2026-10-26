@@ -222,7 +222,7 @@
     @endif
     @stack('styles')
 </head>
-<body @class(['student-mobile-ui' => auth()->user()?->isMahasiswa(), 'admin-ui' => request()->routeIs('admin.*')])>
+<body @class(['student-mobile-ui' => auth()->user()?->isMahasiswa(), 'admin-ui' => request()->routeIs('admin.*'), 'monitor-mode' => \App\Support\Monitoring::active()])>
 <a href="#main-content" class="skip-link">Langsung ke konten</a>
 <div id="nprogress"></div>
 <div id="network-status" class="network-status d-none" role="status" aria-live="polite"><i class="ti ti-wifi-off me-1"></i><span>Anda offline — beberapa fitur tidak tersedia.</span></div>
@@ -378,6 +378,7 @@
                                     <a class="dropdown-item" href="{{ route('admin.dashboard') }}"><i class="ti ti-layout-dashboard me-2"></i>Ringkasan Admin</a>
                                     <a class="dropdown-item" href="{{ route('admin.lecturers.index') }}"><i class="ti ti-school me-2"></i>Kelola Dosen</a>
                                     <a class="dropdown-item" href="{{ route('admin.students.index') }}"><i class="ti ti-users me-2"></i>Mahasiswa</a>
+                                    <a class="dropdown-item" href="{{ route('admin.courses.index') }}"><i class="ti ti-books me-2"></i>Semua Kelas</a>
                                     <a class="dropdown-item" href="{{ route('admin.semesters.index') }}"><i class="ti ti-calendar-stats me-2"></i>Kelola Semester</a>
                                     <a class="dropdown-item" href="{{ route('admin.settings.edit') }}"><i class="ti ti-palette me-2"></i>Tampilan</a>
                                     <a class="dropdown-item" href="{{ route('admin.gradeScale.edit') }}"><i class="ti ti-award me-2"></i>Skala Nilai</a>
@@ -424,6 +425,16 @@
         <main class="page-body" id="main-content" tabindex="-1">
             <div class="container-xl">
                 @include('partials.flash')
+                @if (\App\Support\Monitoring::active())
+                    <div class="alert alert-warning d-flex flex-wrap align-items-center gap-2 mb-3" role="status">
+                        <i class="ti ti-eye fs-2"></i>
+                        <div class="me-auto">
+                            <div class="fw-bold">Mode pantau admin</div>
+                            <div class="small">Anda melihat kelas milik dosen lain. Semua isi hanya bisa dilihat, tidak bisa diubah.</div>
+                        </div>
+                        <a href="{{ route('admin.courses.index') }}" class="btn btn-sm"><i class="ti ti-arrow-left me-1"></i>Semua kelas</a>
+                    </div>
+                @endif
                 @yield('content')
             </div>
         </main>
@@ -681,5 +692,34 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 @stack('scripts')
+@if (\App\Support\Monitoring::active())
+<script>
+// Mode pantau admin: kunci semua kontrol ubah di area halaman (server tetap menolak aksi tulis).
+(function () {
+    function isWrite(form) { return (form.getAttribute('method') || 'get').toLowerCase() !== 'get'; }
+    function hide(el) { el.classList.add('d-none'); el.setAttribute('aria-hidden', 'true'); }
+    document.querySelectorAll('.page-header, .page-body').forEach(function (root) {
+        root.querySelectorAll('form').forEach(function (form) {
+            if (!isWrite(form)) return;
+            form.addEventListener('submit', function (e) { e.preventDefault(); e.stopImmediatePropagation(); }, true);
+            form.querySelectorAll('input:not([type=hidden]), select, textarea').forEach(function (el) { el.disabled = true; });
+            form.querySelectorAll('button[type=submit], button:not([type]), input[type=submit]').forEach(hide);
+            if (form.id) document.querySelectorAll('[form="' + form.id + '"]').forEach(hide);
+        });
+        // Tombol pembuka modal yang isinya formulir ubah.
+        root.querySelectorAll('[data-bs-toggle="modal"]').forEach(function (toggle) {
+            var target = toggle.getAttribute('data-bs-target') || toggle.getAttribute('href');
+            var modal = target && target.charAt(0) === '#' ? document.querySelector(target) : null;
+            var content = modal ? modal.querySelector('.modal-content') : null;
+            if (content && content.tagName === 'FORM' && isWrite(content)) hide(toggle);
+        });
+        // Tautan ke halaman tambah/edit.
+        root.querySelectorAll('a[href]').forEach(function (a) {
+            if (/\/(edit|create)(\?|$)|\/courses-(create|trash)/.test(a.getAttribute('href'))) hide(a);
+        });
+    });
+})();
+</script>
+@endif
 </body>
 </html>

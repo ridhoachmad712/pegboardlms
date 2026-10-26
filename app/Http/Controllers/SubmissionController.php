@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Services\GradingQueue;
 use App\Services\Notifier;
 use App\Support\Grades;
+use App\Support\Monitoring;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -280,7 +281,7 @@ class SubmissionController extends Controller
         $user = $request->user();
         $isOwnerDosen = $user->isDosen() && $submission->assignment->course->user_id === $user->id;
         $isOwnerStudent = $this->studentOwns($submission, $user);
-        abort_unless($isOwnerDosen || $isOwnerStudent, 403);
+        abort_unless($isOwnerDosen || $isOwnerStudent || Monitoring::allows($request, $submission->assignment->course), 403);
 
         $disk = Storage::disk('local');
         $path = $submission->filePath($slot);
@@ -297,7 +298,7 @@ class SubmissionController extends Controller
         $user = $request->user();
         $isOwnerDosen = $user->isDosen() && $submission->assignment->course->user_id === $user->id;
         $isOwnerStudent = $this->studentOwns($submission, $user);
-        abort_unless($isOwnerDosen || $isOwnerStudent, 403);
+        abort_unless($isOwnerDosen || $isOwnerStudent || Monitoring::allows($request, $submission->assignment->course), 403);
 
         $disk = Storage::disk('local');
         $path = $submission->filePath($slot);

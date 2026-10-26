@@ -3,7 +3,7 @@
 @section('title', $course->name)
 
 @section('hero-actions')
-    @if ($isDosen)
+    @if ($isDosen && ! \App\Support\Monitoring::active())
         @if ($course->isCompleted())
             <form method="POST" action="{{ route('courses.complete', $course) }}">
                 @csrf @method('PATCH')

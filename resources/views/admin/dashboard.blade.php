@@ -9,7 +9,7 @@
     <a href="{{ route('admin.lecturers.index', ['status' => 'pending']) }}" class="admin-stat"><span class="admin-stat-label"><i class="ti ti-hourglass text-orange" aria-hidden="true"></i>Menunggu aktivasi</span><strong>{{ number_format($pendingCount) }}</strong></a>
     <a href="{{ route('admin.lecturers.index', ['status' => 'active']) }}" class="admin-stat"><span class="admin-stat-label"><i class="ti ti-school text-primary" aria-hidden="true"></i>Dosen aktif</span><strong>{{ number_format($activeCount) }}</strong></a>
     <a href="{{ route('admin.students.index') }}" class="admin-stat"><span class="admin-stat-label"><i class="ti ti-users text-primary" aria-hidden="true"></i>Mahasiswa</span><strong>{{ number_format($studentCount) }}</strong></a>
-    <a href="{{ route('admin.semesters.index') }}" class="admin-stat"><span class="admin-stat-label"><i class="ti ti-books text-primary" aria-hidden="true"></i>Kelas aktif</span><strong>{{ number_format($courseCount) }}</strong></a>
+    <a href="{{ route('admin.courses.index', ['status' => \App\Models\Course::STATUS_ACTIVE]) }}" class="admin-stat"><span class="admin-stat-label"><i class="ti ti-books text-primary" aria-hidden="true"></i>Kelas aktif</span><strong>{{ number_format($courseCount) }}</strong></a>
 </div>
 <div class="row g-3">
     <div class="col-lg-8">
