@@ -7,6 +7,7 @@ use App\Models\Assignment;
 use App\Models\RubricScore;
 use App\Models\Submission;
 use App\Models\User;
+use App\Services\GradingQueue;
 use App\Services\Notifier;
 use App\Support\Grades;
 use Illuminate\Http\RedirectResponse;
@@ -252,7 +253,24 @@ class SubmissionController extends Controller
             );
         }
 
-        return back()->with('status', 'Nilai tersimpan.'.($assignment->isGroup() ? ' Berlaku untuk semua anggota kelompok.' : ''));
+        $message = 'Nilai '.GradingQueue::label($submission, $assignment).' tersimpan.'.($assignment->isGroup() ? ' Berlaku untuk semua anggota kelompok.' : '');
+
+        // Dari Ruang Penilaian: tetap di halaman, atau lanjut ke pengumpulan berikutnya.
+        if ($request->filled('grading')) {
+            $onlyUngraded = $request->boolean('ungraded');
+            $target = $submission;
+            if ($request->input('grading') === 'next') {
+                $target = GradingQueue::next(GradingQueue::for($assignment), $submission, $onlyUngraded);
+                if (! $target) {
+                    return redirect()->route('grading.show', [$assignment, $submission, 'ungraded' => $onlyUngraded ? 1 : null])
+                        ->with('status', $message.' Tidak ada lagi pengumpulan '.($onlyUngraded ? 'yang belum dinilai' : 'berikutnya').'.');
+                }
+            }
+
+            return redirect()->route('grading.show', [$assignment, $target, 'ungraded' => $onlyUngraded ? 1 : null])->with('status', $message);
+        }
+
+        return back()->with('status', $message);
     }
 
     /** Sajikan berkas pengumpulan secara inline agar bisa dipreview (dosen pemilik / mahasiswa pemilik). */

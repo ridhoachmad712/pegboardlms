@@ -13,6 +13,9 @@
 
 @section('page-actions')
     <div class="btn-list">
+        @if ($submissions->isNotEmpty())
+            <a href="{{ route('grading.show', $assignment) }}" class="btn btn-primary"><i class="ti ti-checkup-list me-1"></i>Mulai menilai</a>
+        @endif
         @if ($submissions->contains(fn ($submission) => $submission->hasFiles()))
             <a href="{{ route('submissions.downloadAll', $assignment) }}" class="btn btn-outline-green"><i class="ti ti-file-zip me-1"></i>Unduh semua (ZIP)</a>
         @endif
@@ -141,7 +144,7 @@
                                         @include('assignments._submission-file-actions', ['submission' => $sub, 'title' => $g->name])
                                     @endif
                                     @if ($sub)
-                                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#grade-{{ $sub->id }}">Nilai</button>
+                                        <a href="{{ route('grading.show', [$assignment, $sub]) }}" class="btn btn-sm btn-primary">{{ $sub->isGraded() ? 'Ubah nilai' : 'Nilai' }}</a>
                                         <form method="POST" action="{{ route('submissions.reopen', $sub) }}" data-confirm="Buka kembali pengumpulan {{ $g->name }}? Berkas dihapus dan kelompok bisa mengumpulkan ulang.">
                                             @csrf
                                             <button class="btn btn-sm" title="Buka kembali" data-bs-toggle="tooltip"><i class="ti ti-lock-open"></i></button>
@@ -219,7 +222,7 @@
                                     @if ($sub->hasFiles())
                                         @include('assignments._submission-file-actions', ['submission' => $sub, 'title' => $sub->student->name])
                                     @endif
-                                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#grade-{{ $sub->id }}">Nilai</button>
+                                    <a href="{{ route('grading.show', [$assignment, $sub]) }}" class="btn btn-sm btn-primary">{{ $sub->isGraded() ? 'Ubah nilai' : 'Nilai' }}</a>
                                     <form method="POST" action="{{ route('submissions.reopen', $sub) }}" data-confirm="Buka kembali pengumpulan {{ $sub->student->name }}? Berkas saat ini akan dihapus dan mahasiswa bisa mengumpulkan ulang.">
                                         @csrf
                                         <button class="btn btn-sm" title="Buka kembali" data-bs-toggle="tooltip"><i class="ti ti-lock-open"></i></button>
@@ -325,63 +328,6 @@
     </div>
 </div>
 
-{{-- Modal nilai per submission --}}
-@foreach ($submissions as $sub)
-    <div class="modal modal-blur fade" id="grade-{{ $sub->id }}" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <form class="modal-content" method="POST" action="{{ route('submissions.grade', $sub) }}">
-                @csrf
-                <div class="modal-header">
-                    <h5 class="modal-title">Nilai — {{ $isGroup ? ($sub->group?->name ?? 'Kelompok') : $sub->student->name }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    {{-- Jawaban mahasiswa: teks langsung dan/atau berkas --}}
-                    @if ($assignment->allowsText() && $sub->answer_text)
-                        <div class="mb-3">
-                            <label class="form-label">Jawaban teks mahasiswa</label>
-                            <div class="border rounded p-2" style="white-space:pre-line;max-height:240px;overflow:auto">{{ $sub->answer_text }}</div>
-                        </div>
-                    @endif
-                    @if ($sub->hasFiles())
-                        <div class="mb-3 btn-list">
-                            @include('assignments._submission-file-actions', ['submission' => $sub, 'title' => $isGroup ? ($sub->group?->name ?? 'Kelompok') : $sub->student->name, 'buttonClass' => 'btn-outline-secondary', 'showLabels' => true])
-                        </div>
-                    @endif
-                    @if ($assignment->rubricCriteria->isNotEmpty())
-                        <label class="form-label">Rubrik (nilai dihitung otomatis)</label>
-                        @foreach ($assignment->rubricCriteria as $crit)
-                            @php($cs = $sub->rubricScores->firstWhere('rubric_criterion_id', $crit->id))
-                            <div class="d-flex align-items-center mb-2 gap-2">
-                                <div class="me-auto small">{{ $crit->name }}
-                                    <span class="text-secondary">(maks {{ \App\Support\Grades::num($crit->max_points) }})</span>
-                                </div>
-                                <input type="number" step="0.01" min="0" max="{{ $crit->max_points }}"
-                                       name="rubric[{{ $crit->id }}]" value="{{ $cs->points ?? '' }}"
-                                       class="form-control form-control-sm js-rubric" data-modal="grade-{{ $sub->id }}"
-                                       style="max-width:90px" aria-label="Poin {{ $crit->name }}" required>
-                            </div>
-                        @endforeach
-                        <div class="text-end mb-3">Total: <strong class="js-rubric-total" data-modal="grade-{{ $sub->id }}">0</strong> / {{ $assignment->max_score }}</div>
-                    @else
-                        <div class="mb-3">
-                            <label class="form-label required">Nilai (0–{{ $assignment->max_score }})</label>
-                            <input type="number" step="0.01" name="score" class="form-control" value="{{ $sub->score }}" min="0" max="{{ $assignment->max_score }}" required>
-                        </div>
-                    @endif
-                    <div class="mb-3">
-                        <label class="form-label">Feedback</label>
-                        <textarea name="feedback" class="form-control" rows="3">{{ $sub->feedback }}</textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-link" data-bs-dismiss="modal">Batal</button>
-                    <button class="btn btn-primary">Simpan Nilai</button>
-                </div>
-            </form>
-        </div>
-    </div>
-@endforeach
 @endsection
 
 @push('scripts')
@@ -421,22 +367,6 @@
         if (dl) dl.setAttribute('href', btn.getAttribute('data-download-url') || '#');
     });
     modal.addEventListener('hidden.bs.modal', function () { frame.src = ''; });
-})();
-
-// Rubrik: hitung total poin secara langsung di modal nilai.
-(function () {
-    function recalc(modalId) {
-        var total = 0;
-        document.querySelectorAll('.js-rubric[data-modal="' + modalId + '"]').forEach(function (i) {
-            total += parseFloat(i.value) || 0;
-        });
-        var out = document.querySelector('.js-rubric-total[data-modal="' + modalId + '"]');
-        if (out) out.textContent = Math.round(total * 100) / 100;
-    }
-    document.querySelectorAll('.js-rubric').forEach(function (input) {
-        input.addEventListener('input', function () { recalc(input.getAttribute('data-modal')); });
-    });
-    document.querySelectorAll('.js-rubric-total').forEach(function (el) { recalc(el.getAttribute('data-modal')); });
 })();
 </script>
 @endpush

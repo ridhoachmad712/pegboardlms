@@ -27,6 +27,7 @@ use App\Http\Controllers\ExportController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\GradeComponentController;
 use App\Http\Controllers\GradeController;
+use App\Http\Controllers\GradingController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\MeetingController;
 use App\Http\Controllers\NotificationController;
@@ -203,6 +204,7 @@ Route::middleware(['auth', 'lecturer.active'])->group(function () {
         Route::put('/assignments/{assignment}', [AssignmentController::class, 'update'])->name('assignments.update');
         Route::delete('/assignments/{assignment}', [AssignmentController::class, 'destroy'])->name('assignments.destroy');
         Route::post('/submissions/{submission}/grade', [SubmissionController::class, 'grade'])->name('submissions.grade');
+        Route::get('/assignments/{assignment}/grading/{submission?}', [GradingController::class, 'show'])->name('grading.show');
 
         // Rubrik penilaian (kriteria per tugas)
         Route::post('/assignments/{assignment}/rubric', [RubricController::class, 'store'])->name('rubric.store');
