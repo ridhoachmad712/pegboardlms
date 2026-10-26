@@ -43,6 +43,25 @@ class Meeting extends Model
         return $this->isMandiri() ? 'Mandiri' : 'Tatap Muka';
     }
 
+    /**
+     * Materi terbuka untuk mahasiswa mulai tanggal pertemuan (sejak 00:00).
+     * Pertemuan tanpa tanggal selalu terbuka (perilaku lama).
+     */
+    public function materialsOpen(): bool
+    {
+        return $this->date === null || ! $this->date->copy()->startOfDay()->isFuture();
+    }
+
+    /** Kosongkan materi pertemuan yang belum dibuka agar tidak ikut tampil ke mahasiswa. */
+    public static function hideLockedMaterials(iterable $meetings): void
+    {
+        foreach ($meetings as $meeting) {
+            if (! $meeting->materialsOpen()) {
+                $meeting->setRelation('materials', $meeting->materials()->getRelated()->newCollection());
+            }
+        }
+    }
+
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);

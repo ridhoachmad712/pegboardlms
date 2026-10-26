@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use App\Models\Meeting;
 use App\Models\Setting;
 use App\Models\Syllabus;
 use App\Models\User;
@@ -159,6 +160,8 @@ class CourseController extends Controller
         if ($isDosen) {
             $readiness = $this->completionReadiness($course, $calc);
         } else {
+            Meeting::hideLockedMaterials($course->meetings);
+
             // Presensi mahasiswa per pertemuan (untuk swa-presensi pertemuan Mandiri)
             $myAttendance = \App\Models\Attendance::where('user_id', $request->user()->id)
                 ->whereIn('meeting_id', $course->meetings->pluck('id'))
@@ -196,8 +199,12 @@ class CourseController extends Controller
         $this->authorizeView($request, $course);
 
         $course->load(['lecturer', 'meetings.materials'])->loadCount('students');
+        $isDosen = $request->user()->isDosen();
+        if (! $isDosen) {
+            Meeting::hideLockedMaterials($course->meetings);
+        }
 
-        return view('courses.materials', compact('course'));
+        return view('courses.materials', compact('course', 'isDosen'));
     }
 
     /** Daftar mahasiswa kelas (tab tersendiri, khusus dosen pemilik). */

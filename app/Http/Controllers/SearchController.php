@@ -58,7 +58,9 @@ class SearchController extends Controller
                 ->when($type !== 'all' && $type !== 'meetings', fn ($query) => $query->whereRaw('1 = 0'))
                 ->where(fn ($query) => $query->where('topic', 'like', $like)->orWhere('description', 'like', $like))
                 ->with('course')->limit(10)->get();
-            $materials = Material::whereHas('meeting', fn ($query) => $query->whereIn('course_id', $courseIds))
+            $materials = Material::whereHas('meeting', fn ($query) => $query->whereIn('course_id', $courseIds)
+                // Mahasiswa: sembunyikan materi pertemuan yang tanggalnya belum tiba.
+                ->when(! $user->isDosen(), fn ($q) => $q->where(fn ($d) => $d->whereNull('date')->orWhereDate('date', '<=', today()))))
                 ->when($type !== 'all' && $type !== 'materials', fn ($query) => $query->whereRaw('1 = 0'))
                 ->where(fn ($query) => $query->where('title', 'like', $like)->orWhere('content', 'like', $like))
                 ->with('meeting.course')->limit(10)->get();

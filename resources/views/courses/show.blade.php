@@ -136,9 +136,14 @@
                             @if ($course->meetings->count() >= $maxMeetings)
                                 <button class="btn" disabled title="Maksimal {{ $maxMeetings }} pertemuan" data-bs-toggle="tooltip"><i class="ti ti-plus me-1"></i>Tambah Pertemuan</button>
                             @else
-                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-meeting">
-                                    <i class="ti ti-plus me-1"></i>Tambah Pertemuan
-                                </button>
+                                <div class="btn-list">
+                                    <button class="btn" data-bs-toggle="modal" data-bs-target="#modal-meeting-generate">
+                                        <i class="ti ti-calendar-plus me-1"></i>Buat Jadwal Sekaligus
+                                    </button>
+                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-meeting">
+                                        <i class="ti ti-plus me-1"></i>Tambah Pertemuan
+                                    </button>
+                                </div>
                             @endif
                         </div>
                     </div>
@@ -171,7 +176,12 @@
                                     <span class="d-flex flex-wrap text-secondary small mt-1" style="gap:.15rem .75rem">
                                         @if ($meeting->date)<span class="text-nowrap"><i class="ti ti-calendar-event me-1"></i>{{ $meeting->date->translatedFormat('d M Y') }}</span>@endif
                                         @if ($meeting->isTatapMuka() && $meeting->location)<span class="text-nowrap"><i class="ti ti-map-pin me-1"></i>{{ $meeting->location }}</span>@endif
-                                        <span class="text-nowrap"><i class="ti ti-file-text me-1"></i>{{ $meeting->materials->count() }} materi</span>
+                                        @if (! $meeting->materialsOpen())
+                                            <span class="text-nowrap text-orange" title="{{ $isDosen ? 'Mahasiswa baru bisa melihat materi mulai tanggal pertemuan' : '' }}"><i class="ti ti-lock me-1"></i>Materi dibuka {{ $meeting->date->translatedFormat('d M') }}</span>
+                                            @if ($isDosen)<span class="text-nowrap"><i class="ti ti-file-text me-1"></i>{{ $meeting->materials->count() }} materi</span>@endif
+                                        @else
+                                            <span class="text-nowrap"><i class="ti ti-file-text me-1"></i>{{ $meeting->materials->count() }} materi</span>
+                                        @endif
                                         @if ($meeting->assignments->count())<span class="text-nowrap"><i class="ti ti-checklist me-1"></i>{{ $meeting->assignments->count() }} tugas/kuis</span>@endif
                                     </span>
                                 </span>
@@ -353,7 +363,11 @@
                                 @endif
                                 @endif
                             @empty
-                                <div class="list-group-item text-secondary small">Belum ada materi pada pertemuan ini.</div>
+                                @if (! $isDosen && ! $meeting->materialsOpen())
+                                    <div class="list-group-item text-secondary small"><i class="ti ti-lock me-1"></i>Materi pertemuan ini dibuka pada {{ $meeting->date->translatedFormat('l, d M Y') }}.</div>
+                                @else
+                                    <div class="list-group-item text-secondary small">Belum ada materi pada pertemuan ini.</div>
+                                @endif
                             @endforelse
                         </div>
                         @if ($meeting->assignments->isNotEmpty())
@@ -539,6 +553,66 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-link" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-primary">Tambah</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- Buat banyak pertemuan sekaligus (mingguan) --}}
+    @php($maxMeetings = \App\Http\Controllers\MeetingController::MAX_MEETINGS)
+    <div class="modal modal-blur fade" id="modal-meeting-generate" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <form class="modal-content" method="POST" action="{{ route('meetings.generate', $course) }}" x-data="{ mtype: '{{ $course->default_meeting_type ?? 'tatap_muka' }}' }">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="ti ti-calendar-plus me-1"></i>Buat Jadwal Pertemuan Sekaligus</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label required" for="gen-count">Jumlah pertemuan</label>
+                            <input type="number" name="count" id="gen-count" class="form-control" min="1" max="{{ $maxMeetings }}" value="{{ $maxMeetings }}" required>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label required" for="gen-interval">Jarak (hari)</label>
+                            <input type="number" name="interval_days" id="gen-interval" class="form-control" min="1" max="31" value="7" required>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label required" for="gen-first">Tanggal pertemuan 1</label>
+                            <input type="date" name="first_date" id="gen-first" class="form-control" required>
+                            <small class="form-hint">Pertemuan berikutnya otomatis dijadwalkan tiap jarak hari di atas (default seminggu sekali).</small>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label required" for="gen-type">Jenis pertemuan</label>
+                            <select name="type" id="gen-type" class="form-select" x-model="mtype">
+                                <option value="tatap_muka">Tatap Muka</option>
+                                <option value="mandiri">Mandiri (Full LMS)</option>
+                            </select>
+                        </div>
+                        <div class="col-12 mb-3" x-show="mtype === 'tatap_muka'" x-cloak>
+                            <label class="form-label" for="gen-location">Lokasi / Ruang</label>
+                            <input type="text" name="location" id="gen-location" class="form-control" placeholder="Ruang 301 / Gedung A">
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label" for="gen-topics">Topik per pertemuan <span class="text-secondary">(opsional, satu baris = satu pertemuan)</span></label>
+                            <textarea name="topics" id="gen-topics" class="form-control" rows="6" placeholder="Pengantar Manajemen&#10;Fungsi Perencanaan&#10;…"></textarea>
+                            <small class="form-hint">Baris kosong/kurang → topik diisi "Pertemuan N" dan bisa diedit nanti.</small>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-check">
+                                <input type="checkbox" name="exams" value="1" class="form-check-input" checked>
+                                <span class="form-check-label">Tandai pertemuan 8 sebagai UTS dan 16 sebagai UAS (bila topiknya kosong)</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="alert alert-info mb-0 mt-3">
+                        <i class="ti ti-lock me-1"></i>Materi tiap pertemuan baru terlihat oleh mahasiswa mulai tanggal pertemuannya. Pertemuan yang nomornya sudah ada akan dilewati.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-link" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary" data-loading="Membuat jadwal…">Buat Jadwal</button>
                 </div>
             </form>
         </div>

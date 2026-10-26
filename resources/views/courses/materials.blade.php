@@ -5,7 +5,7 @@
 @section('content')
 @include('courses._hero')
 
-@php($latestMeetingId = $course->meetings->sortByDesc('number')->first()?->id)
+@php($latestMeetingId = $course->meetings->filter(fn ($m) => $isDosen || $m->materialsOpen())->sortByDesc('number')->first()?->id)
 <div x-data="{ query: '' }">
     <div class="d-flex align-items-end mb-3">
         <div>
@@ -31,8 +31,12 @@
                 <span class="min-w-0 flex-fill">
                     <span class="d-block fw-bold material-title">{{ $meeting->topic }}</span>
                     <span class="text-secondary small">
-                        {{ $meeting->materials->count() }} materi
-                        @if ($meeting->date) · {{ $meeting->date->translatedFormat('d M Y') }} @endif
+                        @if (! $meeting->materialsOpen())
+                            <span class="{{ $isDosen ? 'text-orange' : '' }}"><i class="ti ti-lock me-1"></i>{{ $isDosen ? 'Terkunci untuk mahasiswa' : 'Dibuka' }} sampai {{ $meeting->date->translatedFormat('d M Y') }}</span>@if ($isDosen) · {{ $meeting->materials->count() }} materi @endif
+                        @else
+                            {{ $meeting->materials->count() }} materi
+                            @if ($meeting->date) · {{ $meeting->date->translatedFormat('d M Y') }} @endif
+                        @endif
                     </span>
                 </span>
                 <i class="ti ti-chevron-down material-chevron text-secondary flex-shrink-0 mt-1"></i>
@@ -80,7 +84,11 @@
                             </a>
                         @endif
                     @empty
-                        <div class="list-group-item text-secondary small text-center py-3">Belum ada materi pada pertemuan ini.</div>
+                        @if (! $meeting->materialsOpen())
+                            <div class="list-group-item text-secondary small text-center py-3"><i class="ti ti-lock me-1"></i>Materi pertemuan ini dibuka pada {{ $meeting->date?->translatedFormat('l, d M Y') }}.</div>
+                        @else
+                            <div class="list-group-item text-secondary small text-center py-3">Belum ada materi pada pertemuan ini.</div>
+                        @endif
                     @endforelse
                 </div>
             </div>

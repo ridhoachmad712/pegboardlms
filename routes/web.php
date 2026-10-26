@@ -189,6 +189,7 @@ Route::middleware(['auth', 'lecturer.active'])->group(function () {
 
         // Pertemuan
         Route::post('/courses/{course}/meetings', [MeetingController::class, 'store'])->name('meetings.store');
+        Route::post('/courses/{course}/meetings/generate', [MeetingController::class, 'generate'])->name('meetings.generate');
         Route::put('/meetings/{meeting}', [MeetingController::class, 'update'])->name('meetings.update');
         Route::delete('/meetings/{meeting}', [MeetingController::class, 'destroy'])->name('meetings.destroy');
 

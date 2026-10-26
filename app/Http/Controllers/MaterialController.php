@@ -133,6 +133,12 @@ class MaterialController extends Controller
         }
 
         if ($user->isMahasiswa() && $course->students()->whereKey($user->id)->exists()) {
+            abort_unless(
+                $material->meeting->materialsOpen(),
+                403,
+                'Materi ini baru dibuka pada '.$material->meeting->date?->translatedFormat('d M Y').'.'
+            );
+
             return;
         }
 
