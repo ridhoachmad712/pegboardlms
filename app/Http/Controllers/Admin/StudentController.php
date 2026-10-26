@@ -24,7 +24,7 @@ class StudentController extends Controller
                 ->orWhere('nim_nip', 'like', "%$q%")))
             ->when($courseId, fn ($x) => $x->whereHas('enrolledCourses', fn ($c) => $c->where('courses.id', $courseId)))
             ->withCount('enrolledCourses')
-            ->orderBy('name')
+            ->orderByNim()
             ->paginate(20)
             ->withQueryString();
 

@@ -48,9 +48,11 @@ class Course extends Model
     /** Mahasiswa yang terdaftar. */
     public function students(): BelongsToMany
     {
+        // Semua daftar peserta (absen, tugas, nilai, ekspor) urut NIM.
         return $this->belongsToMany(User::class, 'enrollments', 'course_id', 'user_id')
             ->withTimestamps()
-            ->withPivot('enrolled_at');
+            ->withPivot('enrolled_at')
+            ->orderByNim();
     }
 
     public function enrollments(): HasMany

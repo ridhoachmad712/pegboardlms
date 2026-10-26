@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -75,6 +76,29 @@ class User extends Authenticatable
     }
 
     /** URL foto profil, atau null bila belum ada. */
+    /**
+     * Urutan baku daftar mahasiswa: NIM naik (NIM lebih pendek dulu, sehingga urut
+     * secara angka), mahasiswa tanpa NIM di akhir, lalu nama sebagai penentu.
+     */
+    public function scopeOrderByNim(Builder $query): Builder
+    {
+        return $query
+            ->orderByRaw("NULLIF(users.nim_nip, '') IS NULL")
+            ->orderByRaw('LENGTH(users.nim_nip)')
+            ->orderBy('users.nim_nip')
+            ->orderBy('users.name');
+    }
+
+    /** Pembanding koleksi dengan aturan yang sama seperti scopeOrderByNim(). */
+    public static function compareByNim(?self $a, ?self $b): int
+    {
+        $na = (string) $a?->nim_nip;
+        $nb = (string) $b?->nim_nip;
+
+        return [$na === '', strlen($na), $na, (string) $a?->name]
+            <=> [$nb === '', strlen($nb), $nb, (string) $b?->name];
+    }
+
     public function avatarUrl(): ?string
     {
         return $this->avatar ? Storage::disk('public')->url($this->avatar) : null;

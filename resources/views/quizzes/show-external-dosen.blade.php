@@ -53,7 +53,7 @@
                     <table id="tbl-external-scores" class="table table-vcenter card-table">
                         <thead><tr><th>Mahasiswa</th><th style="width:170px" class="text-center">Nilai / {{ $assignment->max_score }}</th></tr></thead>
                         <tbody>
-                            @foreach ($assignment->course->students->sortBy('name') as $student)
+                            @foreach ($assignment->course->students as $student)
                                 @php($submission = $submissions->get($student->id))
                                 <tr>
                                     <td>{{ $student->name }}<div class="small text-secondary">{{ $student->nim_nip }}</div></td>

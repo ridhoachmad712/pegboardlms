@@ -80,6 +80,7 @@ class SearchController extends Controller
                     ->where(fn ($x) => $x->where('name', 'like', $like)
                         ->orWhere('nim_nip', 'like', $like)
                         ->orWhere('email', 'like', $like))
+                    ->orderByNim()
                     ->limit(10)->get();
             }
         }

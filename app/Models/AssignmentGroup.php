@@ -34,7 +34,7 @@ class AssignmentGroup extends Model
     /** Anggota kelompok (mahasiswa peserta kelas). */
     public function members(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'assignment_group_user')->withTimestamps();
+        return $this->belongsToMany(User::class, 'assignment_group_user')->withTimestamps()->orderByNim();
     }
 
     /** Pengumpulan bersama kelompok (satu untuk semua anggota). */

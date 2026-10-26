@@ -54,7 +54,7 @@ class AttendanceController extends Controller
             $qr = $this->qrDataUri($url);
         }
 
-        $students = $meeting->course->students()->orderBy('name')->get();
+        $students = $meeting->course->students()->get();
         $attendances = $meeting->attendances()->get()->keyBy('user_id');
 
         return view('attendance.session', compact('meeting', 'token', 'qr', 'students', 'attendances'));

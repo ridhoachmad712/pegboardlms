@@ -4,10 +4,11 @@ namespace App\Services;
 
 use App\Models\Assignment;
 use App\Models\Submission;
+use App\Models\User;
 use Illuminate\Support\Collection;
 
 /**
- * Urutan pengumpulan di Ruang Penilaian: individu urut nama mahasiswa,
+ * Urutan pengumpulan di Ruang Penilaian: individu urut NIM mahasiswa,
  * kelompok urut nama kelompok. Dipakai untuk navigasi sebelumnya/berikutnya.
  */
 class GradingQueue
@@ -19,9 +20,11 @@ class GradingQueue
             ->with($assignment->isGroup() ? ['student', 'group.members', 'rubricScores'] : ['student', 'rubricScores'])
             ->get();
 
-        return $submissions
-            ->sortBy(fn (Submission $s) => mb_strtolower($assignment->isGroup() ? ($s->group?->name ?? '') : ($s->student?->name ?? '')), SORT_NATURAL)
-            ->values();
+        $sorted = $assignment->isGroup()
+            ? $submissions->sortBy(fn (Submission $s) => mb_strtolower($s->group?->name ?? ''), SORT_NATURAL)
+            : $submissions->sort(fn (Submission $a, Submission $b) => User::compareByNim($a->student, $b->student));
+
+        return $sorted->values();
     }
 
     public static function label(Submission $submission, Assignment $assignment): string

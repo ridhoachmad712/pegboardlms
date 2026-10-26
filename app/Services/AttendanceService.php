@@ -16,7 +16,7 @@ class AttendanceService
     public function gridForCourse(Course $course): array
     {
         $meetings = $course->meetings()->orderBy('number')->get();
-        $students = $course->students()->orderBy('name')->get();
+        $students = $course->students()->get();
 
         $records = Attendance::whereIn('meeting_id', $meetings->pluck('id'))->get();
 

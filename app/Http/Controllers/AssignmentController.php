@@ -212,7 +212,7 @@ class AssignmentController extends Controller
             $groups = $assignment->groups->sortBy('name')->values();
 
             $groupedIds = $groups->pluck('members')->flatten()->pluck('id')->unique();
-            $ungrouped = $assignment->course->students->whereNotIn('id', $groupedIds)->sortBy('name')->values();
+            $ungrouped = $assignment->course->students->whereNotIn('id', $groupedIds)->sort(User::compareByNim(...))->values();
 
             $submittedGroups = $groups->filter(fn ($g) => $g->submission && $g->submission->submitted_at);
             $stats = [
@@ -234,11 +234,11 @@ class AssignmentController extends Controller
         $submissions = $assignment->submissions()
             ->with('student', 'rubricScores')
             ->get()
-            ->sortBy('student.name');
+            ->sort(fn ($a, $b) => User::compareByNim($a->student, $b->student));
 
         $pending = $assignment->course->students
             ->whereNotIn('id', $submissions->pluck('user_id'))
-            ->sortBy('name')
+            ->sort(User::compareByNim(...))
             ->values();
 
         $total = $assignment->course->students->count();
@@ -272,7 +272,7 @@ class AssignmentController extends Controller
             $groupmateCandidates = $assignment->course->students
                 ->whereNotIn('id', $groupedIds)
                 ->where('id', '!=', $user->id)
-                ->sortBy('name')
+                ->sort(User::compareByNim(...))
                 ->values();
         }
 
@@ -298,7 +298,7 @@ class AssignmentController extends Controller
 
         if ($user->isDosen()) {
             $assignment->loadCount('questions', 'submissions');
-            $submissions = $assignment->submissions()->with('student')->get()->sortBy('student.name');
+            $submissions = $assignment->submissions()->with('student')->get()->sort(fn ($a, $b) => User::compareByNim($a->student, $b->student));
 
             return view('quizzes.show-dosen', compact('assignment', 'submissions'));
         }

@@ -206,12 +206,12 @@ class CourseController extends Controller
         $this->authorizeOwner($request, $course);
 
         $course->loadCount('students');
-        $students = $course->students()->orderBy('name')->get();
+        $students = $course->students()->get();
         $availableStudents = User::where('role', User::ROLE_MAHASISWA)
             ->whereNotIn('id', $students->pluck('id'))
             ->when(! $request->user()->isAdmin(), fn ($query) => $query->whereHas('enrolledCourses',
                 fn ($courses) => $courses->where('courses.user_id', $request->user()->id)))
-            ->orderBy('name')
+            ->orderByNim()
             ->get(['id', 'name', 'nim_nip']);
 
         return view('courses.students', compact('course', 'students', 'availableStudents'));

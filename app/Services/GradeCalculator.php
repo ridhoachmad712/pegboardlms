@@ -26,7 +26,7 @@ class GradeCalculator
         $assignments = $course->assignments()->whereNotNull('grade_component_id')->get();
         $assignmentsByComponent = $assignments->groupBy('grade_component_id');
 
-        $students = $course->students()->orderBy('name')->get();
+        $students = $course->students()->get();
 
         // Persentase kehadiran per mahasiswa (bila ada komponen bertipe kehadiran).
         $attendancePercents = [];
